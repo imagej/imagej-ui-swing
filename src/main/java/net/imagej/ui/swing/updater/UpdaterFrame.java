@@ -119,11 +119,11 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 	protected JPanel rightPanel;
 	protected FileDetails fileDetails;
 	protected JPanel bottomPanel, bottomPanel2;
-	protected JButton apply, cancel, easy, updateSites;
+	protected JButton applyOrUpload, cancel, easy, updateSites;
 	protected boolean easyMode;
 
 	// For developers
-	protected JButton upload, showChanges, rebuildButton;
+	protected JButton showChanges, rebuildButton;
 	protected boolean canUpload;
 	protected final static String gitVersion;
 
@@ -296,16 +296,33 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		});
 
 		// Button to start actions
-		apply =
-			SwingTools.button("Apply changes", "Start installing/uninstalling files",
+		applyOrUpload =
+			SwingTools.button("Apply changes", "Start installing/uninstalling/uploading files",
 				new ActionListener() {
 
 					@Override
 					public void actionPerformed(final ActionEvent e) {
-						applyChanges();
+						if (files.hasUploadOrRemove()) {
+							new Thread() {
+
+								@Override
+								public void run() {
+									try {
+										upload();
+									}
+									catch (final InstantiationException e) {
+										log.error(e);
+										error("Could not upload (possibly unknown protocol)");
+									}
+								}
+							}.start();
+						}
+						else if (files.hasChanges()) {
+							applyChanges();
+						}
 					}
 				}, bottomPanel);
-		apply.setEnabled(files.hasChanges());
+		enableApplyOrUpload();
 
 		// Manage update sites
 		updateSites =
@@ -323,29 +340,6 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		// upload)
 		// includes button to upload to server if is a Developer using
 		bottomPanel2.add(Box.createRigidArea(new Dimension(15, 0)));
-		upload =
-			SwingTools.button("Upload to server", "Upload selected files to server",
-				new ActionListener() {
-
-					@Override
-					public void actionPerformed(final ActionEvent e) {
-						new Thread() {
-
-							@Override
-							public void run() {
-								try {
-									upload();
-								}
-								catch (final InstantiationException e) {
-									log.error(e);
-									error("Could not upload (possibly unknown protocol)");
-								}
-							}
-						}.start();
-					}
-				}, bottomPanel2);
-		upload.setVisible(files.hasUploadableSites());
-		enableUploadOrNot();
 
 		if (gitVersion != null) {
 			bottomPanel2.add(Box.createRigidArea(new Dimension(15, 0)));
@@ -437,7 +431,7 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		getContentPane().add(bottomPanel);
 		getContentPane().add(bottomPanel2);
 
-		getRootPane().setDefaultButton(apply);
+		getRootPane().setDefaultButton(applyOrUpload);
 
 		table.getModel().addTableModelListener(this);
 
@@ -497,7 +491,7 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		super.setVisible(visible);
 		if (visible) {
 			UpdaterUserInterface.get().addWindow(this);
-			apply.requestFocusInWindow();
+			applyOrUpload.requestFocusInWindow();
 		}
 	}
 
@@ -668,7 +662,6 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		else bottomPanel2.add(updateSites, 0);
 
 		final boolean uploadable = !easyMode && files.hasUploadableSites();
-		upload.setVisible(uploadable);
 		if (showChanges != null) showChanges.setVisible(!easyMode && gitVersion != null);
 		if (rebuildButton != null) rebuildButton.setVisible(uploadable);
 
@@ -735,10 +728,8 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 
 		if (showChanges != null) showChanges.setEnabled(table.getSelectedFiles().iterator().hasNext());
 
-		apply.setEnabled(files.hasChanges());
+		enableApplyOrUpload();
 		cancel.setText(files.hasChanges() ? "Cancel" : "Close");
-
-		if (files.hasUploadableSites()) enableUploadOrNot();
 
 		int install = 0, uninstall = 0, upload = 0;
 		long bytesToDownload = 0, bytesToUpload = 0;
@@ -816,12 +807,18 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 
 	void markUploadable() {
 		canUpload = true;
-		enableUploadOrNot();
+		enableApplyOrUpload();
 	}
 
-	void enableUploadOrNot() {
-		upload.setVisible(!easyMode && files.hasUploadableSites());
-		upload.setEnabled(canUpload || files.hasUploadOrRemove());
+	void enableApplyOrUpload() {
+		if (files.hasUploadOrRemove()) {
+			applyOrUpload.setEnabled(true);
+			applyOrUpload.setText("Apply changes (upload)");
+		}
+		else {
+			applyOrUpload.setText("Apply changes");
+			applyOrUpload.setEnabled(files.hasChanges());
+		}
 	}
 
 	protected void upload() throws InstantiationException {
@@ -868,7 +865,7 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 			canUpload = false;
 			files.write();
 			info("Uploaded successfully.");
-			enableUploadOrNot();
+			enableApplyOrUpload();
 			dispose();
 		}
 		catch (final UpdateCanceledException e) {

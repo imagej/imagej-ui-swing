@@ -179,7 +179,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 							final UpdateSite site = getUpdateSite(row);
 							if (value.equals(site.getUploadDirectory())) return super.stopCellEditing();
 						}
-						updaterFrame.enableUploadOrNot();
+						updaterFrame.enableApplyOrUpload();
 						return super.stopCellEditing();
 					}
 				};
@@ -493,7 +493,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 	public void dispose() {
 		super.dispose();
 		updaterFrame.updateFilesTable();
-		updaterFrame.enableUploadOrNot();
+		updaterFrame.enableApplyOrUpload();
 		updaterFrame.addCustomViewOptions();
 	}
 
