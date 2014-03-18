@@ -425,7 +425,6 @@ public class SitesDialog extends JDialog implements ActionListener {
 			rowsChanged(0, sites.size());
 		}
 
-		@SuppressWarnings("unused")
 		public void rowsChanged(final int firstRow, final int lastRow) {
 			// fireTableChanged(new TableModelEvent(this, firstRow, lastRow));
 			fireTableChanged(new TableModelEvent(this));
