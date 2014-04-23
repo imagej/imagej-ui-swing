@@ -31,8 +31,6 @@
 
 package net.imagej.ui.swing.updater;
 
-import imagej.updater.util.UpdaterUserInterface;
-
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.io.IOException;
@@ -44,6 +42,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import net.imagej.updater.util.UpdaterUserInterface;
 import net.miginfocom.swing.MigLayout;
 
 import org.scijava.app.StatusService;

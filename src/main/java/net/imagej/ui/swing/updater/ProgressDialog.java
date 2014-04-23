@@ -31,9 +31,6 @@
 
 package net.imagej.ui.swing.updater;
 
-import imagej.updater.util.Progress;
-import imagej.updater.util.UpdateCanceledException;
-
 import java.awt.Adjustable;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -52,6 +49,9 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
+
+import net.imagej.updater.util.Progress;
+import net.imagej.updater.util.UpdateCanceledException;
 
 /**
  * TODO

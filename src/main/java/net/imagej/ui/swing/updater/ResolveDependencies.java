@@ -31,11 +31,11 @@
 
 package net.imagej.ui.swing.updater;
 
-import imagej.updater.core.Conflicts;
-import imagej.updater.core.Conflicts.Conflict;
-import imagej.updater.core.FilesCollection;
-
 import java.util.ArrayList;
+
+import net.imagej.updater.Conflicts;
+import net.imagej.updater.Conflicts.Conflict;
+import net.imagej.updater.FilesCollection;
 
 /**
  * This dialog displays the update or upload conflicts for resolution.

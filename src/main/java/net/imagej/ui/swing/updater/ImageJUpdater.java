@@ -31,18 +31,6 @@
 
 package net.imagej.ui.swing.updater;
 
-import imagej.updater.core.Conflicts.Conflict;
-import imagej.updater.core.FileObject;
-import imagej.updater.core.FilesCollection;
-import imagej.updater.core.Installer;
-import imagej.updater.core.UpdaterUI;
-import imagej.updater.core.UploaderService;
-import imagej.updater.util.AvailableSites;
-import imagej.updater.util.Progress;
-import imagej.updater.util.UpdateCanceledException;
-import imagej.updater.util.UpdaterUserInterface;
-import imagej.updater.util.Util;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.Authenticator;
@@ -54,6 +42,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.imagej.ui.swing.updater.ViewOptions.Option;
+import net.imagej.updater.Conflicts.Conflict;
+import net.imagej.updater.FileObject;
+import net.imagej.updater.FilesCollection;
+import net.imagej.updater.Installer;
+import net.imagej.updater.UpdaterUI;
+import net.imagej.updater.UploaderService;
+import net.imagej.updater.util.AvailableSites;
+import net.imagej.updater.util.Progress;
+import net.imagej.updater.util.UpdateCanceledException;
+import net.imagej.updater.util.UpdaterUserInterface;
+import net.imagej.updater.util.UpdaterUtil;
 import net.imagej.util.AppUtils;
 
 import org.scijava.app.StatusService;
@@ -94,7 +93,7 @@ public class ImageJUpdater implements UpdaterUI {
 		if (errorIfDebian()) return;
 
 		if (log == null) {
-			log = Util.getLogService();
+			log = UpdaterUtil.getLogService();
 		}
 
 		final File imagejRoot = AppUtils.getBaseDirectory();
@@ -118,7 +117,7 @@ public class ImageJUpdater implements UpdaterUI {
 				return;
 			}
 		}
-		Util.useSystemProxies();
+		UpdaterUtil.useSystemProxies();
 		Authenticator.setDefault(new SwingAuthenticator());
 
 		SwingTools.invokeOnEDT(new Runnable() {

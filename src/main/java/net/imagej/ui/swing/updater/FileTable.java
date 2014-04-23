@@ -31,13 +31,6 @@
 
 package net.imagej.ui.swing.updater;
 
-import imagej.updater.core.FileObject;
-import imagej.updater.core.FileObject.Action;
-import imagej.updater.core.FileObject.Status;
-import imagej.updater.core.FilesCollection;
-import imagej.updater.core.GroupAction;
-import imagej.updater.core.UpdateSite;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -69,6 +62,13 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
+
+import net.imagej.updater.FileObject;
+import net.imagej.updater.FileObject.Action;
+import net.imagej.updater.FileObject.Status;
+import net.imagej.updater.FilesCollection;
+import net.imagej.updater.GroupAction;
+import net.imagej.updater.UpdateSite;
 
 /**
  * This class's role is to be in charge of how the Table should be displayed.

@@ -31,10 +31,6 @@
 
 package net.imagej.ui.swing.updater;
 
-import imagej.updater.core.FileObject;
-import imagej.updater.core.FilesCollection;
-import imagej.updater.util.UpdaterUserInterface;
-
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Point;
@@ -60,6 +56,10 @@ import javax.swing.text.Position;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+
+import net.imagej.updater.FileObject;
+import net.imagej.updater.FilesCollection;
+import net.imagej.updater.util.UpdaterUserInterface;
 
 /**
  * TODO

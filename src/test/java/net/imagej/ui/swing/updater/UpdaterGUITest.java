@@ -31,13 +31,6 @@
 
 package net.imagej.ui.swing.updater;
 
-import imagej.updater.core.FileObject;
-import imagej.updater.core.FilesCollection;
-import imagej.updater.core.FilesUploader;
-import imagej.updater.util.Progress;
-import imagej.updater.util.StderrProgress;
-import imagej.updater.util.Util;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -52,6 +45,13 @@ import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.zip.GZIPOutputStream;
+
+import net.imagej.updater.FileObject;
+import net.imagej.updater.FilesCollection;
+import net.imagej.updater.FilesUploader;
+import net.imagej.updater.util.Progress;
+import net.imagej.updater.util.StderrProgress;
+import net.imagej.updater.util.UpdaterUtil;
 
 import org.scijava.util.MersenneTwisterFast;
 
@@ -120,12 +120,12 @@ public class UpdaterGUITest {
 	}
 
 	protected static void testStringDialog() {
-		SwingUserInterface ui = new SwingUserInterface(Util.getLogService(), null);
+		SwingUserInterface ui = new SwingUserInterface(UpdaterUtil.getLogService(), null);
 		System.err.println(ui.getString("Login for blub"));
 	}
 
 	protected static void testPassword() {
-		SwingUserInterface ui = new SwingUserInterface(Util.getLogService(), null);
+		SwingUserInterface ui = new SwingUserInterface(UpdaterUtil.getLogService(), null);
 		System.err.println(ui.getPassword("Enter password"));
 	}
 

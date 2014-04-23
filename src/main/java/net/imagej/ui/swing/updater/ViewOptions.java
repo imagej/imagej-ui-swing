@@ -31,10 +31,10 @@
 
 package net.imagej.ui.swing.updater;
 
-import imagej.updater.core.FileObject;
-import imagej.updater.core.FilesCollection;
-
 import javax.swing.JComboBox;
+
+import net.imagej.updater.FileObject;
+import net.imagej.updater.FilesCollection;
 
 /**
  * TODO

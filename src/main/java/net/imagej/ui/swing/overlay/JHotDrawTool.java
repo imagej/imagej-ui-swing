@@ -35,9 +35,9 @@ import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.event.UndoableEditListener;
 
-import org.jhotdraw.draw.tool.Tool;
-
 import net.imagej.display.ImageDisplay;
+
+import org.jhotdraw.draw.tool.Tool;
 
 /**
  * A JHotDraw {@link Tool} (<em>not</em> a {@link org.scijava.tool.Tool}) with

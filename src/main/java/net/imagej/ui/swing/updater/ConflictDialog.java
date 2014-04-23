@@ -31,10 +31,6 @@
 
 package net.imagej.ui.swing.updater;
 
-import imagej.updater.core.Conflicts;
-import imagej.updater.core.Conflicts.Conflict;
-import imagej.updater.core.Conflicts.Resolution;
-
 import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -54,6 +50,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
+
+import net.imagej.updater.Conflicts;
+import net.imagej.updater.Conflicts.Conflict;
+import net.imagej.updater.Conflicts.Resolution;
 
 /**
  * This dialog lists conflicts and let's the user choose how to resolve (or ignore) them.

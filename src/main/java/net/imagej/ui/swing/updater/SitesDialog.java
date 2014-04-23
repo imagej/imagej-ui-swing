@@ -31,13 +31,6 @@
 
 package net.imagej.ui.swing.updater;
 
-import imagej.updater.core.FileObject;
-import imagej.updater.core.FileObject.Action;
-import imagej.updater.core.FilesCollection;
-import imagej.updater.core.UpdateSite;
-import imagej.updater.core.UploaderService;
-import imagej.updater.util.Util;
-
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -76,6 +69,12 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
+import net.imagej.updater.FileObject;
+import net.imagej.updater.FileObject.Action;
+import net.imagej.updater.FilesCollection;
+import net.imagej.updater.UpdateSite;
+import net.imagej.updater.UploaderService;
+import net.imagej.updater.util.UpdaterUtil;
 import net.imagej.util.MediaWikiClient;
 import net.miginfocom.swing.MigLayout;
 
@@ -438,7 +437,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 			url += "/";
 		try {
 			return files.util.getLastModified(new URL(url
-					+ Util.XML_COMPRESSED)) != -1;
+					+ UpdaterUtil.XML_COMPRESSED)) != -1;
 		} catch (MalformedURLException e) {
 			updaterFrame.log.error(e);
 			return false;

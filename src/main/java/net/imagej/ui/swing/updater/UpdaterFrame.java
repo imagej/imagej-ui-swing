@@ -31,25 +31,6 @@
 
 package net.imagej.ui.swing.updater;
 
-import imagej.updater.core.Checksummer;
-import imagej.updater.core.Diff.Mode;
-import imagej.updater.core.FileObject;
-import imagej.updater.core.FileObject.Action;
-import imagej.updater.core.FileObject.Status;
-import imagej.updater.core.FilesCollection;
-import imagej.updater.core.FilesCollection.DependencyMap;
-import imagej.updater.core.FilesUploader;
-import imagej.updater.core.GroupAction;
-import imagej.updater.core.Installer;
-import imagej.updater.core.UploaderService;
-import imagej.updater.core.action.InstallOrUpdate;
-import imagej.updater.core.action.KeepAsIs;
-import imagej.updater.core.action.Uninstall;
-import imagej.updater.util.Progress;
-import imagej.updater.util.UpdateCanceledException;
-import imagej.updater.util.UpdaterUserInterface;
-import imagej.updater.util.Util;
-
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -89,6 +70,25 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+
+import net.imagej.updater.Checksummer;
+import net.imagej.updater.Diff.Mode;
+import net.imagej.updater.FileObject;
+import net.imagej.updater.FileObject.Action;
+import net.imagej.updater.FileObject.Status;
+import net.imagej.updater.FilesCollection;
+import net.imagej.updater.FilesCollection.DependencyMap;
+import net.imagej.updater.FilesUploader;
+import net.imagej.updater.GroupAction;
+import net.imagej.updater.Installer;
+import net.imagej.updater.UploaderService;
+import net.imagej.updater.action.InstallOrUpdate;
+import net.imagej.updater.action.KeepAsIs;
+import net.imagej.updater.action.Uninstall;
+import net.imagej.updater.util.Progress;
+import net.imagej.updater.util.UpdateCanceledException;
+import net.imagej.updater.util.UpdaterUserInterface;
+import net.imagej.updater.util.UpdaterUtil;
 
 import org.scijava.Context;
 import org.scijava.log.LogService;
@@ -797,7 +797,7 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 
 	// checkWritable() is guaranteed to be called after Checksummer ran
 	public void checkWritable() {
-		if (Util.isProtectedLocation(files.prefix(""))) {
+		if (UpdaterUtil.isProtectedLocation(files.prefix(""))) {
 			error("<html><p width=400>Windows' security model for the directory '" + files.prefix("") + "' is incompatible with the ImageJ updater.</p>" +
 				"<p>Please install ImageJ into a user-writable directory, e.g. onto the Desktop.</p></html>");
 			return;

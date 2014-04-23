@@ -31,13 +31,6 @@
 
 package net.imagej.ui.swing.updater;
 
-import imagej.updater.core.Diff;
-import imagej.updater.core.Diff.Mode;
-import imagej.updater.core.FileObject;
-import imagej.updater.core.FilesCollection;
-import imagej.updater.util.ByteCodeAnalyzer;
-import imagej.updater.util.Util;
-
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -57,6 +50,13 @@ import java.util.jar.Manifest;
 import javax.swing.JFrame;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+
+import net.imagej.updater.Diff;
+import net.imagej.updater.Diff.Mode;
+import net.imagej.updater.FileObject;
+import net.imagej.updater.FilesCollection;
+import net.imagej.updater.util.ByteCodeAnalyzer;
+import net.imagej.updater.util.UpdaterUtil;
 
 import org.scijava.log.LogService;
 import org.scijava.util.ProcessUtils;
@@ -78,7 +78,7 @@ public class DiffFile extends JFrame {
 	protected Diff diff;
 	protected int diffOffset;
 	protected Thread worker;
-	private final Util util;
+	private final UpdaterUtil util;
 
 	/**
 	 * Initialize the frame.
@@ -259,7 +259,7 @@ public class DiffFile extends JFrame {
 		}
 		else {
 			commitRange = commitLocal;
-			long millis = Util.timestamp2millis(fileObject.current.timestamp);
+			long millis = UpdaterUtil.timestamp2millis(fileObject.current.timestamp);
 			since = "--since=" + (millis / 1000l - 5 * 60);
 			warning = "No precise commit information in the remote .jar;\n"
 					+ "\tUsing timestamp from Updater instead: " + new Date(millis) + " - 5 minutes";
