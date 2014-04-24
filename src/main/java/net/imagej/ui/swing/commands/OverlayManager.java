@@ -29,7 +29,7 @@
  * #L%
  */
 
-package org.scijava.ui.swing.commands;
+package net.imagej.ui.swing.commands;
 
 import net.imagej.ui.swing.overlay.SwingOverlayManager;
 

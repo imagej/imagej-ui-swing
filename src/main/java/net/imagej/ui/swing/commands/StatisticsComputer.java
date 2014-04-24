@@ -48,7 +48,7 @@
  * @author Stephan Preibisch
  */
 
-package org.scijava.ui.swing.commands;
+package net.imagej.ui.swing.commands;
 
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
