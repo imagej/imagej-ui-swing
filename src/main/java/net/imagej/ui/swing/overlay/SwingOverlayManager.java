@@ -31,10 +31,6 @@
 
 package net.imagej.ui.swing.overlay;
 
-import imagej.plugins.commands.display.Flatten;
-import imagej.plugins.commands.overlay.SelectedManagerOverlayProperties;
-import imagej.plugins.commands.overlay.SelectionSpecify;
-
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
@@ -590,7 +586,10 @@ public class SwingOverlayManager
 		final ImageDisplay imageDisplay =
 			imageDisplayService.getActiveImageDisplay();
 		if (imageDisplay == null) return;
-		commandService.run(Flatten.class, true, "display", imageDisplay);
+
+		// FIXME: Migrate Flatten functionality into a core service API.
+		commandService.run("net.imagej.plugins.commands.display.Flatten", true,
+			"display", imageDisplay);
 	}
 	
 	private void help() {
@@ -719,7 +718,10 @@ public class SwingOverlayManager
 		final ImageDisplay imageDisplay =
 			imageDisplayService.getActiveImageDisplay();
 		if (imageDisplay == null) return;
-		commandService.run(SelectionSpecify.class, true, "display", imageDisplay);
+
+		// FIXME: Migrate SelectionSpecify functionality into OverlayService API.
+		commandService.run("net.imagej.plugins.commands.overlay.SelectionSpecify",
+			true, "display", imageDisplay);
 	}
 	
 	/*
@@ -1140,7 +1142,10 @@ public class SwingOverlayManager
 	private void runPropertiesPlugin() {
 		final Map<String, Object> inputMap = new HashMap<String, Object>();
 		inputMap.put("overlays", overlayService.getOverlayInfo().selectedOverlays());
-		commandService.run(SelectedManagerOverlayProperties.class, true, inputMap);
+		// FIXME: Migrate OverlayProperties functionality into OverlayService API.
+		commandService.run(
+			"net.imagej.plugins.commands.overlay.SelectedManagerOverlayProperties",
+			true, inputMap);
 	}
 
 	private ChannelCollection getChannels() {
