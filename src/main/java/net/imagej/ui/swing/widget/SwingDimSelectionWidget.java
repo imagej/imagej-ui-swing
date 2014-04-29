@@ -48,11 +48,9 @@ import net.imagej.Dataset;
 import net.imglib2.meta.TypedAxis;
 import net.imglib2.meta.TypedSpace;
 
-import org.scijava.command.CommandModuleItem;
 import org.scijava.log.LogService;
 import org.scijava.module.Module;
 import org.scijava.module.ModuleItem;
-import org.scijava.plugin.Attr;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.ui.swing.widget.SwingInputWidget;
@@ -179,37 +177,19 @@ public class SwingDimSelectionWidget extends SwingInputWidget<TypedAxis[]>
 	}
 
 	/**
-	 * FIXME: wait for curtis to enable easier access.
-	 * 
 	 * @return The minimum number of dimensions.
 	 */
 	private int getMinDims() {
-		for (final Attr attr : ((CommandModuleItem<?>) get().getItem())
-			.getParameter().attrs())
-		{
-			if (attr.name().equals("min_dims")) {
-				return Integer.parseInt(attr.value());
-			}
-		}
-
-		return 0;
+		final String minDims = get().getItem().get("min_dims");
+		return minDims == null ? 0 : Integer.parseInt(minDims);
 	}
 
 	/**
-	 * FIXME: wait for curtis to enable easier access.
-	 * 
 	 * @return The maximum number of dimensions.
 	 */
 	private int getMaxDims() {
-		for (final Attr attr : ((CommandModuleItem<?>) get().getItem())
-			.getParameter().attrs())
-		{
-			if (attr.name().equals("max_dims")) {
-				return Integer.parseInt(attr.value());
-			}
-		}
-
-		return Integer.MAX_VALUE;
+		final String maxDims = get().getItem().get("max_dims");
+		return maxDims == null ? Integer.MAX_VALUE : Integer.parseInt(maxDims);
 	}
 
 	/**
