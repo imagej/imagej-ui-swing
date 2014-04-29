@@ -70,6 +70,9 @@ public class SwingDimSelectionWidget extends SwingInputWidget<TypedAxis[]>
 	implements DimSelectionWidget<JPanel>
 {
 
+	// FIXME: Use net.imagej.widget.DimSelectionWidget and remove the
+	// one in this package, after the next imagej-common is released.
+
 	@Parameter
 	private LogService log;
 
