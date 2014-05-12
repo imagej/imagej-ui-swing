@@ -325,34 +325,18 @@ public class SitesDialog extends JDialog implements ActionListener {
 
 	private void deactivateUpdateSite(final UpdateSite site) {
 		final List<FileObject> list = new ArrayList<FileObject>();
-		final List<FileObject> toRemove = new ArrayList<FileObject>();
-		int count = 0;
-		for (final FileObject file : files.forUpdateSite(site.getName()))
-			switch (file.getStatus()) {
-				case NEW:
-				case NOT_INSTALLED:
-				case OBSOLETE_UNINSTALLED:
-					count--;
-					toRemove.add(file);
-					break;
-				default:
-					count++;
-					list.add(file);
-			}
+		final String updateSite = site.getName();
+		for (final FileObject file : files.forUpdateSite(updateSite)) {
+			list.add(file);
+		}
+		final int count = list.size();
 		if (count > 0) info("" +
 			count + (count == 1 ? " file is" : " files are") +
 			" installed from the site '" +
 			site.getName() +
-			"'\n" +
-			"These files will not be deleted automatically.\n" +
-			"Note: even if marked as 'Local-only', they might be available from other sites.");
+			"' and will be updated/uninstalled\n");
 		for (final FileObject file : list) {
-			file.updateSite = null;
-			// TODO: unshadow
-			file.setStatus(FileObject.Status.LOCAL_ONLY);
-		}
-		for (final FileObject file : toRemove) {
-			files.remove(file);
+			file.removeFromUpdateSite(updateSite, files);
 		}
 		site.setActive(false);
 		updaterFrame.updateFilesTable();
