@@ -729,7 +729,7 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		if (showChanges != null) showChanges.setEnabled(table.getSelectedFiles().iterator().hasNext());
 
 		enableApplyOrUpload();
-		cancel.setText(files.hasChanges() ? "Cancel" : "Close");
+		cancel.setText(files.hasChanges() || files.hasUpdateSitesChanges() ? "Cancel" : "Close");
 
 		int install = 0, uninstall = 0, upload = 0;
 		long bytesToDownload = 0, bytesToUpload = 0;

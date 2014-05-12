@@ -223,6 +223,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 				} else {
 					deactivateUpdateSite(site);
 				}
+				files.setUpdateSitesChanged(true);
 			}
 
 			@Override
