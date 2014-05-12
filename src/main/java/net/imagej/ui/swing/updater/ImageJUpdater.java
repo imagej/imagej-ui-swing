@@ -53,7 +53,6 @@ import net.imagej.updater.util.Progress;
 import net.imagej.updater.util.UpdateCanceledException;
 import net.imagej.updater.util.UpdaterUserInterface;
 import net.imagej.updater.util.UpdaterUtil;
-import net.imagej.util.AppUtils;
 
 import org.scijava.app.StatusService;
 import org.scijava.command.CommandService;
@@ -61,6 +60,7 @@ import org.scijava.log.LogService;
 import org.scijava.plugin.Menu;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.util.AppUtils;
 
 /**
  * The Updater. As a command.
@@ -96,7 +96,7 @@ public class ImageJUpdater implements UpdaterUI {
 			log = UpdaterUtil.getLogService();
 		}
 
-		final File imagejRoot = AppUtils.getBaseDirectory();
+		final File imagejRoot = AppUtils.getBaseDirectory("ij.dir", FilesCollection.class, "updater");
 		final FilesCollection files = new FilesCollection(imagejRoot);
 		AvailableSites.initializeAndAddSites(files);
 
