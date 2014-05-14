@@ -317,7 +317,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 				"Do you really want to remove the site '" + name + "' from the list?\n"
 				+ "URL: " + getUpdateSite(row).getURL()))
 			return;
-		deactivateUpdateSite(site);
+		files.removeUpdateSite(site.getName());
 		sites.remove(row);
 		tableModel.rowChanged(row);
 	}
