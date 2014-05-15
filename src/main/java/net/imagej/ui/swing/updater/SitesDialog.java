@@ -69,8 +69,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
-import net.imagej.updater.FileObject;
-import net.imagej.updater.FileObject.Action;
 import net.imagej.updater.FilesCollection;
 import net.imagej.updater.UpdateSite;
 import net.imagej.updater.UploaderService;
@@ -179,7 +177,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 							final UpdateSite site = getUpdateSite(row);
 							if (value.equals(site.getUploadDirectory())) return super.stopCellEditing();
 						}
-						updaterFrame.enableUploadOrNot();
+						updaterFrame.enableApplyOrUpload();
 						return super.stopCellEditing();
 					}
 				};
@@ -190,7 +188,13 @@ public class SitesDialog extends JDialog implements ActionListener {
 			{
 				final UpdateSite site = getUpdateSite(row);
 				if (column == 0) {
-					site.setActive(Boolean.TRUE.equals(value));
+					if (Boolean.TRUE.equals(value)) {
+						if (column == 0 || column == 2) {
+							activateUpdateSite(site);
+						}
+					} else {
+						deactivateUpdateSite(site);
+					}
 				} else {
 					final String string = (String)value;
 					// if the name changed, or if we auto-fill the name from the URL
@@ -202,7 +206,10 @@ public class SitesDialog extends JDialog implements ActionListener {
 						break;
 					case 2:
 						if (site.getURL().equals(string)) return;
+						boolean active = site.isActive();
+						if (active) deactivateUpdateSite(site);
 						site.setURL(string);
+						if (active && validURL(string)) activateUpdateSite(site);
 						break;
 					case 3:
 						if (string.equals(site.getHost())) return;
@@ -216,13 +223,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 						updaterFrame.log.error("Whoa! Column " + column + " is not handled!");
 					}
 				}
-				if (site.isActive()) {
-					if (column == 0 || column == 2) {
-						activateUpdateSite(site);
-					}
-				} else {
-					deactivateUpdateSite(site);
-				}
+				files.setUpdateSitesChanged(true);
 			}
 
 			@Override
@@ -323,38 +324,15 @@ public class SitesDialog extends JDialog implements ActionListener {
 	}
 
 	private void deactivateUpdateSite(final UpdateSite site) {
-		final List<FileObject> list = new ArrayList<FileObject>();
-		final List<FileObject> toRemove = new ArrayList<FileObject>();
-		int count = 0;
-		for (final FileObject file : files.forUpdateSite(site.getName()))
-			switch (file.getStatus()) {
-				case NEW:
-				case NOT_INSTALLED:
-				case OBSOLETE_UNINSTALLED:
-					count--;
-					toRemove.add(file);
-					break;
-				default:
-					count++;
-					list.add(file);
-			}
-		if (count > 0) info("" +
+		int count = files.deactivateUpdateSite(site);
+		if (count > 0) {
+			info("" +
 			count + (count == 1 ? " file is" : " files are") +
 			" installed from the site '" +
 			site.getName() +
-			"'\n" +
-			"These files will not be deleted automatically.\n" +
-			"Note: even if marked as 'Local-only', they might be available from other sites.");
-		for (final FileObject file : list) {
-			file.updateSite = null;
-			// TODO: unshadow
-			file.setStatus(FileObject.Status.LOCAL_ONLY);
+			"' and will be updated/uninstalled\n");
+			updaterFrame.updateFilesTable();
 		}
-		for (final FileObject file : toRemove) {
-			files.remove(file);
-		}
-		site.setActive(false);
-		updaterFrame.updateFilesTable();
 	}
 
 	@Override
@@ -425,7 +403,6 @@ public class SitesDialog extends JDialog implements ActionListener {
 			rowsChanged(0, sites.size());
 		}
 
-		@SuppressWarnings("unused")
 		public void rowsChanged(final int firstRow, final int lastRow) {
 			// fireTableChanged(new TableModelEvent(this, firstRow, lastRow));
 			fireTableChanged(new TableModelEvent(this));
@@ -445,27 +422,15 @@ public class SitesDialog extends JDialog implements ActionListener {
 	}
 
 	protected boolean activateUpdateSite(final UpdateSite updateSite) {
-		updateSite.setActive(true);
 		try {
-			files.reReadUpdateSite(updateSite.getName(), updaterFrame.getProgress(null));
-			markForUpdate(updateSite.getName(), false);
-			updaterFrame.filesChanged();
+			files.activateUpdateSite(updateSite, updaterFrame.getProgress(null));
 		} catch (final Exception e) {
 			e.printStackTrace();
 			error("Not a valid URL: " + updateSite.getURL());
-			updateSite.setActive(false);
 			return false;
 		}
+		updaterFrame.filesChanged();
 		return true;
-	}
-
-	private void markForUpdate(final String updateSite, final boolean evenForcedUpdates) {
-		for (final FileObject file : files.forUpdateSite(updateSite)) {
-			if (file.isUpdateable(evenForcedUpdates) && file.isUpdateablePlatform(files)) {
-				file.setFirstValidAction(files, Action.UPDATE,
-					Action.UNINSTALL, Action.INSTALL);
-			}
-		}
 	}
 
 	protected boolean initializeUpdateSite(final String siteName,
@@ -493,7 +458,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 	public void dispose() {
 		super.dispose();
 		updaterFrame.updateFilesTable();
-		updaterFrame.enableUploadOrNot();
+		updaterFrame.enableApplyOrUpload();
 		updaterFrame.addCustomViewOptions();
 	}
 
