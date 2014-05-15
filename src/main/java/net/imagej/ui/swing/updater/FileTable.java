@@ -107,7 +107,7 @@ public class FileTable extends JTable {
 		fileTableModel = new FileTableModel(files);
 		setModel(fileTableModel);
 		getModel().addTableModelListener(this);
-		setColumnWidths(250, 100);
+		setColumnWidths(250, 100, 80);
 		TableRowSorter<FileTableModel> sorter =
 			new TableRowSorter<FileTableModel>(fileTableModel);
 		sorter.setComparator(1, new Comparator<FileObject.Action>() {
@@ -166,9 +166,10 @@ public class FileTable extends JTable {
 			: Color.black);
 	}
 
-	private void setColumnWidths(final int col1Width, final int col2Width) {
+	private void setColumnWidths(final int col1Width, final int col2Width, final int col3Width) {
 		final TableColumn col1 = getColumnModel().getColumn(0);
 		final TableColumn col2 = getColumnModel().getColumn(1);
+		final TableColumn col3 = getColumnModel().getColumn(2);
 
 		col1.setPreferredWidth(col1Width);
 		col1.setMinWidth(col1Width);
@@ -176,6 +177,9 @@ public class FileTable extends JTable {
 		col2.setPreferredWidth(col2Width);
 		col2.setMinWidth(col2Width);
 		col2.setResizable(true);
+		col3.setPreferredWidth(col3Width);
+		col3.setMinWidth(col3Width);
+		col3.setResizable(true);
 	}
 
 	public FilesCollection getAllFiles() {
@@ -312,14 +316,15 @@ public class FileTable extends JTable {
 
 		@Override
 		public int getColumnCount() {
-			return 2; // Name of file, status
+			return 3; // Name of file, status, update site
 		}
 
 		@Override
 		public Class<?> getColumnClass(final int columnIndex) {
 			switch (columnIndex) {
 				case 0:
-					return String.class; // filename
+				case 2:
+					return String.class; // filename / update site
 				case 1:
 					return FileObject.Action.class; // status/action
 				default:
@@ -334,6 +339,8 @@ public class FileTable extends JTable {
 					return "Name";
 				case 1:
 					return "Status/Action";
+				case 2:
+					return "Update Site";
 				default:
 					throw new Error("Column out of range");
 			}
@@ -353,7 +360,15 @@ public class FileTable extends JTable {
 			updateMappings();
 			if (row < 0 || row >= files.size()) return null;
 			final FileObject file = rowToFile.get(row);
-			return column == 1 ? file.getAction() : file.getFilename(true);
+			switch (column) {
+			case 0:
+				return file.getFilename(true);
+			case 1:
+				return file.getAction();
+			case 2:
+				return file.updateSite;
+			}
+			throw new RuntimeException("Unhandled column: " + column);
 		}
 
 		@Override

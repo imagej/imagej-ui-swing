@@ -225,6 +225,7 @@ public class ProgressDialog extends JDialog implements Progress {
 	@Override
 	public void itemDone(final Object item) {
 		checkIfCanceled();
+		if (itemUpdatesTooFast() && !detailsScrollPane.isVisible()) return;
 		SwingTools.invokeOnEDT(new Runnable() {
 			@Override
 			public void run() {
