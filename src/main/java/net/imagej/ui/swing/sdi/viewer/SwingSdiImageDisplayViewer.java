@@ -38,7 +38,7 @@ import net.imagej.ui.swing.viewer.image.SwingImageDisplayViewer;
 
 import org.scijava.plugin.Plugin;
 import org.scijava.ui.UserInterface;
-import org.scijava.ui.swing.sdi.SwingUI;
+import org.scijava.ui.swing.SwingUI;
 import org.scijava.ui.viewer.DisplayViewer;
 
 /**
