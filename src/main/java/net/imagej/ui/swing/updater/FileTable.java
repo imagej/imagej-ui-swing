@@ -37,9 +37,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -56,6 +53,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -103,6 +102,27 @@ public class FileTable extends JTable {
 		setCellSelectionEnabled(true);
 		setColumnSelectionAllowed(false);
 		setRowSelectionAllowed(true);
+		final JPopupMenu popupMenu = new JPopupMenu();
+		popupMenu.addPopupMenuListener(new PopupMenuListener() {
+
+			@Override
+			public void popupMenuWillBecomeVisible(final PopupMenuEvent arg0) {
+				popupMenu.removeAll();
+				populatePopupMenu(getSelectedFiles(), popupMenu);
+			}
+
+			@Override
+			public void popupMenuWillBecomeInvisible(final PopupMenuEvent arg0) {
+				popupMenu.removeAll();
+			}
+
+			@Override
+			public void popupMenuCanceled(PopupMenuEvent arg0) {
+				// do nothing
+			}
+
+		});
+		setComponentPopupMenu(popupMenu);
 
 		fileTableModel = new FileTableModel(files);
 		setModel(fileTableModel);
@@ -132,14 +152,6 @@ public class FileTable extends JTable {
 						hasFocus, row, column);
 				setStyle(comp, row, column);
 				return comp;
-			}
-		});
-
-		addMouseListener(new MouseAdapter() {
-
-			@Override
-			public void mousePressed(final MouseEvent e) {
-				maybeShowPopupMenu(e);
 			}
 		});
 	}
@@ -200,13 +212,9 @@ public class FileTable extends JTable {
 		return new DefaultCellEditor(new JComboBox(actions.toArray()));
 	}
 
-	public void maybeShowPopupMenu(final MouseEvent e) {
-		if (!e.isPopupTrigger() &&
-			(files.util.isMacOSX() || (e.getModifiers() & InputEvent.META_MASK) == 0)) return;
-		final Iterable<FileObject> selected =
-			getSelectedFiles(e.getY() / getRowHeight());
-		if (!selected.iterator().hasNext()) return;
-		final JPopupMenu menu = new JPopupMenu();
+	private void populatePopupMenu(final Iterable<FileObject> selected,
+		final JPopupMenu menu)
+	{
 		int count = 0;
 		for (final GroupAction action : files.getValidActions(selected)) {
 			final JMenuItem item = new JMenuItem(action.getLabel(files, selected));
@@ -228,7 +236,6 @@ public class FileTable extends JTable {
 			noActions.setEnabled(false);
 			menu.add(noActions);
 		}
-		menu.show(e.getComponent(), e.getX(), e.getY());
 	}
 
 	public FileObject getFile(final int row) {
