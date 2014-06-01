@@ -43,7 +43,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -71,7 +70,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
-import net.imagej.updater.Checksummer;
 import net.imagej.updater.Diff.Mode;
 import net.imagej.updater.FileObject;
 import net.imagej.updater.FileObject.Action;
@@ -367,38 +365,6 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 						}
 					}, bottomPanel2);
 		}
-		final IJ1Plugin rebuild = IJ1Plugin.discover("fiji.scripting.RunFijiBuild");
-		if (rebuild != null && files.prefix(".git").isDirectory()) {
-			bottomPanel2.add(Box.createRigidArea(new Dimension(15, 0)));
-			rebuildButton =
-				SwingTools.button("Rebuild", "Rebuild using Fiji Build",
-					new ActionListener() {
-
-						@Override
-						public void actionPerformed(final ActionEvent e) {
-							new Thread() {
-
-								@Override
-								public void run() {
-									String list = "";
-									final List<String> names = new ArrayList<String>();
-									for (final FileObject file : table.getSelectedFiles()) {
-										list +=
-											("".equals(list) ? "" : " ") + file.filename + "-rebuild";
-										names.add(file.filename);
-									}
-									if (!"".equals(list)) rebuild.run(list);
-									final Checksummer checksummer =
-										new Checksummer(files,
-											getProgress("Checksumming rebuilt files"));
-									checksummer.updateFromLocal(names);
-									filesChanged();
-									updateFilesTable();
-								}
-							}.start();
-						}
-					}, bottomPanel2);
-		}
 
 		bottomPanel2.add(Box.createHorizontalGlue());
 
@@ -439,35 +405,6 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 
 		SwingTools.addAccelerator(cancel, (JComponent) getContentPane(), cancel
 			.getActionListeners()[0], KeyEvent.VK_ESCAPE, 0);
-	}
-
-	protected static class IJ1Plugin {
-
-		protected Object file;
-		protected Method run;
-
-		protected void run(final String arg) {
-			try {
-				run.invoke(file, arg);
-			}
-			catch (final Exception e) {
-				UpdaterUserInterface.get().handleException(e);
-			}
-		}
-
-		protected static IJ1Plugin discover(final String className) {
-			try {
-				final IJ1Plugin instance = new IJ1Plugin();
-				final Class<?> clazz =
-					IJ1Plugin.class.getClassLoader().loadClass(className);
-				instance.file = clazz.newInstance();
-				instance.run = instance.file.getClass().getMethod("run", String.class);
-				return instance;
-			}
-			catch (final Throwable e) {
-				return null;
-			}
-		}
 	}
 
 	@Override
