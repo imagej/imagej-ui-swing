@@ -56,6 +56,8 @@ import net.imagej.updater.util.UpdaterUtil;
 
 import org.scijava.app.StatusService;
 import org.scijava.command.CommandService;
+import org.scijava.event.ContextDisposingEvent;
+import org.scijava.event.EventHandler;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Menu;
 import org.scijava.plugin.Parameter;
@@ -224,6 +226,11 @@ public class ImageJUpdater implements UpdaterUI {
 		else if (!files.hasChanges()) main.info("Your ImageJ is up to date!");
 
 		main.updateFilesTable();
+	}
+
+	@EventHandler
+	private void onEvent(final ContextDisposingEvent e) {
+		if (main != null && main.isDisplayable()) main.dispose();
 	}
 
 	protected boolean overwriteWithUpdated(final FilesCollection files,
