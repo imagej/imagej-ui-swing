@@ -238,6 +238,7 @@ public class ImageJUpdater implements UpdaterUI {
 		else if (!files.hasChanges()) main.info("Your ImageJ is up to date!");
 
 		main.updateFilesTable();
+		System.clearProperty("imagej.update.updater");
 	}
 
 	@EventHandler
