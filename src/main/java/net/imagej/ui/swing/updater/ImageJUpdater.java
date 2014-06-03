@@ -180,6 +180,13 @@ public class ImageJUpdater implements UpdaterUI {
 			// make a class path using the updated files
 			final List<URL> classPath = new ArrayList<URL>();
 			for (FileObject component : Installer.getUpdaterFiles(files, commandService, false)) {
+				final File updated = files.prefixUpdate(component.getFilename(false));
+				if (updated.exists()) try {
+					classPath.add(updated.toURI().toURL());
+					continue;
+				} catch (MalformedURLException e) {
+					log.error(e);
+				}
 				final String name = component.getLocalFilename(false);
 				File file = files.prefix(name);
 				try {
@@ -190,7 +197,6 @@ public class ImageJUpdater implements UpdaterUI {
 			}
 			try {
 				log.info("Trying to install and execute the new updater");
-				new Installer(files, null).moveUpdatedIntoPlace();
 				final URL[] urls = classPath.toArray(new URL[classPath.size()]);
 				URLClassLoader remoteClassLoader = new URLClassLoader(urls, ClassLoader.getSystemClassLoader());
 				System.setProperty("imagej.update.updater", "true");
