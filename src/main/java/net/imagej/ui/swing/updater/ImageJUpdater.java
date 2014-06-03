@@ -104,7 +104,7 @@ public class ImageJUpdater implements UpdaterUI {
 
 		UpdaterUserInterface.set(new SwingUserInterface(log, statusService));
 
-		if (new File(imagejRoot, "update").exists()) {
+		if (!Boolean.getBoolean("imagej.update.updater") && new File(imagejRoot, "update").exists()) {
 			if (!UpdaterUserInterface.get().promptYesNo("It is suggested that you restart ImageJ, then continue the update.\n"
 					+ "Alternately, you can attempt to continue the upgrade without\n"
 					+ "restarting, but ImageJ might crash.\n\n"
