@@ -61,6 +61,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.RowSorter.SortKey;
+import javax.swing.SortOrder;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
@@ -587,6 +589,17 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 	}
 
 	protected void showOrHide() {
+		// make sure that *some* files are shown in advanced mode
+		if (!easyMode && table.getRowCount() == 0 &&
+			viewOptions.getSelectedItem() == ViewOptions.Option.UPDATEABLE)
+		{
+			viewOptions.setSelectedItem(ViewOptions.Option.ALL);
+			final List<SortKey> keys = new ArrayList<SortKey>();
+			keys.add(new SortKey(FileTable.ACTION_COLUMN, SortOrder.ASCENDING));
+			keys.add(new SortKey(FileTable.SITE_COLUMN, SortOrder.ASCENDING));
+			table.getRowSorter().setSortKeys(keys);
+		}
+
 		for (final FileActionButton action : fileActions) {
 			action.setVisible(!easyMode);
 		}
