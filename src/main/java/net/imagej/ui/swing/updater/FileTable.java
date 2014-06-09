@@ -83,6 +83,10 @@ public class FileTable extends JTable {
 	private FileTableModel fileTableModel;
 	protected Font plain, bold;
 
+	final static int NAME_COLUMN = 0;
+	final static int ACTION_COLUMN = 1;
+	final static int SITE_COLUMN = 2;
+
 	public FileTable(final UpdaterFrame updaterFrame) {
 		this.updaterFrame = updaterFrame;
 		files = updaterFrame.files;
@@ -130,7 +134,7 @@ public class FileTable extends JTable {
 		setColumnWidths(250, 100, 80);
 		TableRowSorter<FileTableModel> sorter =
 			new TableRowSorter<FileTableModel>(fileTableModel);
-		sorter.setComparator(1, new Comparator<FileObject.Action>() {
+		sorter.setComparator(ACTION_COLUMN, new Comparator<FileObject.Action>() {
 
 			@Override
 			public int compare(Action o1, Action o2) {
@@ -178,20 +182,22 @@ public class FileTable extends JTable {
 			: Color.black);
 	}
 
-	private void setColumnWidths(final int col1Width, final int col2Width, final int col3Width) {
-		final TableColumn col1 = getColumnModel().getColumn(0);
-		final TableColumn col2 = getColumnModel().getColumn(1);
-		final TableColumn col3 = getColumnModel().getColumn(2);
+	private void setColumnWidths(final int nameColumnWidth,
+		final int actionColumnWidth, final int siteColumnWidth)
+	{
+		final TableColumn nameColumn = getColumnModel().getColumn(NAME_COLUMN);
+		final TableColumn actionColumn = getColumnModel().getColumn(ACTION_COLUMN);
+		final TableColumn siteColumn = getColumnModel().getColumn(SITE_COLUMN);
 
-		col1.setPreferredWidth(col1Width);
-		col1.setMinWidth(col1Width);
-		col1.setResizable(false);
-		col2.setPreferredWidth(col2Width);
-		col2.setMinWidth(col2Width);
-		col2.setResizable(true);
-		col3.setPreferredWidth(col3Width);
-		col3.setMinWidth(col3Width);
-		col3.setResizable(true);
+		nameColumn.setPreferredWidth(nameColumnWidth);
+		nameColumn.setMinWidth(nameColumnWidth);
+		nameColumn.setResizable(false);
+		actionColumn.setPreferredWidth(actionColumnWidth);
+		actionColumn.setMinWidth(actionColumnWidth);
+		actionColumn.setResizable(true);
+		siteColumn.setPreferredWidth(siteColumnWidth);
+		siteColumn.setMinWidth(siteColumnWidth);
+		siteColumn.setResizable(true);
 	}
 
 	public FilesCollection getAllFiles() {
@@ -207,7 +213,7 @@ public class FileTable extends JTable {
 		final FileObject file = getFile(row);
 
 		// As we follow FileTableModel, 1st column is filename
-		if (col == 0) return super.getCellEditor(row, col);
+		if (col == NAME_COLUMN) return super.getCellEditor(row, col);
 		final Set<GroupAction> actions = files.getValidActions(Collections.singleton(file));
 		return new DefaultCellEditor(new JComboBox(actions.toArray()));
 	}
@@ -329,10 +335,10 @@ public class FileTable extends JTable {
 		@Override
 		public Class<?> getColumnClass(final int columnIndex) {
 			switch (columnIndex) {
-				case 0:
-				case 2:
+				case NAME_COLUMN:
+				case SITE_COLUMN:
 					return String.class; // filename / update site
-				case 1:
+				case ACTION_COLUMN:
 					return FileObject.Action.class; // status/action
 				default:
 					return Object.class;
@@ -342,11 +348,11 @@ public class FileTable extends JTable {
 		@Override
 		public String getColumnName(final int column) {
 			switch (column) {
-				case 0:
+				case NAME_COLUMN:
 					return "Name";
-				case 1:
+				case ACTION_COLUMN:
 					return "Status/Action";
-				case 2:
+				case SITE_COLUMN:
 					return "Update Site";
 				default:
 					throw new Error("Column out of range");
@@ -368,11 +374,11 @@ public class FileTable extends JTable {
 			if (row < 0 || row >= files.size()) return null;
 			final FileObject file = rowToFile.get(row);
 			switch (column) {
-			case 0:
+			case NAME_COLUMN:
 				return file.getFilename(true);
-			case 1:
+			case ACTION_COLUMN:
 				return file.getAction();
-			case 2:
+			case SITE_COLUMN:
 				return file.updateSite;
 			}
 			throw new RuntimeException("Unhandled column: " + column);
@@ -380,13 +386,13 @@ public class FileTable extends JTable {
 
 		@Override
 		public boolean isCellEditable(final int rowIndex, final int columnIndex) {
-			return columnIndex == 1;
+			return columnIndex == ACTION_COLUMN;
 		}
 
 		@Override
 		public void setValueAt(final Object value, final int row, final int column)
 		{
-			if (column == 1) {
+			if (column == ACTION_COLUMN) {
 				final GroupAction action = (GroupAction) value;
 				final FileObject file = getFile(row);
 				action.setAction(files, file);
