@@ -89,6 +89,8 @@ public class ImageJUpdater implements UpdaterUI {
 	@Parameter
 	private CommandService commandService;
 
+	private final static String UPDATER_UPDATING_THREAD_NAME = "Updating the Updater itself!";
+
 	@Override
 	public void run() {
 
@@ -104,7 +106,7 @@ public class ImageJUpdater implements UpdaterUI {
 
 		UpdaterUserInterface.set(new SwingUserInterface(log, statusService));
 
-		if (!Boolean.getBoolean("imagej.update.updater") && new File(imagejRoot, "update").exists()) {
+		if (!areWeUpdatingTheUpdater() && new File(imagejRoot, "update").exists()) {
 			if (!UpdaterUserInterface.get().promptYesNo("It is suggested that you restart ImageJ, then continue the update.\n"
 					+ "Alternately, you can attempt to continue the upgrade without\n"
 					+ "restarting, but ImageJ might crash.\n\n"
@@ -163,7 +165,7 @@ public class ImageJUpdater implements UpdaterUI {
 			return;
 		}
 
-		if (!Boolean.getBoolean("imagej.update.updater") && Installer.isTheUpdaterUpdateable(files, commandService)) {
+		if (!areWeUpdatingTheUpdater() && Installer.isTheUpdaterUpdateable(files, commandService)) {
 			try {
 				// download just the updater
 				Installer.updateTheUpdater(files, main.getProgress("Installing the updater..."), commandService);
@@ -199,9 +201,9 @@ public class ImageJUpdater implements UpdaterUI {
 				log.info("Trying to install and execute the new updater");
 				final URL[] urls = classPath.toArray(new URL[classPath.size()]);
 				URLClassLoader remoteClassLoader = new URLClassLoader(urls, ClassLoader.getSystemClassLoader());
-				System.setProperty("imagej.update.updater", "true");
 				Class<?> runnable = remoteClassLoader.loadClass(ImageJUpdater.class.getName());
 				final Thread thread = new Thread((Runnable)runnable.newInstance());
+				thread.setName(UPDATER_UPDATING_THREAD_NAME);
 				thread.start();
 				thread.join();
 				return;
@@ -238,7 +240,6 @@ public class ImageJUpdater implements UpdaterUI {
 		else if (!files.hasChanges()) main.info("Your ImageJ is up to date!");
 
 		main.updateFilesTable();
-		System.clearProperty("imagej.update.updater");
 	}
 
 	@EventHandler
@@ -303,6 +304,10 @@ public class ImageJUpdater implements UpdaterUI {
 			}
 		}
 		return file.renameTo(backup);
+	}
+
+	private boolean areWeUpdatingTheUpdater() {
+		return UPDATER_UPDATING_THREAD_NAME.equals(Thread.currentThread().getName());
 	}
 
 	public static void main(String[] args) {
