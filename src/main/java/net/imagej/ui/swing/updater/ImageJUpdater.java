@@ -163,7 +163,7 @@ public class ImageJUpdater implements UpdaterUI {
 			return;
 		}
 
-		if (Installer.isTheUpdaterUpdateable(files, commandService)) {
+		if (!Boolean.getBoolean("imagej.update.updater") && Installer.isTheUpdaterUpdateable(files, commandService)) {
 			try {
 				// download just the updater
 				Installer.updateTheUpdater(files, main.getProgress("Installing the updater..."), commandService);
