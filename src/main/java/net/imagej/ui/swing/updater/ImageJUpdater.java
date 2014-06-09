@@ -100,7 +100,9 @@ public class ImageJUpdater implements UpdaterUI {
 			log = UpdaterUtil.getLogService();
 		}
 
-		final File imagejRoot = AppUtils.getBaseDirectory("ij.dir", FilesCollection.class, "updater");
+		String imagejDirProperty = System.getProperty("imagej.dir");
+		final File imagejRoot = imagejDirProperty != null ? new File(imagejDirProperty) :
+			AppUtils.getBaseDirectory("ij.dir", FilesCollection.class, "updater");
 		final FilesCollection files = new FilesCollection(imagejRoot);
 		AvailableSites.initializeAndAddSites(files);
 
