@@ -202,7 +202,7 @@ public class ImageJUpdater implements UpdaterUI {
 			try {
 				log.info("Trying to install and execute the new updater");
 				final URL[] urls = classPath.toArray(new URL[classPath.size()]);
-				URLClassLoader remoteClassLoader = new URLClassLoader(urls, ClassLoader.getSystemClassLoader());
+				URLClassLoader remoteClassLoader = new URLClassLoader(urls, getClass().getClassLoader().getParent());
 				Class<?> runnable = remoteClassLoader.loadClass(ImageJUpdater.class.getName());
 				final Thread thread = new Thread((Runnable)runnable.newInstance());
 				thread.setName(UPDATER_UPDATING_THREAD_NAME);
