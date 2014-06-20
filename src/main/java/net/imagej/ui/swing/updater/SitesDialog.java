@@ -501,7 +501,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 					"<h2>Personal update site setup</h2>" +
 					"<p width=400>For security reasons, personal update sites are associated with a ImageJ Wiki account. " +
 					"Please provide the account name of your ImageJ Wiki account.</p>" +
-					"<p width=400>If your personal udate site was not yet initialized, you can initialize it in this dialog.</p>" +
+					"<p width=400>If your personal update site was not yet initialized, you can initialize it in this dialog.</p>" +
 					"<p width=400>You can register a ImageJ Wiki account here if  you do not have one yet.</p></html>"), "span 2");
 			userLabel = new JLabel("ImageJ Wiki account");
 			add(userLabel);
