@@ -499,11 +499,11 @@ public class SitesDialog extends JDialog implements ActionListener {
 			add(new JLabel("<html>" +
 					"<style type='text/css'>p { text-indent: 10px; }</style>" +
 					"<h2>Personal update site setup</h2>" +
-					"<p width=400>For security reasons, personal update sites are associated with a Fiji Wiki account. " +
-					"Please provide the account name of your Fiji Wiki account.</p>" +
+					"<p width=400>For security reasons, personal update sites are associated with a ImageJ Wiki account. " +
+					"Please provide the account name of your ImageJ Wiki account.</p>" +
 					"<p width=400>If your personal udate site was not yet initialized, you can initialize it in this dialog.</p>" +
-					"<p width=400>You can register a Fiji Wiki account here if  you do not have one yet.</p></html>"), "span 2");
-			userLabel = new JLabel("Fiji Wiki account");
+					"<p width=400>You can register a ImageJ Wiki account here if  you do not have one yet.</p></html>"), "span 2");
+			userLabel = new JLabel("ImageJ Wiki account");
 			add(userLabel);
 			userField = new JTextField();
 			userField.setColumns(30);
@@ -575,7 +575,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 			} else if (e.getSource() == okay) {
 				final String newName = userField.getText();
 				if ("".equals(newName)) {
-					error("Please provide a Fiji Wiki account name!");
+					error("Please provide a ImageJ Wiki account name!");
 					return;
 				}
 				if (validURL(PERSONAL_SITES_URL + newName)) {
@@ -584,7 +584,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 					return;
 				}
 
-				// create a Fiji Wiki user if needed
+				// create a ImageJ Wiki user if needed
 				final MediaWikiClient wiki = new MediaWikiClient();
 				try {
 					if (!wiki.userExists(newName)) {
@@ -592,20 +592,20 @@ public class SitesDialog extends JDialog implements ActionListener {
 							final String realName = realNameField.getText();
 							final String email = emailField.getText();
 							if ("".equals(realName) || "".equals(email)) {
-								error("<html><p width=400>Please provide your name and email address to register an account on the Fiji Wiki!</p></html>");
+								error("<html><p width=400>Please provide your name and email address to register an account on the ImageJ Wiki!</p></html>");
 							} else {
 								if (wiki.createUser(newName, realName, email, "Wants a personal site")) {
 									setWikiAccountFieldsEnabled(false);
 									setChangePasswordEnabled(true);
 									info("<html><p width=400>An email with the activation code was sent. " +
-											"Please provide your Fiji Wiki password after activating the account.</p></html>");
+											"Please provide your ImageJ Wiki password after activating the account.</p></html>");
 								} else {
 									error("<html><p width=400>There was a problem creating the user account!</p></html>");
 								}
 							}
 						} else {
 							setWikiAccountFieldsEnabled(true);
-							error("<html><p width=400>Please provide your name and email address to register an account on the Fiji Wiki</p></html>");
+							error("<html><p width=400>Please provide your name and email address to register an account on the ImageJ Wiki</p></html>");
 						}
 						return;
 					}
@@ -625,7 +625,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 					dispose();
 				} catch (IOException e2) {
 					updaterFrame.log.error(e2);
-					error("<html><p width=400>There was a problem contacting the Fiji Wiki: " + e2 + "</p></html>");
+					error("<html><p width=400>There was a problem contacting the ImageJ Wiki: " + e2 + "</p></html>");
 					return;
 				}
 			}
