@@ -377,7 +377,7 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 		catch (final BadLocationException e) {
 			return false;
 		}
-		if (!editable.file.isUploadable(updaterFrame.files))
+		if (!editable.file.isUploadable(updaterFrame.files, true))
 			return false;
 
 		final int start = editable.start.getOffset() + 1;
