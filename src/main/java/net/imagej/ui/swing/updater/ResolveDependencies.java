@@ -64,6 +64,7 @@ public class ResolveDependencies extends ConflictDialog {
 		conflictList = new ArrayList<Conflict>();
 	}
 
+	@Override
 	protected void updateConflictList() {
 		conflictList.clear();
 		for (final Conflict conflict : conflicts.getConflicts(forUpload))
