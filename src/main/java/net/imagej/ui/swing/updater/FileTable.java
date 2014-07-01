@@ -274,7 +274,7 @@ public class FileTable extends JTable {
 	public boolean areAllSelectedFilesUploadable() {
 		if (getSelectedRows().length == 0) return false;
 		for (final FileObject file : getSelectedFiles())
-			if (!file.isUploadable(updaterFrame.files)) return false;
+			if (!file.isUploadable(updaterFrame.files, true)) return false;
 		return true;
 	}
 

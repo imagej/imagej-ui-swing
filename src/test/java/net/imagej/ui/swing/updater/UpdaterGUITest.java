@@ -182,7 +182,7 @@ public class UpdaterGUITest {
 		Progress progress = new StderrProgress();
 		files.downloadIndexAndChecksum(progress);
 		for (FileObject file : files) {
-			if (file.isUploadable(files)) {
+			if (file.isUploadable(files, false)) {
 				file.stageForUpload(files, updateSite);
 			}
 		}
