@@ -537,7 +537,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 			final KeyAdapter keyListener = new KeyAdapter() {
 
 				@Override
-				public void keyReleased(final KeyEvent e) {
+				public void keyPressed(final KeyEvent e) {
 					if (e.getKeyCode() == KeyEvent.VK_ESCAPE) dispose();
 					else if (e.getKeyCode() == KeyEvent.VK_ENTER) actionPerformed(new ActionEvent(okay, -1, null));
 				}
