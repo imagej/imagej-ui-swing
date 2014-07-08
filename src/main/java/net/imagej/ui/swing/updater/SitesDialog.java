@@ -609,6 +609,11 @@ public class SitesDialog extends JDialog implements ActionListener {
 						}
 						return;
 					}
+					else if (!passwordField.isEnabled()) {
+						setChangePasswordEnabled(true);
+						error("<html><p width=400>Please type in your the password for your account on the Fiji/ImageJ Wiki</p></html>");
+						return;
+					}
 
 					// initialize the personal update site
 					final String password = new String(passwordField.getPassword());
