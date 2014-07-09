@@ -537,7 +537,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 			final KeyAdapter keyListener = new KeyAdapter() {
 
 				@Override
-				public void keyReleased(final KeyEvent e) {
+				public void keyPressed(final KeyEvent e) {
 					if (e.getKeyCode() == KeyEvent.VK_ESCAPE) dispose();
 					else if (e.getKeyCode() == KeyEvent.VK_ENTER) actionPerformed(new ActionEvent(okay, -1, null));
 				}
@@ -607,6 +607,11 @@ public class SitesDialog extends JDialog implements ActionListener {
 							setWikiAccountFieldsEnabled(true);
 							error("<html><p width=400>Please provide your name and email address to register an account on the ImageJ Wiki</p></html>");
 						}
+						return;
+					}
+					else if (!passwordField.isEnabled()) {
+						setChangePasswordEnabled(true);
+						error("<html><p width=400>Please type in your the password for your account on the Fiji/ImageJ Wiki</p></html>");
 						return;
 					}
 
