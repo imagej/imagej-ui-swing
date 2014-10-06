@@ -573,7 +573,11 @@ public class SitesDialog extends JDialog implements ActionListener {
 				dispose();
 				return;
 			} else if (e.getSource() == okay) {
-				final String newName = userField.getText();
+				String newName = userField.getText();
+				if (!MediaWikiClient.isCapitalized(newName)) {
+					newName = MediaWikiClient.capitalize(newName);
+					userField.setText(newName);
+				}
 				if ("".equals(newName)) {
 					error("Please provide a ImageJ Wiki account name!");
 					return;
