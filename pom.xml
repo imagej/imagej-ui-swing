@@ -119,6 +119,11 @@
 			<artifactId>scripting-javascript</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>scijava-plugins-platforms</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
