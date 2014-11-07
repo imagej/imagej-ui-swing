@@ -72,6 +72,7 @@ import javax.swing.table.TableColumnModel;
 import net.imagej.updater.FilesCollection;
 import net.imagej.updater.UpdateSite;
 import net.imagej.updater.UploaderService;
+import net.imagej.updater.util.UpdaterUserInterface;
 import net.imagej.updater.util.UpdaterUtil;
 import net.imagej.util.MediaWikiClient;
 import net.miginfocom.swing.MigLayout;
@@ -90,7 +91,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 
 	protected DataModel tableModel;
 	protected JTable table;
-	protected JButton addNewSite, addPersonalSite, remove, close;
+	protected JButton addNewSite, addPersonalSite, remove, faq, close;
 
 	public SitesDialog(final UpdaterFrame owner, final FilesCollection files)
 	{
@@ -252,6 +253,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 		addNewSite = SwingTools.button("Add", "Add", this, buttons);
 		remove = SwingTools.button("Remove", "Remove", this, buttons);
 		remove.setEnabled(false);
+		faq = SwingTools.button("FAQ", "Frequently Asked Questions", this, buttons);
 		close = SwingTools.button("Close", "Close", this, buttons);
 		contentPane.add(buttons);
 
@@ -282,6 +284,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 	}
 
 	private final static String PERSONAL_SITES_URL = "http://sites.imagej.net/";
+	private static final String FAQ_URL = "http://imagej.net/Update_Sites#Frequently_asked_questions";
 
 	private void addPersonalSite() {
 		final PersonalSiteDialog dialog = new PersonalSiteDialog();
@@ -341,6 +344,11 @@ public class SitesDialog extends JDialog implements ActionListener {
 		if (source == addNewSite) addNew();
 		else if (source == addPersonalSite) addPersonalSite();
 		else if (source == remove) delete(table.getSelectedRow());
+		else if (source == faq) try {
+			UpdaterUserInterface.get().openURL(FAQ_URL);
+		} catch (final IOException e2) {
+			updaterFrame.log.error(e2);
+		}
 		else if (source == close) {
 			dispose();
 		}
