@@ -120,12 +120,12 @@ public class UpdaterGUITest {
 	}
 
 	protected static void testStringDialog() {
-		SwingUserInterface ui = new SwingUserInterface(UpdaterUtil.getLogService(), null);
+		SwingUserInterface ui = new SwingUserInterface(UpdaterUtil.getLogService(), null, null, null);
 		System.err.println(ui.getString("Login for blub"));
 	}
 
 	protected static void testPassword() {
-		SwingUserInterface ui = new SwingUserInterface(UpdaterUtil.getLogService(), null);
+		SwingUserInterface ui = new SwingUserInterface(UpdaterUtil.getLogService(), null, null, null);
 		System.err.println(ui.getPassword("Enter password"));
 	}
 
