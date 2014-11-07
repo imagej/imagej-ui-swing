@@ -47,7 +47,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.scijava.app.StatusService;
 import org.scijava.log.LogService;
-import org.scijava.util.Prefs;
+import org.scijava.prefs.PrefService;
 
 /**
  * TODO
@@ -58,10 +58,18 @@ public class SwingUserInterface extends UpdaterUserInterface {
 
 	protected final LogService log;
 	protected final StatusService statusService;
+	private final PrefService prefs;
 
+	/** @see */
+	@Deprecated
 	public SwingUserInterface(final LogService log, final StatusService statusService) {
+		this(log, statusService, null);
+	}
+
+	public SwingUserInterface(final LogService log, final StatusService statusService, final PrefService prefs) {
 		this.log = log;
 		this.statusService = statusService;
+		this.prefs = prefs;
 	}
 
 	@Override
@@ -139,15 +147,13 @@ public class SwingUserInterface extends UpdaterUserInterface {
 	@Override
 	public String getPref(final String key) {
 
-		return Prefs.get(this.getClass(), key);
+		return prefs.get(this.getClass(), key);
 
 	}
 
 	@Override
 	public void setPref(final String key, final String value) {
-
-		Prefs.put(this.getClass(), key, value);
-
+		prefs.put(this.getClass(), key, value);
 	}
 
 	@Override
