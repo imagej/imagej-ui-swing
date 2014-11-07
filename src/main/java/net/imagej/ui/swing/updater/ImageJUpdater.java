@@ -59,6 +59,7 @@ import org.scijava.command.CommandService;
 import org.scijava.event.ContextDisposingEvent;
 import org.scijava.event.EventHandler;
 import org.scijava.log.LogService;
+import org.scijava.platform.PlatformService;
 import org.scijava.plugin.Menu;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -91,6 +92,9 @@ public class ImageJUpdater implements UpdaterUI {
 	private CommandService commandService;
 
 	@Parameter
+	private PlatformService platformService;
+
+	@Parameter
 	private PrefService prefs;
 
 	private final static String UPDATER_UPDATING_THREAD_NAME = "Updating the Updater itself!";
@@ -110,7 +114,7 @@ public class ImageJUpdater implements UpdaterUI {
 		final FilesCollection files = new FilesCollection(imagejRoot);
 		AvailableSites.initializeAndAddSites(files);
 
-		UpdaterUserInterface.set(new SwingUserInterface(log, statusService, prefs));
+		UpdaterUserInterface.set(new SwingUserInterface(log, statusService, platformService, prefs));
 
 		if (!areWeUpdatingTheUpdater() && new File(imagejRoot, "update").exists()) {
 			if (!UpdaterUserInterface.get().promptYesNo("It is suggested that you restart ImageJ, then continue the update.\n"

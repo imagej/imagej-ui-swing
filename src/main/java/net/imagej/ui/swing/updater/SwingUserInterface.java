@@ -35,6 +35,7 @@ import java.awt.Frame;
 import java.awt.Graphics;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URL;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -47,6 +48,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.scijava.app.StatusService;
 import org.scijava.log.LogService;
+import org.scijava.platform.PlatformService;
 import org.scijava.prefs.PrefService;
 
 /**
@@ -58,17 +60,19 @@ public class SwingUserInterface extends UpdaterUserInterface {
 
 	protected final LogService log;
 	protected final StatusService statusService;
+	private final PlatformService platformService;
 	private final PrefService prefs;
 
 	/** @see */
 	@Deprecated
 	public SwingUserInterface(final LogService log, final StatusService statusService) {
-		this(log, statusService, null);
+		this(log, statusService, null, null);
 	}
 
-	public SwingUserInterface(final LogService log, final StatusService statusService, final PrefService prefs) {
+	public SwingUserInterface(final LogService log, final StatusService statusService, final PlatformService platformService, final PrefService prefs) {
 		this.log = log;
 		this.statusService = statusService;
+		this.platformService = platformService;
 		this.prefs = prefs;
 	}
 
@@ -165,8 +169,9 @@ public class SwingUserInterface extends UpdaterUserInterface {
 
 	@Override
 	public void openURL(final String url) throws IOException {
-		// TODO Auto-generated method stub
-
+		if (platformService != null) {
+			platformService.open(new URL(url));
+		}
 	}
 
 	@Override
