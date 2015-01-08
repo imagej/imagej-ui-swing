@@ -45,8 +45,8 @@ import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 
 import net.imagej.Dataset;
-import net.imglib2.meta.TypedAxis;
-import net.imglib2.meta.TypedSpace;
+import net.imagej.axis.TypedAxis;
+import net.imagej.space.TypedSpace;
 
 import org.scijava.log.LogService;
 import org.scijava.module.Module;

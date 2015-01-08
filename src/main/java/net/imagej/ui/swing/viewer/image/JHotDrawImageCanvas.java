@@ -53,6 +53,8 @@ import javax.swing.JViewport;
 
 import net.imagej.Dataset;
 import net.imagej.DatasetService;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imagej.display.DataView;
 import net.imagej.display.DatasetView;
 import net.imagej.display.ImageCanvas;
@@ -70,8 +72,6 @@ import net.imagej.ui.swing.overlay.JHotDrawTool;
 import net.imagej.ui.swing.overlay.ToolDelegator;
 import net.imglib2.RandomAccess;
 import net.imglib2.display.screenimage.awt.ARGBScreenImage;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.AxisType;
 import net.imglib2.type.numeric.RealType;
 
 import org.jhotdraw.draw.DefaultDrawing;

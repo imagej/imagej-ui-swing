@@ -51,6 +51,8 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imagej.display.DatasetView;
 import net.imagej.display.ImageCanvas;
 import net.imagej.display.ImageDisplay;
@@ -61,8 +63,6 @@ import net.imagej.display.event.LUTsChangedEvent;
 import net.imagej.ui.swing.SwingColorBar;
 import net.imagej.ui.viewer.image.ImageDisplayPanel;
 import net.imglib2.display.ColorTable;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.AxisType;
 import net.miginfocom.swing.MigLayout;
 
 import org.scijava.event.EventHandler;
