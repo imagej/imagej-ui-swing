@@ -32,6 +32,8 @@ public class ImageJTroubleshooter implements TroubleshooterUI {
 	private Map<String, IJWizardPanelDescriptor> panels;
 	private static final String ROOT = "root";
 	private static final String TAIL = "tail";
+	private static final String ROOT_TITLE = "What went wrong?";
+	private static final String TAIL_TITLE = "Did that fix your problem?";
 
 	@Parameter
 	private TroubleshootingService ts;
@@ -45,7 +47,7 @@ public class ImageJTroubleshooter implements TroubleshooterUI {
 				frame = new JFrame();
 				Wizard w = new Wizard(frame);
 				initPanels(ts.getInstances(), w);
-				w.setTitle("What went wrong?");
+				w.setTitle(ROOT_TITLE);
 				w.setCurrentPanel(ROOT);
 				w.showModalDialog();
 			}
@@ -63,14 +65,16 @@ public class ImageJTroubleshooter implements TroubleshooterUI {
 						Iterator<String> iterator = path.iterator();
 						while (iterator.hasNext()) {
 							String label = iterator.next();
+							String title = label;
 							JButton button = new JButton(path.getDescription(label));
 							button.setFocusPainted(false);
 							button.setContentAreaFilled(false);
 							if (!iterator.hasNext()) {
 								label = TAIL;
+								title = TAIL_TITLE;
 								initTail(w);
 							}
-							button.addActionListener(new WizardListener(w, label));
+							button.addActionListener(new WizardListener(w, label, title));
 							currentPanel.addButton(button);
 							if (iterator.hasNext()) {
 								currentPanel = getPanel(label, lastId);
@@ -109,7 +113,7 @@ public class ImageJTroubleshooter implements TroubleshooterUI {
 						new JButton("That didn't solve my problem - I want to start over");
 					button.setFocusPainted(false);
 					button.setContentAreaFilled(false);
-					button.addActionListener(new WizardListener(w, ROOT));
+					button.addActionListener(new WizardListener(w, ROOT, ROOT_TITLE));
 					tail.addButton(button);
 				}
 			}
@@ -137,17 +141,23 @@ public class ImageJTroubleshooter implements TroubleshooterUI {
 
 		final Wizard wizard;
 		final String id;
+		final String title;
 
 		public WizardListener(Wizard w, String id) {
+			this(w, id, null);
+		}
+
+		public WizardListener(Wizard w, String id, String title) {
 			wizard = w;
 			this.id = id;
+			this.title = title;
 		}
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			wizard.setCurrentPanel(id);
+			if (title != null) wizard.setTitle(title);
 		}
-
 	}
 
 	private static class IJWizardPanelDescriptor extends WizardPanelDescriptor {
