@@ -123,6 +123,12 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>io.scif</groupId>
+			<artifactId>wizard</artifactId>
+			<version>0.1.0-SNAPSHOT</version>
+		</dependency>
+
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>org.scijava</groupId>
