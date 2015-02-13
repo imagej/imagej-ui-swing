@@ -3,11 +3,13 @@ package net.imagej.ui.swing.troubleshooter;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.script.ScriptException;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -23,6 +25,7 @@ import org.scijava.help.TroubleshootingService;
 import org.scijava.plugin.Menu;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.script.ScriptService;
 
 @Plugin(type = TroubleshooterUI.class, menu = { @Menu(label = "Help"),
 	@Menu(label = "Troubleshoot...") })
@@ -37,6 +40,9 @@ public class ImageJTroubleshooter implements TroubleshooterUI {
 
 	@Parameter
 	private TroubleshootingService ts;
+
+	@Parameter
+	private ScriptService ss;
 
 	@Override
 	public void run() {
@@ -74,7 +80,8 @@ public class ImageJTroubleshooter implements TroubleshooterUI {
 								title = TAIL_TITLE;
 								initTail(w);
 							}
-							button.addActionListener(new WizardListener(w, label, title));
+							button.addActionListener(new WizardListener(w, ss, path
+								.getScriptName(), path.getScript(), label, title));
 							currentPanel.addButton(button);
 							if (iterator.hasNext()) {
 								currentPanel = getPanel(label, lastId);
@@ -113,7 +120,8 @@ public class ImageJTroubleshooter implements TroubleshooterUI {
 						new JButton("That didn't solve my problem - I want to start over");
 					button.setFocusPainted(false);
 					button.setContentAreaFilled(false);
-					button.addActionListener(new WizardListener(w, ROOT, ROOT_TITLE));
+					button.addActionListener(new WizardListener(w, ss, "", "", ROOT,
+						ROOT_TITLE));
 					tail.addButton(button);
 				}
 			}
@@ -143,18 +151,41 @@ public class ImageJTroubleshooter implements TroubleshooterUI {
 		final String id;
 		final String title;
 
-		public WizardListener(Wizard w, String id) {
-			this(w, id, null);
+		private String scriptName;
+		private String script;
+		private ScriptService ss;
+
+		public WizardListener(Wizard w, ScriptService ss, String scriptName,
+			String script, String id)
+		{
+			this(w, ss, scriptName, script, id, null);
 		}
 
-		public WizardListener(Wizard w, String id, String title) {
+		public WizardListener(Wizard w, ScriptService ss, String scriptName,
+			String script, String id, String title)
+		{
 			wizard = w;
 			this.id = id;
 			this.title = title;
+			this.scriptName = scriptName;
+			this.script = script;
+			this.ss = ss;
 		}
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			if (id.equals(TAIL)) {
+				try {
+					ss.run(scriptName, script, false, (Object[]) null);
+				}
+				catch (IOException e1) {
+					System.out.println(e1);
+				}
+				catch (ScriptException e1) {
+					System.out.println(e1);
+				}
+			}
+
 			wizard.setCurrentPanel(id);
 			if (title != null) wizard.setTitle(title);
 		}
