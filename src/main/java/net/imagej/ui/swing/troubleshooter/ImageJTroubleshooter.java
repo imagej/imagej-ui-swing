@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -16,16 +17,16 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 
 import net.imagej.ui.swing.updater.SwingTools;
-import net.sf.fmj.ui.wizard.Wizard;
-import net.sf.fmj.ui.wizard.WizardPanelDescriptor;
 
-import org.scijava.help.TroubleshooterUI;
-import org.scijava.help.TroubleshootingPath;
-import org.scijava.help.TroubleshootingService;
+import org.scijava.path.TroubleshooterUI;
+import org.scijava.path.Path;
+import org.scijava.path.TroubleshootingService;
 import org.scijava.plugin.Menu;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.script.ScriptService;
+import org.scijava.ui.swing.wizard.Wizard;
+import org.scijava.ui.swing.wizard.WizardPanelDescriptor;
 
 @Plugin(type = TroubleshooterUI.class, menu = { @Menu(label = "Help"),
 	@Menu(label = "Troubleshoot...") })
@@ -60,12 +61,12 @@ public class ImageJTroubleshooter implements TroubleshooterUI {
 		});
 	}
 
-	private void initPanels(List<TroubleshootingPath> instances, Wizard w) {
+	private void initPanels(List<Path> instances, Wizard w) {
 		if (panels == null) {
 			synchronized (this) {
 				if (panels == null) {
 					panels = new HashMap<String, IJWizardPanelDescriptor>();
-					for (TroubleshootingPath path : ts.getInstances()) {
+					for (Path path : ts.getInstances()) {
 						String lastId = ROOT;
 						IJWizardPanelDescriptor currentPanel = getPanel(lastId, null);
 						Iterator<String> iterator = path.iterator();
@@ -136,7 +137,7 @@ public class ImageJTroubleshooter implements TroubleshooterUI {
 			synchronized (this) {
 				p = panels.get(id);
 				if (p == null) {
-					p = new IJWizardPanelDescriptor(backId);
+					p = new IJWizardPanelDescriptor(id, backId);
 					p.setPanelDescriptorIdentifier(id);
 					panels.put(id, p);
 				}
@@ -193,11 +194,14 @@ public class ImageJTroubleshooter implements TroubleshooterUI {
 
 	private static class IJWizardPanelDescriptor extends WizardPanelDescriptor {
 
+		public static final String BUTTON_PANEL_IDENTIFIER = "buttenPanelIdentifier";
 		private final String backId;
+		private final String title;
 
-		public IJWizardPanelDescriptor(final String backId) {
-			super(backId, new Box(BoxLayout.Y_AXIS));
+		public IJWizardPanelDescriptor(final String backId, final String title) {
+			super(BUTTON_PANEL_IDENTIFIER, new Box(BoxLayout.Y_AXIS));
 			this.backId = backId;
+			this.title = title;
 		}
 
 		public void addButton(final JButton button) {
@@ -206,9 +210,15 @@ public class ImageJTroubleshooter implements TroubleshooterUI {
 			box.add(Box.createVerticalStrut(10));
 		}
 
+		@Override
 		public Object getBackPanelDescriptor() {
 			return backId;
 		}
 
+		@Override
+		public boolean aboutToDisplayPanel(final Object prevId) {
+			getWizard().setTitle(title);
+			return super.aboutToDisplayPanel(prevId);
+		}
 	}
 }
