@@ -90,6 +90,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 
 	protected DataModel tableModel;
 	protected JTable table;
+	protected JScrollPane scrollpane;
 	protected JButton addNewSite, addPersonalSite, remove, close;
 
 	public SitesDialog(final UpdaterFrame owner, final FilesCollection files)
@@ -243,7 +244,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 		table.setRowSelectionAllowed(true);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		tableModel.setColumnWidths();
-		final JScrollPane scrollpane = new JScrollPane(table);
+		scrollpane = new JScrollPane(table);
 		scrollpane.setPreferredSize(new Dimension(tableModel.tableWidth, 400));
 		contentPane.add(scrollpane);
 
