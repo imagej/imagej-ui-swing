@@ -76,6 +76,8 @@ import net.imagej.updater.util.UpdaterUtil;
 import net.imagej.util.MediaWikiClient;
 import net.miginfocom.swing.MigLayout;
 
+import org.scijava.ui.swing.StaticSwingUtils;
+
 /**
  * The dialog in which the user can choose which update sites to follow.
  * 
@@ -301,6 +303,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 		tableModel.rowsChanged();
 		tableModel.rowChanged(row);
 		table.setRowSelectionInterval(row, row);
+		StaticSwingUtils.scrollToBottom(scrollpane);
 	}
 
 	private String makeUniqueSiteName(final String prefix) {
