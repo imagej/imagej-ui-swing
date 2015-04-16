@@ -244,9 +244,12 @@ public class FileTable extends JTable {
 		}
 	}
 
-	public FileObject getFile(final int row) {
-		final int realRow = convertRowIndexToModel(row);
-		return fileTableModel.rowToFile.get(realRow);
+	public FileObject getFile(final int viewRow) {
+		return getFileFromModel(convertRowIndexToModel(viewRow));
+	}
+
+	private FileObject getFileFromModel(final int modelRow) {
+		return fileTableModel.rowToFile.get(modelRow);
 	}
 
 	public Iterable<FileObject> getSelectedFiles() {
@@ -394,7 +397,7 @@ public class FileTable extends JTable {
 		{
 			if (column == ACTION_COLUMN) {
 				final GroupAction action = (GroupAction) value;
-				final FileObject file = getFile(row);
+				final FileObject file = getFileFromModel(row);
 				action.setAction(files, file);
 				fireFileChanged(file);
 			}
