@@ -253,8 +253,7 @@ public class JHotDrawImageCanvas extends JPanel implements AdjustmentListener,
 			datasetService.create(new long[] { w, h, 3 }, "Captured view",
 				new AxisType[] { Axes.X, Axes.Y, Axes.CHANNEL }, 8, false, false);
 		dataset.setRGBMerged(true);
-		final RandomAccess<? extends RealType<?>> accessor =
-			dataset.getImgPlus().randomAccess();
+		final RandomAccess<? extends RealType<?>> accessor = dataset.randomAccess();
 		for (int x = 0; x < w; x++) {
 			accessor.setPosition(x, 0);
 			for (int y = 0; y < h; y++) {
