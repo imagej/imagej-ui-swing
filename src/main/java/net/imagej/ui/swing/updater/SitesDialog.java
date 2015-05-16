@@ -252,7 +252,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 
 		final JPanel buttons = new JPanel();
 		addPersonalSite = SwingTools.button("Add my site", "Add my personal update site", this, buttons);
-		addNewSite = SwingTools.button("Add", "Add", this, buttons);
+		addNewSite = SwingTools.button("Add update site", "Add update site", this, buttons);
 		remove = SwingTools.button("Remove", "Remove", this, buttons);
 		remove.setEnabled(false);
 		close = SwingTools.button("Close", "Close", this, buttons);
