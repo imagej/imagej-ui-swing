@@ -227,7 +227,7 @@ public class TextEditor extends JFrame implements ActionListener,
 	public TextEditor(final Context context) {
 		super("Script Editor");
 		context.inject(this);
-		initializeTokenMakers(pluginService, log);
+		initializeTokenMakers();
 		loadPreferences();
 
 		// Initialize menu
@@ -647,20 +647,18 @@ public class TextEditor extends JFrame implements ActionListener,
 		editorPane.requestFocus();
 	}
 
-	private synchronized static void initializeTokenMakers(
-		final PluginService pluginService, final LogService log)
-	{
+	private synchronized void initializeTokenMakers() {
 		if (tokenMakerFactory != null) return;
 		tokenMakerFactory =
 			(AbstractTokenMakerFactory) TokenMakerFactory.getDefaultInstance();
 		for (final PluginInfo<SyntaxHighlighter> info : pluginService
 			.getPluginsOfType(SyntaxHighlighter.class))
 			try {
-				tokenMakerFactory.putMapping("text/" + info.getLabel(), info
+				tokenMakerFactory.putMapping("text/" + info.getName(), info
 					.getClassName());
 			}
 			catch (final Throwable t) {
-				log.warn("Could not register " + info.getLabel(), t);
+				log.warn("Could not register " + info.getName(), t);
 			}
 	}
 

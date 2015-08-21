@@ -55,6 +55,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
 
+import org.fife.rsta.ac.LanguageSupport;
 import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.Style;
@@ -65,6 +66,7 @@ import org.fife.ui.rtextarea.IconGroup;
 import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.RecordableTextAction;
+import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 import org.scijava.prefs.PrefService;
 import org.scijava.script.ScriptHeaderService;
@@ -93,6 +95,10 @@ public class EditorPane extends RSyntaxTextArea implements DocumentListener {
 	private boolean undoInProgress;
 	private boolean redoInProgress;
 
+	@Parameter
+	Context context;
+	@Parameter
+	private LanguageSupportService languageSupportService;
 	@Parameter
 	private ScriptService scriptService;
 	@Parameter
@@ -441,8 +447,16 @@ public class EditorPane extends RSyntaxTextArea implements DocumentListener {
 	protected void setLanguage(final ScriptLanguage language,
 		final boolean addHeader)
 	{
+		// uninstall existing language support.
+		LanguageSupport support =
+			languageSupportService.getLanguageSupport(currentLanguage);
+		if (support != null) {
+			support.uninstall(this);
+		}
+
 		String languageName;
 		String defaultExtension;
+
 		if (language == null) {
 			languageName = "None";
 			defaultExtension = ".txt";
@@ -478,6 +492,13 @@ public class EditorPane extends RSyntaxTextArea implements DocumentListener {
 		// Add header text
 		if (header != null) {
 			setText(header += getText());
+		}
+
+		// try to get language support for current language, may be null.
+		support = languageSupportService.getLanguageSupport(currentLanguage);
+
+		if (support != null) {
+			support.install(this);
 		}
 	}
 
