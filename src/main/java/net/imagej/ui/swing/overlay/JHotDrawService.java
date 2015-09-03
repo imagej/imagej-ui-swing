@@ -36,6 +36,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import net.imagej.ImageJService;
 import net.imagej.display.DataView;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
@@ -60,7 +61,7 @@ import org.scijava.tool.Tool;
  * @author Curtis Rueden
  */
 @Plugin(type = Service.class)
-public class JHotDrawService extends AbstractService {
+public class JHotDrawService extends AbstractService implements ImageJService {
 
 	@Parameter
 	private PluginService pluginService;
