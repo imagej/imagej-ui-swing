@@ -153,7 +153,7 @@ public class SwingOverlayManager
 	// -- instance variables --
 	
 	private final Context context;
-	private final JList jlist;
+	private final JList<OverlayInfo> jlist;
 	private final JCheckBox showAllCheckBox;
 	private final JCheckBox editModeCheckBox;
 
@@ -189,7 +189,7 @@ public class SwingOverlayManager
 		this.context = context;
 		context.inject(this);
 
-		jlist = new JList(new OverlayListModel(overlayService.getOverlayInfo()));
+		jlist = new JList<>(new OverlayListModel(overlayService.getOverlayInfo()));
 		//jlist.setCellRenderer(new OverlayRenderer());
 
 		final JScrollPane listScroller = new JScrollPane(jlist);
@@ -311,7 +311,7 @@ public class SwingOverlayManager
 	// -- private helpers for overlay list maintenance --
 
 	
-	private class OverlayListModel extends AbstractListModel {
+	private class OverlayListModel extends AbstractListModel<OverlayInfo> {
 
 		//private static final long serialVersionUID = 7941252533859436640L;
 
@@ -322,7 +322,7 @@ public class SwingOverlayManager
 		}
 		
 		@Override
-		public Object getElementAt(final int index) {
+		public OverlayInfo getElementAt(final int index) {
 			return overlayInfoList.getOverlayInfo(index);
 		}
 
@@ -837,8 +837,8 @@ public class SwingOverlayManager
 					final ImageDisplay display =
 						imageDisplayService.getActiveImageDisplay();
 					if (display == null) return;
-					final JList list = (JList) listSelectionEvent.getSource();
-					final Object[] selectionValues = list.getSelectedValues();
+					final JList<?> list = (JList<?>) listSelectionEvent.getSource();
+					final List<?> selectionValues = list.getSelectedValuesList();
 					overlayService.getOverlayInfo().deselectAll();
 					for (final Object overlayInfoObj : selectionValues) {
 						final OverlayInfo overlayInfo = (OverlayInfo) overlayInfoObj;

@@ -42,7 +42,7 @@ import net.imagej.updater.FilesCollection;
  * @author Johannes Schindelin
  */
 @SuppressWarnings("serial")
-public class ViewOptions extends JComboBox {
+public class ViewOptions extends JComboBox<Object> {
 
 	public static enum Option {
 		ALL("all files"), INSTALLED("installed files only"), UNINSTALLED(

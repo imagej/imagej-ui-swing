@@ -61,7 +61,7 @@ public class OverlayFigureView extends AbstractContextual implements FigureView
 	/** JHotDraw {@link Figure} linked to the associated {@link Overlay}. */
 	private final Figure figure;
 
-	private final JHotDrawAdapter adapter;
+	private final JHotDrawAdapter<Figure> adapter;
 
 	@Parameter
 	private JHotDrawService jHotDrawService;
@@ -97,7 +97,11 @@ public class OverlayFigureView extends AbstractContextual implements FigureView
 		this.displayViewer = displayViewer;
 		this.overlayView = overlayView;
 
-		adapter = jHotDrawService.getAdapter(overlayView.getData(), figure);
+		@SuppressWarnings("unchecked")
+		final JHotDrawAdapter<Figure> adapterMatch =
+			(JHotDrawAdapter<Figure>) jHotDrawService.getAdapter(overlayView
+				.getData(), figure);
+		adapter = adapterMatch;
 		if (figure == null) {
 			this.figure = adapter.createDefaultFigure();
 			adapter.updateFigure(overlayView, this.figure);

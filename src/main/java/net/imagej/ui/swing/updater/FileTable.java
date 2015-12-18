@@ -215,7 +215,7 @@ public class FileTable extends JTable {
 		// As we follow FileTableModel, 1st column is filename
 		if (col == NAME_COLUMN) return super.getCellEditor(row, col);
 		final Set<GroupAction> actions = files.getValidActions(Collections.singleton(file));
-		return new DefaultCellEditor(new JComboBox(actions.toArray()));
+		return new DefaultCellEditor(new JComboBox<>(actions.toArray()));
 	}
 
 	private void populatePopupMenu(final Iterable<FileObject> selected,
