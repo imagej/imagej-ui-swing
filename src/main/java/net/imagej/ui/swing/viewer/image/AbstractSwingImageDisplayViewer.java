@@ -35,6 +35,7 @@ import net.imagej.Dataset;
 import net.imagej.ui.viewer.image.AbstractImageDisplayViewer;
 
 import org.scijava.display.Display;
+import org.scijava.display.DisplayService;
 import org.scijava.event.EventHandler;
 import org.scijava.event.EventService;
 import org.scijava.options.event.OptionsEvent;
@@ -77,6 +78,10 @@ public abstract class AbstractSwingImageDisplayViewer extends
 	@Override
 	public void view(final DisplayWindow w, final Display<?> d) {
 		super.view(w, d);
+		
+		// NB: resolve the racing condition when other consumer are looking up the 
+		// active display
+		getContext().service(DisplayService.class).setActiveDisplay(getDisplay());
 
 		dispatcher = new AWTInputEventDispatcher(getDisplay(), eventService);
 
