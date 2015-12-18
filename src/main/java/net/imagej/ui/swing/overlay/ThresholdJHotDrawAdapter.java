@@ -96,7 +96,7 @@ public class ThresholdJHotDrawAdapter extends
 
 	@Override
 	public JHotDrawTool getCreationTool(ImageDisplay display) {
-		return new IJCreationTool<ThresholdFigure>(display, this);
+		return new IJCreationTool<>(display, this);
 	}
 
 	@Override

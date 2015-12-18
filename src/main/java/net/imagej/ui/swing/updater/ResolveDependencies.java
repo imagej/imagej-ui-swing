@@ -61,7 +61,7 @@ public class ResolveDependencies extends ConflictDialog {
 
 		this.forUpload = forUpload;
 		conflicts = new Conflicts(files);
-		conflictList = new ArrayList<Conflict>();
+		conflictList = new ArrayList<>();
 	}
 
 	@Override

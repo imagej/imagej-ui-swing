@@ -94,10 +94,10 @@ public class SwingImageDisplayPanel extends JPanel implements ImageDisplayPanel 
 	private boolean initialScaleCalculated = false;
 
 	private final Map<AxisType, JScrollBar> axisSliders =
-		new ConcurrentHashMap<AxisType, JScrollBar>();
+		new ConcurrentHashMap<>();
 
 	private final Map<AxisType, JLabel> axisLabels =
-		new HashMap<AxisType, JLabel>();
+		new HashMap<>();
 
 	@Parameter
 	private ImageDisplayService imageDisplayService;

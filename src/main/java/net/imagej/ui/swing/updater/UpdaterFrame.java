@@ -476,7 +476,7 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		filesChanged();
 	}
 
-	List<FileActionButton> fileActions = new ArrayList<FileActionButton>();
+	List<FileActionButton> fileActions = new ArrayList<>();
 
 	private class FileActionButton extends JButton implements ActionListener {
 
@@ -539,7 +539,7 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 			@Override
 			public void run() {
 				Iterable<FileObject> view = viewOptions.getView(table);
-				final Set<FileObject> selected = new HashSet<FileObject>();
+				final Set<FileObject> selected = new HashSet<>();
 				for (final FileObject file : table.getSelectedFiles())
 					selected.add(file);
 				table.clearSelection();
@@ -594,7 +594,7 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 			viewOptions.getSelectedItem() == ViewOptions.Option.UPDATEABLE)
 		{
 			viewOptions.setSelectedItem(ViewOptions.Option.ALL);
-			final List<SortKey> keys = new ArrayList<SortKey>();
+			final List<SortKey> keys = new ArrayList<>();
 			keys.add(new SortKey(FileTable.ACTION_COLUMN, SortOrder.ASCENDING));
 			keys.add(new SortKey(FileTable.SITE_COLUMN, SortOrder.ASCENDING));
 			table.getRowSorter().setSortKeys(keys);
@@ -783,7 +783,7 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		}
 
 		final List<String> possibleSites =
-			new ArrayList<String>(files.getSiteNamesToUpload());
+			new ArrayList<>(files.getSiteNamesToUpload());
 		if (possibleSites.size() == 0) {
 			error("Huh? No upload site?");
 			return;

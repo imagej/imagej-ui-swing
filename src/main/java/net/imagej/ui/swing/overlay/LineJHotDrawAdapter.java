@@ -127,7 +127,7 @@ public class LineJHotDrawAdapter extends
 
 	@Override
 	public JHotDrawTool getCreationTool(final ImageDisplay display) {
-		return new IJCreationTool<LineFigure>(display, this);
+		return new IJCreationTool<>(display, this);
 	}
 
 	@Override

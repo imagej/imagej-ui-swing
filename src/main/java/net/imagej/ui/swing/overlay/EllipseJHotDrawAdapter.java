@@ -135,7 +135,7 @@ public class EllipseJHotDrawAdapter extends
 
 	@Override
 	public JHotDrawTool getCreationTool(final ImageDisplay display) {
-		return new IJCreationTool<EllipseFigure>(display, this);
+		return new IJCreationTool<>(display, this);
 	}
 
 	@Override

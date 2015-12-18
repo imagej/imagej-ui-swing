@@ -134,7 +134,7 @@ public class AngleJHotDrawAdapter extends
 
 	@Override
 	public JHotDrawTool getCreationTool(final ImageDisplay display) {
-		return new IJCreationTool<AngleFigure>(display, this);
+		return new IJCreationTool<>(display, this);
 	}
 
 	protected class AngleFigure extends BezierFigure {

@@ -182,7 +182,7 @@ public class ImageJUpdater implements UpdaterUI {
 			}
 
 			// make a class path using the updated files
-			final List<URL> classPath = new ArrayList<URL>();
+			final List<URL> classPath = new ArrayList<>();
 			for (FileObject component : Installer.getUpdaterFiles(files, commandService, false)) {
 				final File updated = files.prefixUpdate(component.getFilename(false));
 				if (updated.exists()) try {

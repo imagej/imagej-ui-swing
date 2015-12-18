@@ -115,7 +115,7 @@ public class SwingHistogramWidget extends SwingInputWidget<HistogramBundle>
 	 * Returns a JFreeChart containing data from the provided histogram.
 	 */
 	private JFreeChart getChart(final String title, final HistogramBundle bund) {
-		List<XYSeries> series = new ArrayList<XYSeries>();
+		List<XYSeries> series = new ArrayList<>();
 		for (int h = 0; h < bund.getHistogramCount(); h++) {
 			final XYSeries xys = new XYSeries("histo" + h);
 			final long total = bund.getHistogram(h).getBinCount();

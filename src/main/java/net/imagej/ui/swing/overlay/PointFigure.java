@@ -73,7 +73,7 @@ public class PointFigure extends AbstractAttributedFigure {
 	public PointFigure(List<double[]> pts) {
 		bounds = new Rectangle2D.Double();
 		rect = new Rectangle2D.Double();
-		points = new ArrayList<double[]>();
+		points = new ArrayList<>();
 		setPoints(pts);
 	}
 

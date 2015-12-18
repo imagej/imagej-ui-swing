@@ -154,10 +154,10 @@ public class OpViewer extends JFrame {
 	private void createNodes(final DefaultMutableTreeNode top) {
 		// Map namespaces and ops to their parent tree node
 		final Map<String, DefaultMutableTreeNode> namespaces =
-			new HashMap<String, DefaultMutableTreeNode>();
+			new HashMap<>();
 
 		final Map<String, DefaultMutableTreeNode> ops =
-			new HashMap<String, DefaultMutableTreeNode>();
+			new HashMap<>();
 
 		// Iterate over all ops
 		for (final OpInfo info : opService.infos()) {

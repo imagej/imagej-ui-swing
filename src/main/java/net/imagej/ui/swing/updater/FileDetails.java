@@ -126,7 +126,7 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 			}
 		};
 
-		editables = new TreeMap<Position, EditableRegion>(comparator);
+		editables = new TreeMap<>(comparator);
 		dummySpace = null;
 	}
 
@@ -221,7 +221,7 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 	public void list(String label, final boolean showLinks,
 		final Iterable<?> items, final String delim, final FileObject file)
 	{
-		final List<Object> list = new ArrayList<Object>();
+		final List<Object> list = new ArrayList<>();
 		for (final Object object : items)
 			list.add(object);
 

@@ -131,7 +131,7 @@ public class RectangleJHotDrawAdapter extends
 
 	@Override
 	public JHotDrawTool getCreationTool(final ImageDisplay display) {
-		return new IJCreationTool<RectangleFigure>(display, this);
+		return new IJCreationTool<>(display, this);
 	}
 
 	@Override

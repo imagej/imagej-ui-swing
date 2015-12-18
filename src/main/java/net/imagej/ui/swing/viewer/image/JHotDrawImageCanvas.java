@@ -122,7 +122,7 @@ public class JHotDrawImageCanvas extends JPanel implements AdjustmentListener,
 
 	private final JScrollPane scrollPane;
 
-	private final List<FigureView> figureViews = new ArrayList<FigureView>();
+	private final List<FigureView> figureViews = new ArrayList<>();
 
 	private final List<EventSubscriber<?>> subscribers;
 

@@ -101,7 +101,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 		updaterFrame = owner;
 		this.files = files;
 
-		sites = new ArrayList<UpdateSite>(files.getUpdateSites(true));
+		sites = new ArrayList<>(files.getUpdateSites(true));
 
 		final Container contentPane = getContentPane();
 		contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
@@ -307,7 +307,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 	}
 
 	private String makeUniqueSiteName(final String prefix) {
-		final Set<String> names = new HashSet<String>();
+		final Set<String> names = new HashSet<>();
 		for (final UpdateSite site : sites) names.add(site.getName());
 		if (!names.contains(prefix)) return prefix;
 		for (int i = 2; ; i++) {

@@ -52,7 +52,7 @@ public class PolygonFigure extends BezierFigure {
 
 	@Override
 	public Collection<Handle> createHandles(final int detailLevel) {
-		final LinkedList<Handle> handles = new LinkedList<Handle>();
+		final LinkedList<Handle> handles = new LinkedList<>();
 		if (detailLevel != 0) {
 			return super.createHandles(detailLevel);
 		}

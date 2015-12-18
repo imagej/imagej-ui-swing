@@ -152,7 +152,7 @@ public class DefaultJHotDrawAdapter extends
 
 	@Override
 	public JHotDrawTool getCreationTool(final ImageDisplay display) {
-		return new IJCreationTool<ImageFigure>(display, this);
+		return new IJCreationTool<>(display, this);
 	}
 
 	@Override

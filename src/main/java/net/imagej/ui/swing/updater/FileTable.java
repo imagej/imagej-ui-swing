@@ -90,7 +90,7 @@ public class FileTable extends JTable {
 	public FileTable(final UpdaterFrame updaterFrame) {
 		this.updaterFrame = updaterFrame;
 		files = updaterFrame.files;
-		row2file = new ArrayList<FileObject>();
+		row2file = new ArrayList<>();
 		for (final FileObject file : files) {
 			row2file.add(file);
 		}
@@ -133,7 +133,7 @@ public class FileTable extends JTable {
 		getModel().addTableModelListener(this);
 		setColumnWidths(250, 100, 80);
 		TableRowSorter<FileTableModel> sorter =
-			new TableRowSorter<FileTableModel>(fileTableModel);
+			new TableRowSorter<>(fileTableModel);
 		sorter.setComparator(ACTION_COLUMN, new Comparator<FileObject.Action>() {
 
 			@Override
@@ -284,7 +284,7 @@ public class FileTable extends JTable {
 	public boolean chooseUpdateSite(final FilesCollection files,
 		final FileObject file)
 	{
-		final List<String> list = new ArrayList<String>();
+		final List<String> list = new ArrayList<>();
 		for (final String name : files.getUpdateSiteNames(false)) {
 			final UpdateSite site = files.getUpdateSite(name, true);
 			if (site.isUploadable()) list.add(name);
@@ -415,8 +415,8 @@ public class FileTable extends JTable {
 
 		protected void updateMappings() {
 			if (fileToRow != null) return;
-			fileToRow = new HashMap<FileObject, Integer>();
-			rowToFile = new ArrayList<FileObject>();
+			fileToRow = new HashMap<>();
+			rowToFile = new ArrayList<>();
 			// the table may be sorted, and we need the model's row
 			int i = 0;
 			for (final FileObject f : files) {

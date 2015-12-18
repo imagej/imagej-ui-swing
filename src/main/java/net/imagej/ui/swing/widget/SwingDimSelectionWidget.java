@@ -99,7 +99,7 @@ public class SwingDimSelectionWidget extends SwingInputWidget<TypedAxis[]>
 
 	@Override
 	public TypedAxis[] getValue() {
-		final List<TypedAxis> selectedAxis = new ArrayList<TypedAxis>();
+		final List<TypedAxis> selectedAxis = new ArrayList<>();
 
 		for (int i = 0; i < m_dimLabelButtonList.size(); i++) {
 			final JToggleButton axisButton = m_dimLabelButtonList.get(i);
@@ -147,8 +147,8 @@ public class SwingDimSelectionWidget extends SwingInputWidget<TypedAxis[]>
 	 */
 	private void buildUI() {
 
-		m_dimLabelButtonList = new ArrayList<JToggleButton>(m_typedAxis.length);
-		m_activeToogleButtonsQueue = new LinkedList<JToggleButton>();
+		m_dimLabelButtonList = new ArrayList<>(m_typedAxis.length);
+		m_activeToogleButtonsQueue = new LinkedList<>();
 
 		for (final TypedAxis m_typedAxi : m_typedAxis) {
 			final JToggleButton button =

@@ -509,7 +509,7 @@ public class SwingOverlayManager
 	
 	private void delete() {
 		if (overlayService.getOverlayInfo().getOverlayInfoCount() == 0) return;
-		List<Overlay> overlaysToDelete = new LinkedList<Overlay>();
+		List<Overlay> overlaysToDelete = new LinkedList<>();
 		final int[] selectedIndices = overlayService.getOverlayInfo().selectedIndices();
 		if (selectedIndices.length == 0) {
 			final int result =
@@ -787,7 +787,7 @@ public class SwingOverlayManager
 			public void keyTyped(KeyEvent e) { /* do nothing */ }
 		};
 		
-		final Stack<Component> stack = new Stack<Component>();
+		final Stack<Component> stack = new Stack<>();
 		stack.push(this);
 		while (!stack.empty()) {
 			final Component component = stack.pop();
@@ -1140,7 +1140,7 @@ public class SwingOverlayManager
 	}
 	
 	private void runPropertiesPlugin() {
-		final Map<String, Object> inputMap = new HashMap<String, Object>();
+		final Map<String, Object> inputMap = new HashMap<>();
 		inputMap.put("overlays", overlayService.getOverlayInfo().selectedOverlays());
 		// FIXME: Migrate OverlayProperties functionality into OverlayService API.
 		commandService.run(

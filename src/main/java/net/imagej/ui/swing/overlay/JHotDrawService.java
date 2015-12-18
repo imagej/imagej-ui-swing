@@ -140,7 +140,7 @@ public class JHotDrawService extends AbstractService implements ImageJService {
 		final Figure figure)
 	{
 		final ArrayList<JHotDrawAdapter<?>> result =
-			new ArrayList<JHotDrawAdapter<?>>();
+			new ArrayList<>();
 		for (final JHotDrawAdapter<?> adapter : adapters()) {
 			if (adapter.supports(overlay, figure)) result.add(adapter);
 		}

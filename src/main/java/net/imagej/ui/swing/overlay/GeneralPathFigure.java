@@ -152,7 +152,7 @@ public class GeneralPathFigure extends AbstractAttributedFigure {
 
 	@Override
 	public Object getTransformRestoreData() {
-		final List<BezierFigure> result = new ArrayList<BezierFigure>();
+		final List<BezierFigure> result = new ArrayList<>();
 		for (final BezierFigure figure : figures) {
 			result.add(figure.clone());
 		}
@@ -190,7 +190,7 @@ public class GeneralPathFigure extends AbstractAttributedFigure {
 
 	@Override
 	public Collection<Handle> createHandles(final int detailLevel) {
-		final LinkedList<Handle> handles = new LinkedList<Handle>();
+		final LinkedList<Handle> handles = new LinkedList<>();
 		for (final BezierFigure figure : figures) {
 			handles.addAll(figure.createHandles(detailLevel));
 		}
