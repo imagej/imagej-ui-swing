@@ -2082,6 +2082,10 @@ public class TextEditor extends JFrame implements ActionListener,
 	 * @return static {@link Reflections} instance
 	 */
 	private static Reflections getReflections() {
+		//TODO consider moving this to a service with plugins to determine how the
+		//packages are filtered. For example having scijava-common on the classpath
+		//adds org.scijava. Adding imagej-common would add net.imagej to the filter
+		//list.. etc...
 		if (reflections == null) {
 			synchronized(TextEditor.class) {
 				if (reflections == null) {
