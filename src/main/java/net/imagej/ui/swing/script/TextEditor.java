@@ -59,6 +59,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -107,6 +108,10 @@ import net.imagej.ui.swing.script.commands.KillScript;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
 import org.scijava.Context;
 import org.scijava.command.CommandService;
 import org.scijava.event.ContextDisposingEvent;
@@ -168,6 +173,7 @@ public class TextEditor extends JFrame implements ActionListener,
 	}
 
 	private static AbstractTokenMakerFactory tokenMakerFactory = null;
+	private static Reflections reflections = null;
 
 	private JTabbedPane tabbed;
 	private JMenuItem newFile, open, save, saveas, compileAndRun, compile,
@@ -2064,7 +2070,35 @@ public class TextEditor extends JFrame implements ActionListener,
 	public String getSelectedClassNameOrAsk() {
 		String className = getSelectedTextOrAsk("Class name");
 		if (className != null) className = className.trim();
+
 		return className;
+	}
+
+	/**
+	 * Returns the static Reflections instance, constructing it
+	 * if it doesn't already exist. This is to limit the number of
+	 * classpath scans.
+	 *
+	 * @return static {@link Reflections} instance
+	 */
+	private static Reflections getReflections() {
+		if (reflections == null) {
+			synchronized(TextEditor.class) {
+				if (reflections == null) {
+					final Collection<URL> packages = new HashSet<>();
+					packages.addAll(ClasspathHelper.forPackage("net.imagej"));
+					packages.addAll(ClasspathHelper.forPackage("org.scijava"));
+					packages.addAll(ClasspathHelper.forPackage("net.imglib2"));
+					packages.addAll(ClasspathHelper.forPackage("io.scif"));
+					packages.addAll(ClasspathHelper.forPackage("sc.fiji"));
+					packages.addAll(ClasspathHelper.forPackage("ij"));
+					reflections = new Reflections(new ConfigurationBuilder().setUrls(
+						packages).setScanners(new SubTypesScanner(false)));
+				}
+			}
+		}
+
+		return reflections;
 	}
 
 	private static void append(final JTextArea textArea, final String text) {
@@ -2209,7 +2243,38 @@ public class TextEditor extends JFrame implements ActionListener,
 
 	public void addImport(final String className) {
 		if (className != null) {
-			new TokenFunctions(getTextArea()).addImport(className.trim());
+
+			boolean addRaw = true;
+
+			// If there are NO package separators then this is a raw class name. Try
+			// and find matching packages
+
+			// NB: decided to only look for complete class names without packages.
+			// Matching "endsWith(className) can produce a plethora of false positives
+			// which we want to limit, because the current implementation imports
+			// all matches.
+			// Some alternatives to consider (including combinations):
+			//  - match *className
+			//  - match *className*
+			//  - match .className*
+			//  - if >1 match show list to the user to choose a "winner" to import
+			if (!className.contains(".")) {
+				final String packagedClass = "." + className;
+				final Reflections refl = TextEditor.getReflections();
+				final StringBuilder sb = new StringBuilder();
+
+				for (final String type : refl.getAllTypes()) {
+					// look for "blah.className"
+					if (type.endsWith(packagedClass)) {
+						addRaw = false;
+						new TokenFunctions(getTextArea()).addImport(type.trim());
+					}
+				}
+			}
+
+			// If there was a package separator or no matching packages, import the raw
+			// class.
+			if (addRaw) new TokenFunctions(getTextArea()).addImport(className.trim());
 		}
 	}
 
