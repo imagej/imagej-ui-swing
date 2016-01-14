@@ -176,7 +176,7 @@ public class OpViewer extends JFrame {
 
 				// Create a leaf node for this particular Op's signature
 				final DefaultMutableTreeNode opSignature = new DefaultMutableTreeNode(
-					OpUtils.opString(info.cInfo()));
+					OpUtils.simpleString(info.cInfo()));
 
 				opCategory.add(opSignature);
 			}
