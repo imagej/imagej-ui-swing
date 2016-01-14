@@ -127,6 +127,7 @@
 
 	<properties>
 		<scijava.jvm.version>1.8</scijava.jvm.version>
+    <enforcer.skip>true</enforcer.skip>
 	</properties>
 
 	<repositories>
@@ -149,6 +150,7 @@
 		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>imagej-ops</artifactId>
+      <version>0.24.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>net.imagej</groupId>
