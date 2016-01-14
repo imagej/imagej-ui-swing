@@ -174,6 +174,10 @@ public class OpViewer extends JFrame {
 				final DefaultMutableTreeNode opCategory = getCategory(nsCategory, ops,
 					opName);
 
+				// FIXME add separate column for base info.getDelegateClassName
+				// FIXME the first row for each leaf set, or a row on the expandable node itself,
+				//       should print the base interface for those nodes
+				// FIXME auto expand nodes of size 1 ?
 				// Create a leaf node for this particular Op's signature
 				final DefaultMutableTreeNode opSignature = new DefaultMutableTreeNode(
 					OpUtils.simpleString(info.cInfo()));
