@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -108,6 +109,11 @@ public class OpViewer extends JFrame implements DocumentListener {
 	private JTextField prompt;
 	private JXTreeTable treeTable;
 	private OpTreeTableModel model;
+	private JLabel successLabel = null;
+
+	// Icons
+	private ImageIcon opFail;
+	private ImageIcon opSuccess;
 
 	// Caching TreePaths
 	private Set<TreePath> expandedPaths;
@@ -131,7 +137,7 @@ public class OpViewer extends JFrame implements DocumentListener {
 	private CommandService commandService;
 
 	public OpViewer(final Context context) {
-		super("Op Viewer");
+		super("Viewing available Ops...");
 		context.inject(this);
 
 		expandedPaths = new HashSet<>();
@@ -177,9 +183,9 @@ public class OpViewer extends JFrame implements DocumentListener {
 		panel.add(new JSeparator(SwingConstants.VERTICAL));
 
 		// Build buttons
-		final JButton runButton = new JButton("Run");
-		final JButton snippetButton = new JButton("Snippet");
-		final JButton wikiButton = new JButton("Learn more");
+		final JButton runButton = new JButton(new ImageIcon(getClass().getResource("/icons/opbrowser/play.png")));
+		final JButton snippetButton = new JButton(new ImageIcon(getClass().getResource("/icons/opbrowser/paperclip.png")));
+		final JButton wikiButton = new JButton(new ImageIcon(getClass().getResource("/icons/opbrowser/globe.png")));
 
 		runButton.setToolTipText("Run the Op selected below");
 		runButton.addActionListener(new RunButtonListener());
@@ -196,6 +202,16 @@ public class OpViewer extends JFrame implements DocumentListener {
 		panel.add(new JSeparator(SwingConstants.VERTICAL));
 
 		panel.add(wikiButton);
+
+		panel.add(new JSeparator(SwingConstants.VERTICAL));
+
+		// These icons are used for visual feedback after clicking a button
+		opFail = new ImageIcon(getClass().getResource("/icons/opbrowser/redx.png"));
+		opSuccess = new ImageIcon(getClass().getResource("/icons/opbrowser/greencheck.png"));
+		successLabel = new JLabel(opSuccess);
+		successLabel.setVisible(false);
+
+		panel.add(successLabel);
 
 		prompt.getDocument().addDocumentListener(this);
 
@@ -473,11 +489,13 @@ public class OpViewer extends JFrame implements DocumentListener {
 			if (selectedNode == null || (codeCall = selectedNode.getCodeCall()).isEmpty()) {
 				statusService.clearStatus();
 				statusService.showStatus("No code to copy (is an Op row selected?)");
+				setFail();
 			} else {
 				statusService.showStatus("Op copied to clipboard!");
 				final StringSelection stringSelection = new StringSelection(codeCall);
 				final Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
 				clpbrd.setContents(stringSelection, null);
+				setPass();
 			}
 		}
 	}
@@ -496,8 +514,10 @@ public class OpViewer extends JFrame implements DocumentListener {
 			if (selectedNode == null || (cInfo = selectedNode.getCommandInfo()) == null) {
 				statusService.clearStatus();
 				statusService.showStatus("No Op selected or Op name not found");
+				setFail();
 			} else {
 				commandService.run(cInfo, true);
+				setPass();
 			}
 		}
 	}
@@ -512,6 +532,16 @@ public class OpViewer extends JFrame implements DocumentListener {
 
 			final TreePath path = treeTable.getPathForRow(row);
 			return (OpTreeTableNode) path.getPath()[path.getPathCount()-1];
+		}
+
+		public void setPass() {
+			successLabel.setVisible(true);
+			successLabel.setIcon(opSuccess);
+		}
+
+		public void setFail() {
+			successLabel.setVisible(true);
+			successLabel.setIcon(opFail);
 		}
 	}
 }
