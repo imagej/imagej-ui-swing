@@ -23,7 +23,7 @@ public class OpTreeTableModel extends AbstractTreeTableModel
 		switch( column )
 		{
 		case 0: return "Op signature";
-		case 1: return "Code to use";
+		case 1: return "Code snippet";
 		case 2: return "Defined in class";
 		default: return "Unknown";
 		}

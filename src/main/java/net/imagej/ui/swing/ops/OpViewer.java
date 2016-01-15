@@ -43,6 +43,7 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import net.imagej.ops.Namespace;
@@ -80,6 +81,9 @@ public class OpViewer extends JFrame implements DocumentListener {
 
 	// Sizing fields
 	private int[] widths;
+
+	// Child elements
+	private JTextField prompt;
 
 	@Parameter
 	private OpService opService;
@@ -183,6 +187,29 @@ public class OpViewer extends JFrame implements DocumentListener {
 		setPreferredSize(new Dimension(prefService.getInt(WINDOW_WIDTH, dim.width),
 			prefService.getInt(WINDOW_HEIGHT, dim.height)));
 	}
+
+	// -- DocumentListener methods --
+
+	@Override
+	public void insertUpdate(final DocumentEvent e) {
+		filterOps(e);
+	}
+
+	@Override
+	public void removeUpdate(final DocumentEvent e) {
+		filterOps(e);
+	}
+
+	@Override
+	public void changedUpdate(final DocumentEvent e) {
+		filterOps(e);
+	}
+
+	private void filterOps(DocumentEvent e) {
+		System.err.println("ok");
+	}
+
+	// -- Helper methods --
 
 	/**
 	 * Helper method to populate the {@link Op} nodes. Ops without a valid name
