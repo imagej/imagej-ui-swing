@@ -34,8 +34,10 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -49,6 +51,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import javax.swing.tree.TreePath;
 
 import net.imagej.ops.Namespace;
 import net.imagej.ops.Op;
@@ -92,6 +95,9 @@ public class OpViewer extends JFrame implements DocumentListener {
 	private JXTreeTable treeTable;
 	private OpTreeTableModel model;
 
+	// Caching TreePaths
+	private Set<TreePath> expandedPaths;
+
 	@Parameter
 	private OpService opService;
 
@@ -104,6 +110,8 @@ public class OpViewer extends JFrame implements DocumentListener {
 	public OpViewer(final Context context) {
 		super("Op Viewer");
 		context.inject(this);
+
+		expandedPaths = new HashSet<>();
 
 		// Load the frame size
 		loadPreferences();
@@ -215,10 +223,12 @@ public class OpViewer extends JFrame implements DocumentListener {
 		try {
 			final String text = doc.getText(0, doc.getLength());
 
-			if (text == null || text.isEmpty())
-				//TODO node expansion is not preserved..
+			if (text == null || text.isEmpty()) {
 				treeTable.setTreeTableModel(model);
+				restoreExpandedPaths();
+			}
 			else {
+				cacheExpandedPaths();
 				OpTreeTableModel tempModel = new OpTreeTableModel();
 				createNodes(tempModel.getRoot(), text);
 				treeTable.setTreeTableModel(tempModel);
@@ -227,6 +237,34 @@ public class OpViewer extends JFrame implements DocumentListener {
 			}
 		} catch (final BadLocationException exc) {
 			logService.error(exc);
+		}
+	}
+
+	/**
+	 * Expand all cached TreePaths and clear the cache.
+	 */
+	private void restoreExpandedPaths() {
+		for (final TreePath path : expandedPaths) {
+			treeTable.expandPath(path);
+		}
+
+		expandedPaths.clear();
+	}
+
+	/**
+	 * If they are not already cached, check which paths are expanded and
+	 * cache them for future restoration.
+	 */
+	private void cacheExpandedPaths() {
+		// If paths have already been cached we don't need to do anything.
+		// Paths are only cached when filtering, and restored when done
+		// filtering.
+		if (!expandedPaths.isEmpty()) return;
+
+		// Find and cache the expanded paths
+		for (int i=0; i<treeTable.getRowCount(); i++) {
+			if (treeTable.isExpanded(i))
+				expandedPaths.add(treeTable.getPathForRow(i));
 		}
 	}
 
@@ -241,6 +279,10 @@ public class OpViewer extends JFrame implements DocumentListener {
 		createNodes(root, null);
 	}
 
+	/**
+	 * As {@link #createNodes(OpTreeTableNode)} with an option filter to restrict
+	 * nodes matched.
+	 */
 	private void createNodes(final OpTreeTableNode root, final String filter) {
 		final String filterLC = filter == null ? "" : filter.toLowerCase();
 		final OpTreeTableNode parent = new OpTreeTableNode("ops", "# @OpService ops;",
