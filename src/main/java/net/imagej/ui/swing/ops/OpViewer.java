@@ -103,6 +103,9 @@ public class OpViewer extends JFrame {
 		final JXTreeTable treeTable = new JXTreeTable(model);
 		treeTable.setColumnMargin(COLUMN_MARGIN);
 
+		// Allow rows to be selected
+		treeTable.setRowSelectionAllowed(true);
+
 		// Expand the top row
 		treeTable.expandRow(0);
 
