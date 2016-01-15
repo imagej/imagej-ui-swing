@@ -30,12 +30,16 @@
 
 package net.imagej.ui.swing.ops;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
@@ -121,12 +125,19 @@ public class OpViewer extends JFrame {
 			treeTable.getColumn(i).setPreferredWidth(widths[i]);
 		}
 
-		// Make the treetable scrollable
-		final JScrollPane pane = new JScrollPane(treeTable,
-			ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-			ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		// Build search panel
+		final JTextField prompt = new JTextField("", 20);
+        final JLabel label = new JLabel("Filter Ops:  ");
+		final JPanel panel = new JPanel();
+		panel.add(label);
+		panel.add(prompt);
 
-		setContentPane(pane);
+		// Add panel
+		add(panel, BorderLayout.NORTH);
+
+		// Add table and make it scrollable
+		add(new JScrollPane(treeTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
 
 		try {
 			if (SwingUtilities.isEventDispatchThread()) {
