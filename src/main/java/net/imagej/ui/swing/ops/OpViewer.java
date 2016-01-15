@@ -36,22 +36,20 @@ import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
-import javax.swing.JTree;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeSelectionModel;
-
-import org.scijava.Context;
-import org.scijava.plugin.Parameter;
-import org.scijava.prefs.PrefService;
 
 import net.imagej.ops.Namespace;
 import net.imagej.ops.Op;
 import net.imagej.ops.OpInfo;
 import net.imagej.ops.OpService;
 import net.imagej.ops.OpUtils;
+
+import org.jdesktop.swingx.JXTreeTable;
+import org.scijava.Context;
+import org.scijava.plugin.Parameter;
+import org.scijava.prefs.PrefService;
 
 /**
  * A scrollable tree view of all discovered {@link Op} implementations. The goal
@@ -87,19 +85,24 @@ public class OpViewer extends JFrame {
 		// Load the frame size
 		loadPreferences();
 
-		// Top node of the JTree
-		final DefaultMutableTreeNode top = new DefaultMutableTreeNode(
-			"Available Ops");
-		createNodes(top);
+		final OpTreeTableModel model = new OpTreeTableModel();
 
-		final JTree tree = new JTree(top);
-		tree.getSelectionModel().setSelectionMode(
-			TreeSelectionModel.SINGLE_TREE_SELECTION);
+		// Root of the TreeTable
+		final OpTreeTableNode root = new OpTreeTableNode("Available Ops", "# @OpService ops;",
+				"net.imagej.ops.OpService");
+		model.getRoot().add(root);
+
+		createNodes(root);
+
+		final JXTreeTable treeTable = new JXTreeTable(model);
+
+		// Expand the top row
+		treeTable.expandRow(0);
 
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-		// Make the JTree scrollable
-		final JScrollPane pane = new JScrollPane(tree,
+		// Make the treetable scrollable
+		final JScrollPane pane = new JScrollPane(treeTable,
 			ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 			ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
@@ -151,12 +154,12 @@ public class OpViewer extends JFrame {
 	 * will be skipped. Ops with no namespace will be put in a
 	 * {@link #NO_NAMESPACE} category.
 	 */
-	private void createNodes(final DefaultMutableTreeNode top) {
+	private void createNodes(final OpTreeTableNode parent) {
 		// Map namespaces and ops to their parent tree node
-		final Map<String, DefaultMutableTreeNode> namespaces =
+		final Map<String, OpTreeTableNode> namespaces =
 			new HashMap<>();
 
-		final Map<String, DefaultMutableTreeNode> ops =
+		final Map<String, OpTreeTableNode> ops =
 			new HashMap<>();
 
 		// Iterate over all ops
@@ -164,23 +167,19 @@ public class OpViewer extends JFrame {
 			final String namespace = getName(info.getNamespace(), NO_NAMESPACE);
 
 			// Get the namespace node for this Op
-			final DefaultMutableTreeNode nsCategory = getCategory(top, namespaces,
+			final OpTreeTableNode nsCategory = getCategory(parent, namespaces,
 				namespace);
 
 			final String opName = getName(info.getSimpleName(), info.getName());
 
 			if (!opName.isEmpty()) {
 				// get the general Op node for this Op
-				final DefaultMutableTreeNode opCategory = getCategory(nsCategory, ops,
+				final OpTreeTableNode opCategory = getCategory(nsCategory, ops,
 					opName);
 
-				// FIXME add separate column for base info.getDelegateClassName
-				// FIXME the first row for each leaf set, or a row on the expandable node itself,
-				//       should print the base interface for those nodes
-				// FIXME auto expand nodes of size 1 ?
 				// Create a leaf node for this particular Op's signature
-				final DefaultMutableTreeNode opSignature = new DefaultMutableTreeNode(
-					OpUtils.simpleString(info.cInfo()));
+				final OpTreeTableNode opSignature = new OpTreeTableNode(
+					OpUtils.simpleString(info.cInfo()), "", info.cInfo().getDelegateClassName());
 
 				opCategory.add(opSignature);
 			}
@@ -206,16 +205,16 @@ public class OpViewer extends JFrame {
 	 * category does not exist yet, it's created, added to the map, and added as a
 	 * child to the parent tree node.
 	 */
-	private DefaultMutableTreeNode getCategory(
-		final DefaultMutableTreeNode parent,
-		final Map<String, DefaultMutableTreeNode> categoryMap,
+	private OpTreeTableNode getCategory(
+		final OpTreeTableNode parent,
+		final Map<String, OpTreeTableNode> ops,
 		final String categoryName)
 	{
-		DefaultMutableTreeNode nsCategory = categoryMap.get(categoryName);
+		OpTreeTableNode nsCategory = ops.get(categoryName);
 		if (nsCategory == null) {
-			nsCategory = new DefaultMutableTreeNode(categoryName);
+			nsCategory = new OpTreeTableNode(categoryName);
 			parent.add(nsCategory);
-			categoryMap.put(categoryName, nsCategory);
+			ops.put(categoryName, nsCategory);
 		}
 
 		return nsCategory;
