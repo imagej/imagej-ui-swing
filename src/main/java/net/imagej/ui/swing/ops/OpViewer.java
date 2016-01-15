@@ -43,6 +43,7 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import javax.swing.event.DocumentListener;
 
 import net.imagej.ops.Namespace;
 import net.imagej.ops.Op;
@@ -68,7 +69,7 @@ import org.scijava.prefs.PrefService;
  * @author Mark Hiner <hinerm@gmail.com>
  */
 @SuppressWarnings("serial")
-public class OpViewer extends JFrame {
+public class OpViewer extends JFrame implements DocumentListener {
 
 	public static final int DEFAULT_WINDOW_WIDTH = 800;
 	public static final int DEFAULT_WINDOW_HEIGHT = 700;
@@ -97,7 +98,7 @@ public class OpViewer extends JFrame {
 		widths = new int[model.getColumnCount()];
 
 		// Root of the TreeTable
-		final OpTreeTableNode root = new OpTreeTableNode("Available Ops", "# @OpService ops;",
+		final OpTreeTableNode root = new OpTreeTableNode("ops", "# @OpService ops;",
 				"net.imagej.ops.OpService");
 		model.getRoot().add(root);
 
@@ -116,21 +117,24 @@ public class OpViewer extends JFrame {
 		// Update dimensions
 		final Dimension dims = new Dimension(getSize());
 		int preferredWidth = 0;
-		for (int i : widths) preferredWidth += (i + COLUMN_MARGIN);
+		for (int i : widths)
+			preferredWidth += (i + COLUMN_MARGIN);
 		dims.setSize(preferredWidth, DEFAULT_WINDOW_HEIGHT);
 		setPreferredSize(dims);
 
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		for (int i=0; i<model.getColumnCount(); i++) {
+		for (int i = 0; i < model.getColumnCount(); i++) {
 			treeTable.getColumn(i).setPreferredWidth(widths[i]);
 		}
 
 		// Build search panel
-		final JTextField prompt = new JTextField("", 20);
-        final JLabel label = new JLabel("Filter Ops:  ");
+		prompt = new JTextField("", 20);
+		final JLabel label = new JLabel("Filter Ops:  ");
 		final JPanel panel = new JPanel();
 		panel.add(label);
 		panel.add(prompt);
+
+		prompt.getDocument().addDocumentListener(this);
 
 		// Add panel
 		add(panel, BorderLayout.NORTH);
