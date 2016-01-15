@@ -7,6 +7,7 @@ public class OpTreeTableNode {
 	private String simpleName = "";
 	private String referenceClass = "";
 	private String codeCall = "";
+	private String opName = "";
 	private List<OpTreeTableNode> children = new ArrayList<>();
 
 	/**
@@ -60,5 +61,13 @@ public class OpTreeTableNode {
 	@Override
 	public String toString() {
 		return getName();
+	}
+
+	public void setOpName(final String simpleName) {
+		this.opName = simpleName;
+	}
+
+	public String getOpName() {
+		return opName;
 	}
 }
