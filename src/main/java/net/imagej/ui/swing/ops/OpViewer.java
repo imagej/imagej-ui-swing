@@ -66,11 +66,15 @@ import org.scijava.prefs.PrefService;
 @SuppressWarnings("serial")
 public class OpViewer extends JFrame {
 
-	public static final int DEFAULT_WINDOW_WIDTH = 500;
+	public static final int DEFAULT_WINDOW_WIDTH = 800;
 	public static final int DEFAULT_WINDOW_HEIGHT = 700;
+	public static final int COLUMN_MARGIN = 5;
 	public static final String WINDOW_HEIGHT = "op.viewer.height";
 	public static final String WINDOW_WIDTH = "op.viewer.width";
 	public static final String NO_NAMESPACE = "default namespace";
+
+	// Sizing fields
+	private int[] widths;
 
 	@Parameter
 	private OpService opService;
@@ -86,20 +90,33 @@ public class OpViewer extends JFrame {
 		loadPreferences();
 
 		final OpTreeTableModel model = new OpTreeTableModel();
+		widths = new int[model.getColumnCount()];
 
 		// Root of the TreeTable
 		final OpTreeTableNode root = new OpTreeTableNode("Available Ops", "# @OpService ops;",
 				"net.imagej.ops.OpService");
 		model.getRoot().add(root);
 
+		// Populate the nodes
 		createNodes(root);
 
 		final JXTreeTable treeTable = new JXTreeTable(model);
+		treeTable.setColumnMargin(COLUMN_MARGIN);
 
 		// Expand the top row
 		treeTable.expandRow(0);
 
+		// Update dimensions
+		final Dimension dims = new Dimension(getSize());
+		int preferredWidth = 0;
+		for (int i : widths) preferredWidth += (i + COLUMN_MARGIN);
+		dims.setSize(preferredWidth, DEFAULT_WINDOW_HEIGHT);
+		setPreferredSize(dims);
+
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		for (int i=0; i<model.getColumnCount(); i++) {
+			treeTable.getColumn(i).setPreferredWidth(widths[i]);
+		}
 
 		// Make the treetable scrollable
 		final JScrollPane pane = new JScrollPane(treeTable,
@@ -177,12 +194,29 @@ public class OpViewer extends JFrame {
 				final OpTreeTableNode opCategory = getCategory(nsCategory, ops,
 					opName);
 
+				final String simpleName = OpUtils.simpleString(info.cInfo());
+				//TODO
+				final String codeCall = "";
+				final String delegateClass = info.cInfo().getDelegateClassName();
+
+				updateWidths(widths, simpleName, codeCall, delegateClass);
+
 				// Create a leaf node for this particular Op's signature
 				final OpTreeTableNode opSignature = new OpTreeTableNode(
-					OpUtils.simpleString(info.cInfo()), "", info.cInfo().getDelegateClassName());
+					simpleName, codeCall, delegateClass);
 
 				opCategory.add(opSignature);
 			}
+		}
+	}
+
+	/**
+	 * Helper method to update the widths array to track the longest strings in each column.
+	 */
+	private void updateWidths(int[] colWidths, String... colContents) {
+		
+		for (int i=0; i<Math.min(colWidths.length, colContents.length); i++) {
+			colWidths[i] = Math.max(colWidths[i], colContents[i].length());
 		}
 	}
 
