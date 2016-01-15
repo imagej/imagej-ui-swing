@@ -3,11 +3,13 @@ package net.imagej.ui.swing.ops;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.scijava.command.CommandInfo;
+
 public class OpTreeTableNode {
 	private String simpleName = "";
 	private String referenceClass = "";
 	private String codeCall = "";
-	private String opName = "";
+	private CommandInfo info;
 	private List<OpTreeTableNode> children = new ArrayList<>();
 
 	/**
@@ -63,11 +65,11 @@ public class OpTreeTableNode {
 		return getName();
 	}
 
-	public void setOpName(final String simpleName) {
-		this.opName = simpleName;
+	public void setCommandInfo(final CommandInfo info) {
+		this.info = info;
 	}
 
-	public String getOpName() {
-		return opName;
+	public CommandInfo getCommandInfo() {
+		return info;
 	}
 }

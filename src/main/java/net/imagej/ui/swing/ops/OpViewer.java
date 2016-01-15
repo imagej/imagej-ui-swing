@@ -72,6 +72,8 @@ import net.imagej.ops.OpUtils;
 import org.jdesktop.swingx.JXTreeTable;
 import org.scijava.Context;
 import org.scijava.app.StatusService;
+import org.scijava.command.CommandInfo;
+import org.scijava.command.CommandService;
 import org.scijava.log.LogService;
 import org.scijava.platform.PlatformService;
 import org.scijava.plugin.Parameter;
@@ -124,6 +126,9 @@ public class OpViewer extends JFrame implements DocumentListener {
 
 	@Parameter
 	private PlatformService platformService;
+
+	@Parameter
+	private CommandService commandService;
 
 	public OpViewer(final Context context) {
 		super("Op Viewer");
@@ -367,12 +372,7 @@ public class OpViewer extends JFrame implements DocumentListener {
 					final OpTreeTableNode opSignature = new OpTreeTableNode(
 							simpleName, codeCall, delegateClass);
 
-					try {
-						opSignature.setOpName(OpUtils.getOpName(info.cInfo()));
-					} catch (NoSuchFieldException | SecurityException | InstantiationException | IllegalAccessException
-							| ClassNotFoundException exc) {
-						logService.warn("No Op name found for: " + info);
-					}
+					opSignature.setCommandInfo(info.cInfo());
 
 					opCategory.add(opSignature);
 				}
@@ -491,13 +491,13 @@ public class OpViewer extends JFrame implements DocumentListener {
 		public void actionPerformed(final ActionEvent e) {
 			final OpTreeTableNode selectedNode = getSelectedNode();
 
-			String code;
+			CommandInfo cInfo;
 
-			if (selectedNode == null || (code = selectedNode.getOpName()).isEmpty()) {
+			if (selectedNode == null || (cInfo = selectedNode.getCommandInfo()) == null) {
 				statusService.clearStatus();
 				statusService.showStatus("No Op selected or Op name not found");
 			} else {
-				opService.run(code);
+				commandService.run(cInfo, true);
 			}
 		}
 	}
