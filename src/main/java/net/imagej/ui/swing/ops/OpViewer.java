@@ -32,7 +32,9 @@ package net.imagej.ui.swing.ops;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JFrame;
@@ -214,6 +216,7 @@ public class OpViewer extends JFrame implements DocumentListener {
 			final String text = doc.getText(0, doc.getLength());
 
 			if (text == null || text.isEmpty())
+				//TODO node expansion is not preserved..
 				treeTable.setTreeTableModel(model);
 			else {
 				OpTreeTableModel tempModel = new OpTreeTableModel();
@@ -286,7 +289,27 @@ public class OpViewer extends JFrame implements DocumentListener {
 			}
 		}
 
-		// TODO prune all nodes with no children and no delegateClass
+		pruneEmptyNodes(root);
+	}
+
+	/**
+	 * Recursively any node that a) has no children, and b) has no "ReferenceClass" field
+	 *
+	 * @return true if this node should be removed from the child list.
+	 */
+	private boolean pruneEmptyNodes(final OpTreeTableNode node) {
+		boolean removeThis = node.getCodeCall().isEmpty();
+		final List<OpTreeTableNode> preservedChildren = new ArrayList<>();
+
+		for (final OpTreeTableNode child : node.getChildren()) {
+			if (!pruneEmptyNodes(child)) preservedChildren.add(child);
+		}
+
+		node.getChildren().retainAll(preservedChildren);
+
+		removeThis &= node.getChildren().isEmpty();
+
+		return removeThis;
 	}
 
 	/**
