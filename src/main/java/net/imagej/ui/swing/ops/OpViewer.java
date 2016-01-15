@@ -195,8 +195,7 @@ public class OpViewer extends JFrame {
 					opName);
 
 				final String simpleName = OpUtils.simpleString(info.cInfo());
-				//TODO
-				final String codeCall = "";
+				final String codeCall = OpUtils.opCall(info.cInfo());
 				final String delegateClass = info.cInfo().getDelegateClassName();
 
 				updateWidths(widths, simpleName, codeCall, delegateClass);
