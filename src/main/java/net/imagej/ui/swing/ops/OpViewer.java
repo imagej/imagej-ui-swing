@@ -48,16 +48,15 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.script.ScriptException;
+import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
@@ -198,16 +197,19 @@ public class OpViewer extends JFrame implements DocumentListener {
 		// Use flow layout to avoid resizing when showing/hiding the status buttons
 		final JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		final JLabel label = new JLabel("Filter Ops:  ");
-		panel.add(new JSeparator(SwingConstants.VERTICAL));
+		panel.add(Box.createRigidArea(new Dimension(5, 0)));
 		panel.add(label);
 		panel.add(prompt);
 
-		panel.add(new JSeparator(SwingConstants.VERTICAL));
+		panel.add(Box.createRigidArea(new Dimension(20, 0)));
 
 		// Build buttons
 		final JButton runButton = new JButton(new ImageIcon(getClass().getResource("/icons/opbrowser/play.png")));
 		final JButton snippetButton = new JButton(new ImageIcon(getClass().getResource("/icons/opbrowser/paperclip.png")));
 		final JButton wikiButton = new JButton(new ImageIcon(getClass().getResource("/icons/opbrowser/globe.png")));
+		runButton.setPreferredSize(new Dimension(32, 32));
+		snippetButton.setPreferredSize(new Dimension(32, 32));
+		wikiButton.setPreferredSize(new Dimension(32, 32));
 
 		runButton.setToolTipText("Run the Op selected below");
 		runButton.addActionListener(new RunButtonListener());
@@ -219,18 +221,18 @@ public class OpViewer extends JFrame implements DocumentListener {
 		wikiButton.addActionListener(new WikiButtonListener());
 
 		panel.add(runButton);
+		panel.add(Box.createRigidArea(new Dimension(7, 0)));
 		panel.add(snippetButton);
-
-		panel.add(new JSeparator(SwingConstants.VERTICAL));
-
+		panel.add(Box.createRigidArea(new Dimension(7, 0)));
 		panel.add(wikiButton);
 
-		panel.add(new JSeparator(SwingConstants.VERTICAL));
+		panel.add(Box.createRigidArea(new Dimension(10, 0)));
 
 		// These icons are used for visual feedback after clicking a button
 		opFail = new ImageIcon(getClass().getResource("/icons/opbrowser/redx.png"));
 		opSuccess = new ImageIcon(getClass().getResource("/icons/opbrowser/greencheck.png"));
 		successLabel = new JLabel(opSuccess);
+		successLabel.setPreferredSize(new Dimension(20, 20));
 		successLabel.setVisible(false);
 
 		panel.add(successLabel);
