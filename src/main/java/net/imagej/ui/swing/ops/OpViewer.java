@@ -104,7 +104,7 @@ public class OpViewer extends JFrame implements DocumentListener {
 	public static final int HIDE_COOLDOWN = 1500;
 	public static final String WINDOW_HEIGHT = "op.viewer.height";
 	public static final String WINDOW_WIDTH = "op.viewer.width";
-	public static final String NO_NAMESPACE = "default namespace";
+	public static final String NO_NAMESPACE = "(global)";
 
 	// Sizing fields
 	private int[] widths;
