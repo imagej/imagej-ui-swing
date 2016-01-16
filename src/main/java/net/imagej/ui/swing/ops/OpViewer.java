@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.script.ScriptException;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -76,11 +77,12 @@ import org.jdesktop.swingx.JXTreeTable;
 import org.scijava.Context;
 import org.scijava.app.StatusService;
 import org.scijava.command.CommandInfo;
-import org.scijava.command.CommandService;
 import org.scijava.log.LogService;
+import org.scijava.module.ModuleItem;
 import org.scijava.platform.PlatformService;
 import org.scijava.plugin.Parameter;
 import org.scijava.prefs.PrefService;
+import org.scijava.script.ScriptService;
 import org.scijava.thread.ThreadService;
 
 /**
@@ -142,7 +144,7 @@ public class OpViewer extends JFrame implements DocumentListener {
 	private PlatformService platformService;
 
 	@Parameter
-	private CommandService commandService;
+	private ScriptService scriptService;
 
 	@Parameter
 	private ThreadService threadService;
@@ -529,16 +531,51 @@ public class OpViewer extends JFrame implements DocumentListener {
 		public void actionPerformed(final ActionEvent e) {
 			final OpTreeTableNode selectedNode = getSelectedNode();
 
-			CommandInfo cInfo;
-
-			if (selectedNode == null || (cInfo = selectedNode.getCommandInfo()) == null) {
+			if (selectedNode == null || selectedNode.getCommandInfo() == null) {
 				statusService.clearStatus();
 				statusService.showStatus("No Op selected or Op name not found");
 				setFail();
 			} else {
-				commandService.run(cInfo, true);
+				try {
+					final String script = makeScript(selectedNode);
+					scriptService.run("op_browser.py", script, true);
+				} catch (IOException | ScriptException | NoSuchFieldException | SecurityException
+						| InstantiationException | IllegalAccessException | ClassNotFoundException exc) {
+					logService.error(exc);
+				}
 				setPass();
 			}
+		}
+
+		private String makeScript(final OpTreeTableNode node) throws NoSuchFieldException, SecurityException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+			final CommandInfo cInfo = node.getCommandInfo();
+			final StringBuffer sb = new StringBuffer();
+			sb.append("# @OpService ops\n");
+			int i = 1;
+			for (final ModuleItem<?> in : cInfo.inputs()) {
+				if (in.isRequired()) {
+					sb.append("# @");
+					sb.append(in.getType().getName());
+					sb.append(" p");
+					sb.append(i++);
+					sb.append("\n");
+				}
+			}
+
+			sb.append("ops.run(\"");
+			sb.append(OpUtils.getOpName(cInfo));
+			sb.append("\"");
+
+			i = 1;
+			for (final ModuleItem<?> in : cInfo.inputs()) {
+				if (in.isRequired()) {
+					sb.append(", p");
+					sb.append(i++);
+				}
+			}
+			sb.append(")\n");
+
+			return sb.toString();
 		}
 	}
 
