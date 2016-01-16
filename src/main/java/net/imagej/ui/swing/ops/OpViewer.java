@@ -367,7 +367,7 @@ public class OpViewer extends JFrame implements DocumentListener {
 	 */
 	private void createNodes(final OpTreeTableNode root, final String filter) {
 		final String filterLC = filter == null ? "" : filter.toLowerCase();
-		final OpTreeTableNode parent = new OpTreeTableNode("ops", "# @OpService ops;",
+		final OpTreeTableNode parent = new OpTreeTableNode("ops", "# @OpService ops",
 						"net.imagej.ops.OpService");
 		root.add(parent);
 
