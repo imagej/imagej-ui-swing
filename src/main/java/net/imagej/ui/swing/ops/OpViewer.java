@@ -58,6 +58,7 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -80,6 +81,7 @@ import org.scijava.log.LogService;
 import org.scijava.platform.PlatformService;
 import org.scijava.plugin.Parameter;
 import org.scijava.prefs.PrefService;
+import org.scijava.thread.ThreadService;
 
 /**
  * A scrollable tree view of all discovered {@link Op} implementations. The goal
@@ -99,6 +101,7 @@ public class OpViewer extends JFrame implements DocumentListener {
 	public static final int DEFAULT_WINDOW_WIDTH = 800;
 	public static final int DEFAULT_WINDOW_HEIGHT = 700;
 	public static final int COLUMN_MARGIN = 5;
+	public static final int HIDE_COOLDOWN = 1500;
 	public static final String WINDOW_HEIGHT = "op.viewer.height";
 	public static final String WINDOW_WIDTH = "op.viewer.width";
 	public static final String NO_NAMESPACE = "default namespace";
@@ -119,6 +122,10 @@ public class OpViewer extends JFrame implements DocumentListener {
 	// Caching TreePaths
 	private Set<TreePath> expandedPaths;
 
+	// For hiding the successLabel
+	private Timer timer;
+	private final ActionListener taskPerformer;
+
 	@Parameter
 	private StatusService statusService;
 
@@ -137,6 +144,9 @@ public class OpViewer extends JFrame implements DocumentListener {
 	@Parameter
 	private CommandService commandService;
 
+	@Parameter
+	private ThreadService threadService;
+
 	public OpViewer(final Context context) {
 		super("Viewing available Ops...");
 		context.inject(this);
@@ -148,6 +158,13 @@ public class OpViewer extends JFrame implements DocumentListener {
 
 		model = new OpTreeTableModel();
 		widths = new int[model.getColumnCount()];
+		taskPerformer = new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent evt) {
+				successLabel.setVisible(false);
+			}
+		};
+		timer = new Timer(HIDE_COOLDOWN, taskPerformer);
 
 		// Populate the nodes
 		createNodes(model.getRoot());
@@ -529,6 +546,7 @@ public class OpViewer extends JFrame implements DocumentListener {
 	 * Abstract helper class for button {@link ActionListener}s
 	 */
 	private abstract class OpsViewerButtonListener implements ActionListener {
+
 		public OpTreeTableNode getSelectedNode() {
 			final int row = treeTable.getSelectedRow();
 			if (row < 0) return null;
@@ -540,11 +558,21 @@ public class OpViewer extends JFrame implements DocumentListener {
 		public void setPass() {
 			successLabel.setVisible(true);
 			successLabel.setIcon(opSuccess);
+			queueHide();
 		}
 
 		public void setFail() {
 			successLabel.setVisible(true);
 			successLabel.setIcon(opFail);
+			queueHide();
+		}
+
+		private void queueHide() {
+			synchronized(timer) {
+				timer.stop();
+				timer = new Timer(HIDE_COOLDOWN, taskPerformer);
+				timer.start();
+			}
 		}
 	}
 }
