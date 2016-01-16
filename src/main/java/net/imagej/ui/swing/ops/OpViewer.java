@@ -32,6 +32,7 @@ package net.imagej.ui.swing.ops;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -175,8 +176,10 @@ public class OpViewer extends JFrame implements DocumentListener {
 
 		// Build search panel
 		prompt = new JTextField("", 20);
+		// Use flow layout to avoid resizing when showing/hiding the status buttons
+		final JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		final JLabel label = new JLabel("Filter Ops:  ");
-		final JPanel panel = new JPanel();
+		panel.add(new JSeparator(SwingConstants.VERTICAL));
 		panel.add(label);
 		panel.add(prompt);
 
