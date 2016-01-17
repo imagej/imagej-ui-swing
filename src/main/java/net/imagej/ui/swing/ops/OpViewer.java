@@ -256,7 +256,12 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 					switch (colIndex)
 					{
 					case 0:
-						return n.getName();
+						String name;
+						if (rowIndex == 0) name = "all available ops";
+						else name = n.getName();
+						if (rowIndex > 0 && n.getCodeCall().isEmpty())
+							name += " namespace";
+						return name;
 					case 1:
 						return n.getCodeCall();
 					case 2:
@@ -357,7 +362,7 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 	/**
 	 */
 	private JPanel buildBottomPanel() {
-		final JPanel panelBottom = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		final JPanel panelBottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		toggleDetailsButton = new JButton("<  >");
 		toggleDetailsButton.setPreferredSize(new Dimension(32, 32));
 		toggleDetailsButton.setToolTipText("Show / Hide Details");
@@ -422,6 +427,7 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 			int newWidth = getWidth();
 			if (detailsPane.isVisible()) {
 				newWidth -= detailsPane.getWidth();
+				// provide a small margin when hiding
 				detailsPane.setVisible(false);
 			} else {
 				detailsPane.setVisible(true);
@@ -429,8 +435,6 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 			}
 
 			setSize(newWidth, getHeight());
-//			pack();
-//			repaint();
 		}
 	}
 
