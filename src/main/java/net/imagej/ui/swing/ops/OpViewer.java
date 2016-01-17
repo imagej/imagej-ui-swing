@@ -57,17 +57,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import javax.swing.text.StyledDocument;
 import javax.swing.tree.TreePath;
 
 import net.imagej.ops.Namespace;
@@ -101,7 +98,7 @@ import org.scijava.thread.ThreadService;
  * @author Mark Hiner <hinerm@gmail.com>
  */
 @SuppressWarnings("serial")
-public class OpViewer extends JFrame implements DocumentListener {
+public class OpViewer extends JFrame implements DocumentListener, ActionListener {
 
 	public static final int DEFAULT_WINDOW_WIDTH = 800;
 	public static final int DEFAULT_WINDOW_HEIGHT = 700;
@@ -119,6 +116,9 @@ public class OpViewer extends JFrame implements DocumentListener {
 	private JXTreeTable treeTable;
 	private OpTreeTableModel model;
 	private JLabel successLabel = null;
+	private JEditorPane textPane;
+	private JScrollPane detailsPane;
+	private JButton toggleDetailsButton;
 
 	// Icons
 	private ImageIcon opFail;
@@ -129,7 +129,7 @@ public class OpViewer extends JFrame implements DocumentListener {
 
 	// For hiding the successLabel
 	private Timer timer;
-	private final ActionListener taskPerformer;
+	private ActionListener taskPerformer;
 
 	@Parameter
 	private StatusService statusService;
@@ -156,21 +156,77 @@ public class OpViewer extends JFrame implements DocumentListener {
 		super("Viewing available Ops...   [shift + L]");
 		context.inject(this);
 
-		expandedPaths = new HashSet<>();
-
 		// Load the frame size
-		loadPreferences();
+//		loadPreferences();
 
-		model = new OpTreeTableModel();
-		widths = new int[model.getColumnCount()];
-		taskPerformer = new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent evt) {
-				successLabel.setVisible(false);
+		initialize();
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+
+		// Build search panel
+		// Use flow layout to avoid resizing when showing/hiding the status buttons
+		final JPanel topBar = buildTopBar();
+		add(topBar, BorderLayout.NORTH);
+
+		// Build the tree table
+		buildTreeTable();
+		add(new JScrollPane(treeTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
+
+		// Build the details pane
+		buildDetailsPane();
+		add(detailsPane, BorderLayout.EAST);
+
+		// Build the bottom panel
+		final JPanel panelBottom = buildBottomPanel();
+		add(panelBottom, BorderLayout.SOUTH);
+
+		// Update dimensions
+		updateDimensions();
+
+		// Pack
+		try {
+			if (SwingUtilities.isEventDispatchThread()) {
+				pack();
 			}
-		};
-		timer = new Timer(HIDE_COOLDOWN, taskPerformer);
+			else {
+				SwingUtilities.invokeAndWait(new Runnable() {
 
+					@Override
+					public void run() {
+						pack();
+					}
+				});
+			}
+		}
+		catch (final Exception ie) {
+			logService.error(ie);
+		}
+
+		setLocationRelativeTo(null); // center on screen
+		requestFocus();
+	}
+
+	/**
+	 * 
+	 */
+	private void updateDimensions() {
+		final Dimension dims = new Dimension(getSize());
+		int preferredWidth = 0;
+		for (int i : widths)
+			preferredWidth += (i + COLUMN_MARGIN);
+		dims.setSize(preferredWidth, DEFAULT_WINDOW_HEIGHT);
+		setPreferredSize(dims);
+
+		for (int i = 0; i < model.getColumnCount(); i++) {
+			treeTable.getColumn(i).setPreferredWidth(widths[i]);
+		}	
+	}
+
+	/**
+	 * 
+	 */
+	private void buildTreeTable() {
 		// Populate the nodes
 		createNodes(model.getRoot());
 
@@ -182,30 +238,35 @@ public class OpViewer extends JFrame implements DocumentListener {
 
 		// Expand the top row
 		treeTable.expandRow(0);
+	}
 
-		// Update dimensions
-		final Dimension dims = new Dimension(getSize());
-		int preferredWidth = 0;
-		for (int i : widths)
-			preferredWidth += (i + COLUMN_MARGIN);
-		dims.setSize(preferredWidth, DEFAULT_WINDOW_HEIGHT);
-		setPreferredSize(dims);
+	/**
+	 * 
+	 */
+	private void initialize() {
+		expandedPaths = new HashSet<>();
+		model = new OpTreeTableModel();
+		widths = new int[model.getColumnCount()];
+		taskPerformer = new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent evt) {
+				successLabel.setVisible(false);
+			}
+		};
+		timer = new Timer(HIDE_COOLDOWN, taskPerformer);
+	}
 
-		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		for (int i = 0; i < model.getColumnCount(); i++) {
-			treeTable.getColumn(i).setPreferredWidth(widths[i]);
-		}
-
-		// Build search panel
+	/**
+	 */
+	private JPanel buildTopBar() {
 		prompt = new JTextField("", 20);
-		// Use flow layout to avoid resizing when showing/hiding the status buttons
-		final JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		final JLabel label = new JLabel("Filter Ops:  ");
-		panel.add(Box.createRigidArea(new Dimension(5, 0)));
-		panel.add(label);
-		panel.add(prompt);
+		final JPanel topBar = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		final JLabel searchLabel = new JLabel("Filter Ops:  ");
+		topBar.add(Box.createRigidArea(new Dimension(5, 0)));
+		topBar.add(searchLabel);
+		topBar.add(prompt);
 
-		panel.add(Box.createRigidArea(new Dimension(20, 0)));
+		topBar.add(Box.createRigidArea(new Dimension(20, 0)));
 
 		// Build buttons
 		final JButton runButton = new JButton(new ImageIcon(getClass().getResource("/icons/opbrowser/play.png")));
@@ -224,13 +285,13 @@ public class OpViewer extends JFrame implements DocumentListener {
 		wikiButton.setToolTipText("Learn more about ImageJ Ops");
 		wikiButton.addActionListener(new WikiButtonListener());
 
-		panel.add(runButton);
-		panel.add(Box.createRigidArea(new Dimension(7, 0)));
-		panel.add(snippetButton);
-		panel.add(Box.createRigidArea(new Dimension(7, 0)));
-		panel.add(wikiButton);
+		topBar.add(runButton);
+		topBar.add(Box.createRigidArea(new Dimension(7, 0)));
+		topBar.add(snippetButton);
+		topBar.add(Box.createRigidArea(new Dimension(7, 0)));
+		topBar.add(wikiButton);
 
-		panel.add(Box.createRigidArea(new Dimension(10, 0)));
+		topBar.add(Box.createRigidArea(new Dimension(10, 0)));
 
 		// These icons are used for visual feedback after clicking a button
 		opFail = new ImageIcon(getClass().getResource("/icons/opbrowser/redx.png"));
@@ -239,50 +300,36 @@ public class OpViewer extends JFrame implements DocumentListener {
 		successLabel.setPreferredSize(new Dimension(20, 20));
 		successLabel.setVisible(false);
 
-		panel.add(successLabel);
+		topBar.add(successLabel);
 
-		prompt.getDocument().addDocumentListener(this);
+		prompt.getDocument().addDocumentListener(this);	
 
-		// Add panel
-		add(panel, BorderLayout.NORTH);
+		return topBar;
+	}
 
+	/**
+	 * 
+	 */
+	private void buildDetailsPane() {
+		detailsPane = new JScrollPane(textPane, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-		// Add table and make it scrollable
-		add(new JScrollPane(treeTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
-
-		JScrollPane displayText;
-		JEditorPane textPane;
-		try {
-			textPane = new JEditorPane(new URL("http://javadoc.imagej.net/ImageJ/net/imagej/ops/OpEnvironment.html"));
-		} catch (IOException exc) {
-			textPane = new JEditorPane("text/html", "Testing");
-		}
+		textPane = new JEditorPane("text/html", "Select an Op for more information");
 		textPane.setEditable(false);
-		textPane.setPreferredSize(new Dimension(DEFAULT_WINDOW_HEIGHT, DEFAULT_WINDOW_WIDTH / 2));
-		displayText = new JScrollPane(textPane, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		add(displayText, BorderLayout.EAST);
+		textPane.setPreferredSize(new Dimension(DEFAULT_WINDOW_WIDTH / 2, DEFAULT_WINDOW_HEIGHT));
+	}
 
-		try {
-			if (SwingUtilities.isEventDispatchThread()) {
-				pack();
-			}
-			else {
-				SwingUtilities.invokeAndWait(new Runnable() {
-
-					@Override
-					public void run() {
-						pack();
-					}
-				});
-			}
-		}
-		catch (final Exception ie) {
-			/* ignore */
-		}
-
-		setLocationRelativeTo(null); // center on screen
-		requestFocus();
+	/**
+	 * @return
+	 */
+	private JPanel buildBottomPanel() {
+		final JPanel panelBottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		toggleDetailsButton = new JButton("<  >");
+		toggleDetailsButton.setPreferredSize(new Dimension(32, 32));
+		toggleDetailsButton.setToolTipText("Show / Hide Details");
+		toggleDetailsButton.addActionListener(new ToggleDetailsButtonListener());
+		panelBottom.add(toggleDetailsButton);
+		return panelBottom;
 	}
 
 	/**
@@ -302,6 +349,22 @@ public class OpViewer extends JFrame implements DocumentListener {
 
 		setPreferredSize(new Dimension(prefService.getInt(WINDOW_WIDTH, dim.width),
 			prefService.getInt(WINDOW_HEIGHT, dim.height)));
+	}
+
+	@Override
+	public void actionPerformed(final ActionEvent e) {
+		if (e.getSource() == toggleDetailsButton) {
+			int newWidth = getWidth();
+			if (detailsPane.isVisible()) {
+				newWidth -= detailsPane.getWidth();
+				detailsPane.setVisible(false);
+			} else {
+				detailsPane.setVisible(true);
+				newWidth += detailsPane.getPreferredSize().getWidth();
+			}
+
+			setPreferredSize(new Dimension(newWidth, getHeight()));
+		}
 	}
 
 	// -- DocumentListener methods --
@@ -514,6 +577,17 @@ public class OpViewer extends JFrame implements DocumentListener {
 			} catch (final IOException exc) {
 				logService.error(exc);
 			}
+		}
+	}
+
+	/**
+	 * Button action listener to open and hide the Op detail panel
+	 */
+	private class ToggleDetailsButtonListener extends OpsViewerButtonListener {
+		@Override
+		public void actionPerformed(final ActionEvent e) {
+			detailsPane.setVisible(!detailsPane.isVisible());
+			OpViewer.this.repaint();
 		}
 	}
 
