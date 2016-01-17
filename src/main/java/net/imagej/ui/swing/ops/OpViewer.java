@@ -38,6 +38,7 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -236,23 +237,6 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 	/**
 	 * 
 	 */
-	private void buildTreeTable() {
-		// Populate the nodes
-		createNodes(model.getRoot());
-
-		treeTable = new JXTreeTable(model);
-		treeTable.setColumnMargin(COLUMN_MARGIN);
-
-		// Allow rows to be selected
-		treeTable.setRowSelectionAllowed(true);
-
-		// Expand the top row
-		treeTable.expandRow(0);
-	}
-
-	/**
-	 * 
-	 */
 	private void initialize() {
 		expandedPaths = new HashSet<>();
 		model = new OpTreeTableModel();
@@ -264,6 +248,54 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 			}
 		};
 		timer = new Timer(HIDE_COOLDOWN, taskPerformer);
+	}
+
+	/**
+	 * 
+	 */
+	private void buildTreeTable() {
+		// Populate the nodes
+		createNodes(model.getRoot());
+
+		treeTable = new JXTreeTable(model) {
+
+			// Implement table cell tool tips.
+			// Adapted from:
+			// http://stackoverflow.com/a/21281257/1027800
+			@Override
+			public String getToolTipText(final MouseEvent e) {
+				String tip = null;
+				final java.awt.Point p = e.getPoint();
+				final int rowIndex = rowAtPoint(p);
+				final int colIndex = columnAtPoint(p);
+
+				try {
+					final OpTreeTableNode n = getNodeAtRow(rowIndex);
+					switch (colIndex)
+					{
+					case 0:
+						return n.getName();
+					case 1:
+						return n.getCodeCall();
+					case 2:
+						return n.getReferenceClass();
+					}
+				} catch (RuntimeException e1) {
+					// catch null pointer exception if mouse is over an empty
+					// line
+				}
+
+				return tip;
+			}
+		};
+
+		treeTable.setColumnMargin(COLUMN_MARGIN);
+
+		// Allow rows to be selected
+		treeTable.setRowSelectionAllowed(true);
+
+		// Expand the top row
+		treeTable.expandRow(0);
 	}
 
 	/**
@@ -578,6 +610,18 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 		return nsCategory;
 	}
 
+	private OpTreeTableNode getSelectedNode() {
+		final int row = treeTable.getSelectedRow();
+		if (row < 0) return null;
+
+		return getNodeAtRow(row);
+	}
+
+	private OpTreeTableNode getNodeAtRow(final int row) {
+		final TreePath path = treeTable.getPathForRow(row);
+		return (OpTreeTableNode) path.getPath()[path.getPathCount()-1];
+	}
+
 	/**
 	 * Button action listener to open the ImageJ Ops wiki page
 	 */
@@ -688,14 +732,6 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 	 * Abstract helper class for button {@link ActionListener}s
 	 */
 	private abstract class OpsViewerButtonListener implements ActionListener {
-
-		public OpTreeTableNode getSelectedNode() {
-			final int row = treeTable.getSelectedRow();
-			if (row < 0) return null;
-
-			final TreePath path = treeTable.getPathForRow(row);
-			return (OpTreeTableNode) path.getPath()[path.getPathCount()-1];
-		}
 
 		public void setPass() {
 			successLabel.setVisible(true);
