@@ -100,8 +100,8 @@ import org.scijava.thread.ThreadService;
 @SuppressWarnings("serial")
 public class OpViewer extends JFrame implements DocumentListener, ActionListener {
 
-	public static final int DEFAULT_WINDOW_WIDTH = 800;
-	public static final int DEFAULT_WINDOW_HEIGHT = 700;
+	public static final int DETAILS_WINDOW_WIDTH = 400;
+	public static final int MAIN_WINDOW_HEIGHT = 700;
 	public static final int COLUMN_MARGIN = 5;
 	public static final int HIDE_COOLDOWN = 1500;
 	public static final String WINDOW_HEIGHT = "op.viewer.height";
@@ -212,15 +212,25 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 	 */
 	private void updateDimensions() {
 		final Dimension dims = new Dimension(getSize());
+
+		// Update preferred width of main window based
+		// on discovered widths
 		int preferredWidth = 0;
 		for (int i : widths)
 			preferredWidth += (i + COLUMN_MARGIN);
-		dims.setSize(preferredWidth, DEFAULT_WINDOW_HEIGHT);
+
+		// Update preferred width to account for the
+		// details pane
+		preferredWidth += DETAILS_WINDOW_WIDTH;
+
+		// Set preferred width of main window
+		dims.setSize(preferredWidth, MAIN_WINDOW_HEIGHT);
 		setPreferredSize(dims);
 
+		// Set column widths in the main table
 		for (int i = 0; i < model.getColumnCount(); i++) {
 			treeTable.getColumn(i).setPreferredWidth(widths[i]);
-		}	
+		}
 	}
 
 	/**
@@ -316,11 +326,10 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 
 		textPane = new JEditorPane("text/html", "Select an Op for more information");
 		textPane.setEditable(false);
-		textPane.setPreferredSize(new Dimension(DEFAULT_WINDOW_WIDTH / 2, DEFAULT_WINDOW_HEIGHT));
+		textPane.setPreferredSize(new Dimension(DETAILS_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT));
 	}
 
 	/**
-	 * @return
 	 */
 	private JPanel buildBottomPanel() {
 		final JPanel panelBottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -341,10 +350,13 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 
 		// If a dimension is 0 then use the default dimension size
 		if (0 == dim.width) {
-			dim.width = DEFAULT_WINDOW_WIDTH;
+			for (int i : widths)
+				dim.width += (i + COLUMN_MARGIN);
+
+			dim.width += DETAILS_WINDOW_WIDTH;
 		}
 		if (0 == dim.height) {
-			dim.height = DEFAULT_WINDOW_HEIGHT;
+			dim.height = MAIN_WINDOW_HEIGHT;
 		}
 
 		setPreferredSize(new Dimension(prefService.getInt(WINDOW_WIDTH, dim.width),
