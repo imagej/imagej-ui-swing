@@ -79,6 +79,8 @@ import net.imagej.ops.OpService;
 import net.imagej.ops.OpUtils;
 
 import org.jdesktop.swingx.JXTreeTable;
+import org.jsoup.Jsoup;
+import org.jsoup.select.Elements;
 import org.scijava.Context;
 import org.scijava.app.StatusService;
 import org.scijava.command.CommandInfo;
@@ -112,6 +114,7 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 	public static final String WINDOW_HEIGHT = "op.viewer.height";
 	public static final String WINDOW_WIDTH = "op.viewer.width";
 	public static final String NO_NAMESPACE = "(global)";
+	public static final String BASE_JAVADOC_URL = "http://javadoc.imagej.net/ImageJ/";
 
 	// Sizing fields
 	private int[] widths;
@@ -337,10 +340,25 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 			@Override
 			public void valueChanged(final ListSelectionEvent event) {
 				final OpTreeTableNode n = getNodeAtRow(treeTable.getSelectedRow());
-				if (n != null) {
-					final String newText = n.getReferenceClass();
-					if (!newText.isEmpty())
-						textPane.setText(n.getReferenceClass());
+				if (n != null && detailsPane.isVisible()) {
+					String newText = n.getReferenceClass();
+					if (!newText.isEmpty()){
+						try {
+							newText = newText.replaceAll("\\.", "/");
+							final StringBuilder sb = new StringBuilder();
+							sb.append(BASE_JAVADOC_URL);
+							sb.append(newText);
+							sb.append(".html");
+							final org.jsoup.nodes.Document doc = Jsoup
+									.connect(sb.toString()).get();
+							final Elements elements = doc.select("div.header");
+							elements.addAll(doc.select("div.contentContainer"));
+							textPane.setText(elements.html());
+						} catch (IOException exc) {
+							textPane.setText("Javadoc not available for: " + newText);
+						}
+					}
+
 				}
 			}
 		});
