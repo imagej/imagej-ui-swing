@@ -33,11 +33,13 @@ package net.imagej.ui.swing.ops;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URL;
@@ -241,15 +243,14 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 		// Populate the nodes
 		createNodes(model.getRoot());
 
+		// per-cell tool-tips
 		treeTable = new JXTreeTable(model) {
-
-			// Implement table cell tool tips.
 			// Adapted from:
 			// http://stackoverflow.com/a/21281257/1027800
 			@Override
 			public String getToolTipText(final MouseEvent e) {
 				String tip = null;
-				final java.awt.Point p = e.getPoint();
+				final Point p = e.getPoint();
 				final int rowIndex = rowAtPoint(p);
 				final int colIndex = columnAtPoint(p);
 
@@ -278,6 +279,48 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 			}
 		};
 
+		// Double-click to copy cell contents
+		// See:
+		// http://stackoverflow.com/a/25918436/1027800
+		treeTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					final Point p = e.getPoint();
+					final int rowIndex = treeTable.rowAtPoint(p);
+					final int colIndex = treeTable.columnAtPoint(p);
+					final OpTreeTableNode n = getNodeAtRow(rowIndex);
+
+					String text;
+					switch (colIndex)
+					{
+					case 0:
+						text = n.getName();
+						break;
+					case 1:
+						text = n.getCodeCall();
+						break;
+					case 2:
+						text = n.getReferenceClass();
+						break;
+					default:
+						text = "";
+					}
+
+					if (text.isEmpty()) {
+						setSuccessIcon(opFail);
+					}
+					else {
+						final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+						clipboard.setContents(new StringSelection(text), null);
+						setSuccessIcon(opSuccess);
+					}
+					queueHide();
+				}
+			}
+		});
+
+		// Space the columns slightly
 		treeTable.setColumnMargin(COLUMN_MARGIN);
 
 		// Allow rows to be selected
@@ -315,10 +358,12 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 		snippetButton.setPreferredSize(new Dimension(32, 32));
 		wikiButton.setPreferredSize(new Dimension(32, 32));
 
-		runButton.setToolTipText("Run the Op selected below");
+		runButton.setToolTipText("Run the selected Op");
 		runButton.addActionListener(new RunButtonListener());
 
-		snippetButton.setToolTipText("Copy the selected code snippet to your clipboard (e.g. for use in the script editor)");
+		snippetButton.setToolTipText(
+				"<html>Copy the selected code snippet to your clipboard.<br />"
+						+ "You can also double-click a cell to copy its contents.</html>");
 		snippetButton.addActionListener(new SnippetButtonListener());
 
 		wikiButton.setToolTipText("Learn more about ImageJ Ops");
@@ -655,6 +700,19 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 		return (OpTreeTableNode) path.getPath()[path.getPathCount()-1];
 	}
 
+	public void setSuccessIcon(final ImageIcon icon) {
+		successLabel.setVisible(true);
+		successLabel.setIcon(icon);
+	}
+
+	private void queueHide() {
+		synchronized(timer) {
+			timer.stop();
+			timer = new Timer(HIDE_COOLDOWN, taskPerformer);
+			timer.start();
+		}
+	}
+
 	/**
 	 * Button action listener to open the ImageJ Ops wiki page
 	 */
@@ -756,23 +814,13 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 	private abstract class OpsViewerButtonListener implements ActionListener {
 
 		public void setPass() {
-			successLabel.setVisible(true);
-			successLabel.setIcon(opSuccess);
+			setSuccessIcon(opSuccess);
 			queueHide();
 		}
 
 		public void setFail() {
-			successLabel.setVisible(true);
-			successLabel.setIcon(opFail);
+			setSuccessIcon(opFail);
 			queueHide();
-		}
-
-		private void queueHide() {
-			synchronized(timer) {
-				timer.stop();
-				timer = new Timer(HIDE_COOLDOWN, taskPerformer);
-				timer.start();
-			}
 		}
 	}
 }
