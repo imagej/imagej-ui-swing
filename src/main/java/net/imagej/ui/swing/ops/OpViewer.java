@@ -266,7 +266,16 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 							if (rowIndex == 0) name = "all available ops";
 							else name = n.getName();
 							if (rowIndex > 0 && n.getCodeCall().isEmpty())
-								name += " namespace";
+							{
+								final OpTreeTableNode firstChild = n.getChildren().get(0);
+								if (firstChild != null && firstChild.getChildren().isEmpty()) {
+									// If a child of this node is a leaf then this node
+									// is an Op node
+									name += " op";
+								}
+								// Otherwise this is a namespace
+								else name += " namespace";
+							}
 							return name;
 						case 1:
 							return n.getCodeCall();
