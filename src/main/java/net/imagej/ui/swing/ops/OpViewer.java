@@ -66,6 +66,8 @@ import javax.swing.Timer;
 import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.tree.TreePath;
@@ -249,26 +251,28 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 			// http://stackoverflow.com/a/21281257/1027800
 			@Override
 			public String getToolTipText(final MouseEvent e) {
-				String tip = null;
+				String tip = "";
 				final Point p = e.getPoint();
 				final int rowIndex = rowAtPoint(p);
 				final int colIndex = columnAtPoint(p);
 
 				try {
 					final OpTreeTableNode n = getNodeAtRow(rowIndex);
-					switch (colIndex)
-					{
-					case 0:
-						String name;
-						if (rowIndex == 0) name = "all available ops";
-						else name = n.getName();
-						if (rowIndex > 0 && n.getCodeCall().isEmpty())
-							name += " namespace";
-						return name;
-					case 1:
-						return n.getCodeCall();
-					case 2:
-						return n.getReferenceClass();
+					if (n != null) {
+						switch (colIndex)
+						{
+						case 0:
+							String name;
+							if (rowIndex == 0) name = "all available ops";
+							else name = n.getName();
+							if (rowIndex > 0 && n.getCodeCall().isEmpty())
+								name += " namespace";
+							return name;
+						case 1:
+							return n.getCodeCall();
+						case 2:
+							return n.getReferenceClass();
+						}
 					}
 				} catch (RuntimeException e1) {
 					// catch null pointer exception if mouse is over an empty
@@ -291,31 +295,43 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 					final int colIndex = treeTable.columnAtPoint(p);
 					final OpTreeTableNode n = getNodeAtRow(rowIndex);
 
-					String text;
-					switch (colIndex)
-					{
-					case 0:
-						text = n.getName();
-						break;
-					case 1:
-						text = n.getCodeCall();
-						break;
-					case 2:
-						text = n.getReferenceClass();
-						break;
-					default:
-						text = "";
-					}
+					if (n != null) {
+						String text;
+						switch (colIndex) {
+						case 0:
+							text = n.getName();
+							break;
+						case 1:
+							text = n.getCodeCall();
+							break;
+						case 2:
+							text = n.getReferenceClass();
+							break;
+						default:
+							text = "";
+						}
 
-					if (text.isEmpty()) {
-						setSuccessIcon(opFail);
+						if (text.isEmpty()) {
+							setSuccessIcon(opFail);
+						} else {
+							final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+							clipboard.setContents(new StringSelection(text), null);
+							setSuccessIcon(opSuccess);
+						}
+						queueHide();
 					}
-					else {
-						final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-						clipboard.setContents(new StringSelection(text), null);
-						setSuccessIcon(opSuccess);
-					}
-					queueHide();
+				}
+			}
+		});
+
+		treeTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(final ListSelectionEvent event) {
+				final OpTreeTableNode n = getNodeAtRow(treeTable.getSelectedRow());
+				if (n != null) {
+					final String newText = n.getReferenceClass();
+					if (!newText.isEmpty())
+						textPane.setText(n.getReferenceClass());
 				}
 			}
 		});
@@ -697,7 +713,7 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 
 	private OpTreeTableNode getNodeAtRow(final int row) {
 		final TreePath path = treeTable.getPathForRow(row);
-		return (OpTreeTableNode) path.getPath()[path.getPathCount()-1];
+		return path == null ? null : (OpTreeTableNode) path.getPath()[path.getPathCount() - 1];
 	}
 
 	public void setSuccessIcon(final ImageIcon icon) {
