@@ -51,19 +51,23 @@ import javax.script.ScriptException;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import javax.swing.text.StyledDocument;
 import javax.swing.tree.TreePath;
 
 import net.imagej.ops.Namespace;
@@ -242,9 +246,22 @@ public class OpViewer extends JFrame implements DocumentListener {
 		// Add panel
 		add(panel, BorderLayout.NORTH);
 
+
 		// Add table and make it scrollable
 		add(new JScrollPane(treeTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
+
+		JScrollPane displayText;
+		JEditorPane textPane;
+		try {
+			textPane = new JEditorPane(new URL("http://javadoc.imagej.net/ImageJ/net/imagej/ops/OpEnvironment.html"));
+		} catch (IOException exc) {
+			textPane = new JEditorPane("text/html", "Testing");
+		}
+		textPane.setEditable(false);
+		textPane.setPreferredSize(new Dimension(DEFAULT_WINDOW_HEIGHT, DEFAULT_WINDOW_WIDTH / 2));
+		displayText = new JScrollPane(textPane, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		add(displayText, BorderLayout.EAST);
 
 		try {
 			if (SwingUtilities.isEventDispatchThread()) {
