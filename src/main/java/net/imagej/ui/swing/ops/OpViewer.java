@@ -353,12 +353,13 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 	 * 
 	 */
 	private void buildDetailsPane() {
+		textPane = new JEditorPane("text/html", "Select an Op for more information");
+		textPane.setEditable(false);
+
 		detailsPane = new JScrollPane(textPane, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-		textPane = new JEditorPane("text/html", "Select an Op for more information");
-		textPane.setEditable(false);
-		textPane.setPreferredSize(new Dimension(DETAILS_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT));
+		detailsPane.setPreferredSize(new Dimension(DETAILS_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT));
 	}
 
 	/**
