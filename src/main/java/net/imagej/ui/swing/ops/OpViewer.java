@@ -149,7 +149,7 @@ public class OpViewer extends JFrame implements DocumentListener {
 	private ThreadService threadService;
 
 	public OpViewer(final Context context) {
-		super("Viewing available Ops...");
+		super("Viewing available Ops...   [shift + L]");
 		context.inject(this);
 
 		expandedPaths = new HashSet<>();

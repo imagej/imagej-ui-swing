@@ -44,7 +44,7 @@ import org.scijava.plugin.Plugin;
 @Plugin(type = Command.class, menu = { @Menu(
 	label = MenuConstants.PLUGINS_LABEL, weight = MenuConstants.PLUGINS_WEIGHT,
 	mnemonic = MenuConstants.PLUGINS_MNEMONIC), @Menu(label = "Utilities"),
-	@Menu(label = "Browse Ops...", weight = 22) }, headless = false)
+	@Menu(label = "Browse Ops...", weight = 22, accelerator = "shift L") }, headless = false)
 public class BrowseOps extends ContextCommand {
 
 	@Override
