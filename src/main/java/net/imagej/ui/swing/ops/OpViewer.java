@@ -166,7 +166,7 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 
 		// Build search panel
 		// Use flow layout to avoid resizing when showing/hiding the status buttons
-		final JPanel topBar = buildTopBar();
+		final JPanel topBar = buildTopPanel();
 		add(topBar, BorderLayout.NORTH);
 
 		// Build the tree table
@@ -185,24 +185,8 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 		// Update dimensions
 		updateDimensions();
 
-		// Pack
-		try {
-			if (SwingUtilities.isEventDispatchThread()) {
-				pack();
-			}
-			else {
-				SwingUtilities.invokeAndWait(new Runnable() {
 
-					@Override
-					public void run() {
-						pack();
-					}
-				});
-			}
-		}
-		catch (final Exception ie) {
-			logService.error(ie);
-		}
+		pack();
 
 		setLocationRelativeTo(null); // center on screen
 		requestFocus();
@@ -216,9 +200,7 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 
 		// Update preferred width of main window based
 		// on discovered widths
-		int preferredWidth = 0;
-		for (int i : widths)
-			preferredWidth += (i + COLUMN_MARGIN);
+		int preferredWidth = getPreferredMainWidth();
 
 		// Update preferred width to account for the
 		// details pane
@@ -298,17 +280,25 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 		treeTable.expandRow(0);
 	}
 
+	private int getPreferredMainWidth() {
+		int preferredWidth = 0;
+		for (int i : widths)
+			preferredWidth += (i + COLUMN_MARGIN);
+
+		return preferredWidth;
+	}
+
 	/**
 	 */
-	private JPanel buildTopBar() {
+	private JPanel buildTopPanel() {
 		prompt = new JTextField("", 20);
-		final JPanel topBar = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		final JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		final JLabel searchLabel = new JLabel("Filter Ops:  ");
-		topBar.add(Box.createRigidArea(new Dimension(5, 0)));
-		topBar.add(searchLabel);
-		topBar.add(prompt);
+		topPanel.add(Box.createRigidArea(new Dimension(5, 0)));
+		topPanel.add(searchLabel);
+		topPanel.add(prompt);
 
-		topBar.add(Box.createRigidArea(new Dimension(20, 0)));
+		topPanel.add(Box.createRigidArea(new Dimension(20, 0)));
 
 		// Build buttons
 		final JButton runButton = new JButton(new ImageIcon(getClass().getResource("/icons/opbrowser/play.png")));
@@ -327,13 +317,13 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 		wikiButton.setToolTipText("Learn more about ImageJ Ops");
 		wikiButton.addActionListener(new WikiButtonListener());
 
-		topBar.add(runButton);
-		topBar.add(Box.createRigidArea(new Dimension(7, 0)));
-		topBar.add(snippetButton);
-		topBar.add(Box.createRigidArea(new Dimension(7, 0)));
-		topBar.add(wikiButton);
+		topPanel.add(runButton);
+		topPanel.add(Box.createRigidArea(new Dimension(7, 0)));
+		topPanel.add(snippetButton);
+		topPanel.add(Box.createRigidArea(new Dimension(7, 0)));
+		topPanel.add(wikiButton);
 
-		topBar.add(Box.createRigidArea(new Dimension(10, 0)));
+		topPanel.add(Box.createRigidArea(new Dimension(10, 0)));
 
 		// These icons are used for visual feedback after clicking a button
 		opFail = new ImageIcon(getClass().getResource("/icons/opbrowser/redx.png"));
@@ -342,11 +332,13 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 		successLabel.setPreferredSize(new Dimension(20, 20));
 		successLabel.setVisible(false);
 
-		topBar.add(successLabel);
+		topPanel.add(successLabel);
 
 		prompt.getDocument().addDocumentListener(this);	
 
-		return topBar;
+		setPanelToMainWidth(topPanel);
+
+		return topPanel;
 	}
 
 	/**
@@ -365,13 +357,20 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 	/**
 	 */
 	private JPanel buildBottomPanel() {
-		final JPanel panelBottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		final JPanel panelBottom = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		toggleDetailsButton = new JButton("<  >");
 		toggleDetailsButton.setPreferredSize(new Dimension(32, 32));
 		toggleDetailsButton.setToolTipText("Show / Hide Details");
-		toggleDetailsButton.addActionListener(new ToggleDetailsButtonListener());
+		toggleDetailsButton.addActionListener(this);
 		panelBottom.add(toggleDetailsButton);
+		setPanelToMainWidth(panelBottom);
 		return panelBottom;
+	}
+
+	private void setPanelToMainWidth(final JPanel panel) {
+		final Dimension dims = new Dimension(panel.getPreferredSize());
+		dims.setSize(getPreferredMainWidth(), dims.getHeight());
+		panel.setPreferredSize(dims);
 	}
 
 	/**
@@ -383,8 +382,7 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 
 		// If a dimension is 0 then use the default dimension size
 		if (0 == dim.width) {
-			for (int i : widths)
-				dim.width += (i + COLUMN_MARGIN);
+			dim.width = getPreferredMainWidth();
 
 			dim.width += DETAILS_WINDOW_WIDTH;
 		}
@@ -394,6 +392,28 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 
 		setPreferredSize(new Dimension(prefService.getInt(WINDOW_WIDTH, dim.width),
 			prefService.getInt(WINDOW_HEIGHT, dim.height)));
+	}
+
+	@Override
+	public void pack() {
+		// Pack
+		try {
+			if (SwingUtilities.isEventDispatchThread()) {
+				super.pack();
+			}
+			else {
+				SwingUtilities.invokeAndWait(new Runnable() {
+
+					@Override
+					public void run() {
+						OpViewer.super.pack();
+					}
+				});
+			}
+		}
+		catch (final Exception ie) {
+			logService.error(ie);
+		}
 	}
 
 	@Override
@@ -408,7 +428,9 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 				newWidth += detailsPane.getPreferredSize().getWidth();
 			}
 
-			setPreferredSize(new Dimension(newWidth, getHeight()));
+			setSize(newWidth, getHeight());
+//			pack();
+//			repaint();
 		}
 	}
 
@@ -634,17 +656,6 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 			} catch (final IOException exc) {
 				logService.error(exc);
 			}
-		}
-	}
-
-	/**
-	 * Button action listener to open and hide the Op detail panel
-	 */
-	private class ToggleDetailsButtonListener extends OpsViewerButtonListener {
-		@Override
-		public void actionPerformed(final ActionEvent e) {
-			detailsPane.setVisible(!detailsPane.isVisible());
-			OpViewer.this.repaint();
 		}
 	}
 
