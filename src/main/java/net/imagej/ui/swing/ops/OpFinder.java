@@ -593,26 +593,23 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		final Map<String, OpTreeTableNode> namespaces =
 			new HashMap<>();
 
-		final Map<String, OpTreeTableNode> ops =
-			new HashMap<>();
-
 		Integer maxScore = -1;
 		final Map<Integer, List<OpTreeTableNode>> scoredOps = new HashMap<>();
 
 		// Iterate over all ops
 		for (final OpInfo info : opService.infos()) {
-			final String namespace = getName(info.getNamespace(), NO_NAMESPACE);
-
-			// Get the namespace node for this Op
-			final OpTreeTableNode nsCategory = getCategory(parent, namespaces,
-				namespace);
 
 			final String opName = getName(info.getSimpleName(), info.getName());
 
 			if (!opName.isEmpty()) {
-				// get the general Op node for this Op
-				final OpTreeTableNode opCategory = getCategory(nsCategory, ops,
-					opName);
+				final String namespacePath = getName(info.getNamespace(),NO_NAMESPACE);
+				final String pathToOp = namespacePath + "." + opName;
+
+				// Build the node path to this op.
+				// There is one node per namespace.
+				// Then a general Op type node, the leaves of which are the actual
+				// implementations.
+				final OpTreeTableNode opType = buildOpHierarchy(parent, namespaces, pathToOp);
 
 				final String delegateClass = info.cInfo().getDelegateClassName();
 				final String simpleName = OpUtils.simpleString(info.cInfo());
@@ -623,7 +620,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 				opSignature.setCommandInfo(info.cInfo());
 
 				if (filterLC.isEmpty()) {
-					opCategory.add(opSignature);
+					opType.add(opSignature);
 					updateWidths(widths, simpleName, codeCall, delegateClass);
 				}
 				else {
@@ -652,6 +649,27 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		}
 
 		pruneEmptyNodes(root);
+	}
+
+	private OpTreeTableNode buildOpHierarchy(final OpTreeTableNode parent, final Map<String, OpTreeTableNode> namespaces,
+			final String namespace) {
+
+		final StringBuilder sb = new StringBuilder();
+
+		OpTreeTableNode prevParent = parent;
+		for (final String ns : namespace.split("\\.")) {
+			sb.append(ns);
+			final String key = sb.toString();
+			OpTreeTableNode nsNode = namespaces.get(key);
+			if (nsNode == null) {
+				nsNode = new OpTreeTableNode(ns);
+				namespaces.put(key, nsNode);
+				prevParent.add(nsNode);
+			}
+			prevParent = nsNode;
+		}
+
+		return prevParent;
 	}
 
 	/**
@@ -752,26 +770,6 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		if (name == null || name.isEmpty()) name = backupName;
 
 		return name == null ? "" : name.toLowerCase().trim();
-	}
-
-	/**
-	 * Helper method to retrieved a map category with the specified name. If the
-	 * category does not exist yet, it's created, added to the map, and added as a
-	 * child to the parent tree node.
-	 */
-	private OpTreeTableNode getCategory(
-		final OpTreeTableNode parent,
-		final Map<String, OpTreeTableNode> ops,
-		final String categoryName)
-	{
-		OpTreeTableNode nsCategory = ops.get(categoryName);
-		if (nsCategory == null) {
-			nsCategory = new OpTreeTableNode(categoryName);
-			parent.add(nsCategory);
-			ops.put(categoryName, nsCategory);
-		}
-
-		return nsCategory;
 	}
 
 	/**
