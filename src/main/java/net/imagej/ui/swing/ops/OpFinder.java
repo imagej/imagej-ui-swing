@@ -343,8 +343,16 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 						} catch (IOException exc) {
 							textPane.setText("Javadoc not available for: " + newText);
 						}
-					}
 
+						// scroll to 0,0
+						SwingUtilities.invokeLater(new Runnable() {
+							@Override
+							public void run() {
+								detailsPane.getVerticalScrollBar().setValue(0);
+								detailsPane.getHorizontalScrollBar().setValue(0);
+							}
+						});
+					}
 				}
 			}
 		});
