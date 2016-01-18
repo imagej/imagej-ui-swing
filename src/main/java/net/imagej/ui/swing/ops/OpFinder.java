@@ -536,7 +536,6 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 			int newWidth = getWidth();
 			if (detailsPane.isVisible()) {
 				newWidth -= detailsPane.getWidth();
-				// provide a small margin when hiding
 				detailsPane.setVisible(false);
 				toggleDetailsButton.setIcon(expandDetails);
 			} else {
