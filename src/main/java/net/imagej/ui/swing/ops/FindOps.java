@@ -37,19 +37,19 @@ import org.scijava.plugin.Menu;
 import org.scijava.plugin.Plugin;
 
 /**
- * Simple command to create and show a new {@link OpViewer}.
+ * Simple command to create and show a new {@link OpFinder}.
  *
  * @author Mark Hiner <hinerm@gmail.com>
  */
 @Plugin(type = Command.class, menu = { @Menu(
 	label = MenuConstants.PLUGINS_LABEL, weight = MenuConstants.PLUGINS_WEIGHT,
 	mnemonic = MenuConstants.PLUGINS_MNEMONIC), @Menu(label = "Utilities"),
-	@Menu(label = "Browse Ops...", weight = 22, accelerator = "shift L") }, headless = false)
-public class BrowseOps extends ContextCommand {
+	@Menu(label = "Find Ops...", weight = 22, accelerator = "shift L") }, headless = false)
+public class FindOps extends ContextCommand {
 
 	@Override
 	public void run() {
-		new OpViewer(getContext()).setVisible(true);
+		new OpFinder(getContext()).setVisible(true);
 	}
 
 }

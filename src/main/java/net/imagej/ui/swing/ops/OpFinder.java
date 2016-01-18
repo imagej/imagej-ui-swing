@@ -105,7 +105,7 @@ import org.scijava.thread.ThreadService;
  * @author Mark Hiner <hinerm@gmail.com>
  */
 @SuppressWarnings("serial")
-public class OpViewer extends JFrame implements DocumentListener, ActionListener {
+public class OpFinder extends JFrame implements DocumentListener, ActionListener {
 
 	public static final int DETAILS_WINDOW_WIDTH = 400;
 	public static final int MAIN_WINDOW_HEIGHT = 700;
@@ -162,7 +162,7 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 	@Parameter
 	private ThreadService threadService;
 
-	public OpViewer(final Context context) {
+	public OpFinder(final Context context) {
 		super("Viewing available Ops...   [shift + L]");
 		context.inject(this);
 
@@ -503,7 +503,7 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 
 					@Override
 					public void run() {
-						OpViewer.super.pack();
+						OpFinder.super.pack();
 					}
 				});
 			}
@@ -675,8 +675,8 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 	 * matches, or 2 points if the match is directly adjacent to the previous
 	 * match. For example, given a base string of "insects":
 	 * <ul>
-	 * <li>"sec" scores 4</li>
-	 * <li>"set" scores 3</li>
+	 * <li>"sec" scores 5</li>
+	 * <li>"set" scores 4</li>
 	 * <li>"sets" scores 6</li>
 	 * <li>"sects" scores 9</li>
 	 * </ul>
