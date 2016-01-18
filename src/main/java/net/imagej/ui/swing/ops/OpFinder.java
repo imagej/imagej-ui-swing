@@ -138,6 +138,9 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	// Caching TreePaths
 	private Set<TreePath> expandedPaths;
 
+	// Caching web elements
+	private Map<String, Elements> elementsMap;
+
 	// For hiding the successLabel
 	private Timer timer;
 	private ActionListener taskPerformer;
@@ -231,6 +234,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	 */
 	private void initialize() {
 		expandedPaths = new HashSet<>();
+		elementsMap = new HashMap<>();
 		model = new OpTreeTableModel();
 		widths = new int[model.getColumnCount()];
 		taskPerformer = new ActionListener() {
@@ -346,14 +350,26 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 					if (!newText.isEmpty()){
 						try {
 							newText = newText.replaceAll("\\.", "/");
+							if (newText.contains("$")) {
+								// For nested classes, replace $ with a URL-safe '.'
+								final String suffix = newText.substring(newText.lastIndexOf("$"));
+								newText = newText.replace(suffix, "%2E" + suffix.substring(1));
+							}
 							final StringBuilder sb = new StringBuilder();
 							sb.append(BASE_JAVADOC_URL);
 							sb.append(newText);
 							sb.append(".html");
-							final org.jsoup.nodes.Document doc = Jsoup
-									.connect(sb.toString()).get();
-							final Elements elements = doc.select("div.header");
-							elements.addAll(doc.select("div.contentContainer"));
+							final String url = sb.toString();
+							Elements elements;
+
+							if (elementsMap.containsKey(url)) elements = elementsMap.get(url);
+							else {
+								final org.jsoup.nodes.Document doc = Jsoup
+										.connect(sb.toString()).get();
+								elements = doc.select("div.header");
+								elements.addAll(doc.select("div.contentContainer"));
+								elementsMap.put(url, elements);
+							}
 							textPane.setText(elements.html());
 						} catch (IOException exc) {
 							textPane.setText("Javadoc not available for: " + newText);
