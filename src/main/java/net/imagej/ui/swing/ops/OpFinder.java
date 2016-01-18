@@ -30,9 +30,8 @@
 
 package net.imagej.ui.swing.ops;
 
-import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -52,7 +51,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.script.ScriptException;
-import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
@@ -60,6 +58,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
@@ -78,6 +77,7 @@ import net.imagej.ops.Op;
 import net.imagej.ops.OpInfo;
 import net.imagej.ops.OpService;
 import net.imagej.ops.OpUtils;
+import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXTreeTable;
 import org.jsoup.Jsoup;
@@ -128,6 +128,8 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	private JEditorPane textPane;
 	private JScrollPane detailsPane;
 	private JButton toggleDetailsButton;
+	private JPanel mainPane;
+	private JSplitPane splitPane;
 
 	// Icons
 	private ImageIcon opFail;
@@ -170,63 +172,30 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		super("Viewing available Ops...   [shift + L]");
 		context.inject(this);
 
-		// Load the frame size
-//		loadPreferences();
-
 		initialize();
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
+		mainPane = new JPanel(new MigLayout("", "[][][][][][grow, right]","[grow]"));
 
 		// Build search panel
-		// Use flow layout to avoid resizing when showing/hiding the status buttons
-		final JPanel topBar = buildTopPanel();
-		add(topBar, BorderLayout.NORTH);
+		buildTopPanel();
 
 		// Build the tree table
 		buildTreeTable();
-		add(new JScrollPane(treeTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
 
 		// Build the details pane
 		buildDetailsPane();
-		add(detailsPane, BorderLayout.EAST);
 
 		// Build the bottom panel
-		final JPanel panelBottom = buildBottomPanel();
-		add(panelBottom, BorderLayout.SOUTH);
+		buildBottomPanel();
 
-		// Update dimensions
-		updateDimensions();
-
+		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, mainPane, detailsPane);
+		add(splitPane);
 
 		pack();
 
 		setLocationRelativeTo(null); // center on screen
 		requestFocus();
-	}
-
-	/**
-	 * 
-	 */
-	private void updateDimensions() {
-		final Dimension dims = new Dimension(getSize());
-
-		// Update preferred width of main window based
-		// on discovered widths
-		int preferredWidth = getPreferredMainWidth();
-
-		// Update preferred width to account for the
-		// details pane
-		preferredWidth += DETAILS_WINDOW_WIDTH;
-
-		// Set preferred width of main window
-		dims.setSize(preferredWidth, MAIN_WINDOW_HEIGHT);
-		setPreferredSize(dims);
-
-		// Set column widths in the main table
-		for (int i = 0; i < model.getColumnCount(); i++) {
-			treeTable.getColumn(i).setPreferredWidth(widths[i]);
-		}
 	}
 
 	/**
@@ -388,6 +357,11 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 
 		// Expand the top row
 		treeTable.expandRow(0);
+		final int preferredWidth = getPreferredMainWidth();
+		mainPane.add(
+				new JScrollPane(treeTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+						ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED),
+				"span, wrap, grow, w " + preferredWidth/2 + ":" + preferredWidth + ", h " + MAIN_WINDOW_HEIGHT);
 	}
 
 	private int getPreferredMainWidth() {
@@ -400,23 +374,17 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 
 	/**
 	 */
-	private JPanel buildTopPanel() {
-		prompt = new JTextField("", 20);
-		final JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+	private void buildTopPanel() {
+		final int searchWidth = 250;
+		prompt = new JTextField(searchWidth);
 		final JLabel searchLabel = new JLabel("Filter Ops:  ");
-		topPanel.add(Box.createRigidArea(new Dimension(5, 0)));
-		topPanel.add(searchLabel);
-		topPanel.add(prompt);
-
-		topPanel.add(Box.createRigidArea(new Dimension(20, 0)));
+		mainPane.add(searchLabel);
+		mainPane.add(prompt, "w " + searchWidth + "!, growy");
 
 		// Build buttons
 		final JButton runButton = new JButton(new ImageIcon(getClass().getResource("/icons/opbrowser/play.png")));
 		final JButton snippetButton = new JButton(new ImageIcon(getClass().getResource("/icons/opbrowser/paperclip.png")));
 		final JButton wikiButton = new JButton(new ImageIcon(getClass().getResource("/icons/opbrowser/globe.png")));
-		runButton.setPreferredSize(new Dimension(32, 32));
-		snippetButton.setPreferredSize(new Dimension(32, 32));
-		wikiButton.setPreferredSize(new Dimension(32, 32));
 
 		runButton.setToolTipText("Run the selected Op");
 		runButton.addActionListener(new RunButtonListener());
@@ -429,28 +397,19 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		wikiButton.setToolTipText("Learn more about ImageJ Ops");
 		wikiButton.addActionListener(new WikiButtonListener());
 
-		topPanel.add(runButton);
-		topPanel.add(Box.createRigidArea(new Dimension(7, 0)));
-		topPanel.add(snippetButton);
-		topPanel.add(Box.createRigidArea(new Dimension(7, 0)));
-		topPanel.add(wikiButton);
-
-		topPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+		mainPane.add(runButton, "w 32!, h 32!, gapleft 32");
+		mainPane.add(snippetButton, "w 32!, h 32!");
+		mainPane.add(wikiButton, "w 32!, h 32!");
 
 		// These icons are used for visual feedback after clicking a button
 		opFail = new ImageIcon(getClass().getResource("/icons/opbrowser/redx.png"));
 		opSuccess = new ImageIcon(getClass().getResource("/icons/opbrowser/greencheck.png"));
 		successLabel = new JLabel(opSuccess);
-		successLabel.setPreferredSize(new Dimension(20, 20));
 		successLabel.setVisible(false);
 
-		topPanel.add(successLabel);
+		mainPane.add(successLabel, "h 20!, gapright 6, wrap");
 
 		prompt.getDocument().addDocumentListener(this);	
-
-		setPanelToMainWidth(topPanel);
-
-		return topPanel;
 	}
 
 	/**
@@ -468,44 +427,13 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 
 	/**
 	 */
-	private JPanel buildBottomPanel() {
-		final JPanel panelBottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+	private void buildBottomPanel() {
 		hideDetails = new ImageIcon(getClass().getResource("/icons/opbrowser/arrow_left.png"));
 		expandDetails = new ImageIcon(getClass().getResource("/icons/opbrowser/arrow_right.png"));
 		toggleDetailsButton = new JButton(hideDetails);
-		toggleDetailsButton.setPreferredSize(new Dimension(32, 32));
 		toggleDetailsButton.setToolTipText("Show / Hide Details");
 		toggleDetailsButton.addActionListener(this);
-		panelBottom.add(toggleDetailsButton);
-		setPanelToMainWidth(panelBottom);
-		return panelBottom;
-	}
-
-	private void setPanelToMainWidth(final JPanel panel) {
-		final Dimension dims = new Dimension(panel.getPreferredSize());
-		dims.setSize(getPreferredMainWidth(), dims.getHeight());
-		panel.setPreferredSize(dims);
-	}
-
-	/**
-	 * Load any preferences saved via the {@link PrefService}, such as window
-	 * width and height.
-	 */
-	public void loadPreferences() {
-		final Dimension dim = getSize();
-
-		// If a dimension is 0 then use the default dimension size
-		if (0 == dim.width) {
-			dim.width = getPreferredMainWidth();
-
-			dim.width += DETAILS_WINDOW_WIDTH;
-		}
-		if (0 == dim.height) {
-			dim.height = MAIN_WINDOW_HEIGHT;
-		}
-
-		setPreferredSize(new Dimension(prefService.getInt(WINDOW_WIDTH, dim.width),
-			prefService.getInt(WINDOW_HEIGHT, dim.height)));
+		mainPane.add(toggleDetailsButton, "span, align right, w 32!, h 32!");
 	}
 
 	@Override
@@ -533,18 +461,23 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	@Override
 	public void actionPerformed(final ActionEvent e) {
 		if (e.getSource() == toggleDetailsButton) {
-			int newWidth = getWidth();
-			if (detailsPane.isVisible()) {
-				newWidth -= detailsPane.getWidth();
+			final boolean hide = detailsPane.isVisible();
+			if (hide) {
+				detailsPane.setPreferredSize(detailsPane.getSize());
+				splitPane.remove(detailsPane);
 				detailsPane.setVisible(false);
 				toggleDetailsButton.setIcon(expandDetails);
 			} else {
 				detailsPane.setVisible(true);
-				newWidth += detailsPane.getPreferredSize().getWidth();
+				splitPane.add(detailsPane);
 				toggleDetailsButton.setIcon(hideDetails);
 			}
 
-				setSize(newWidth, getHeight());
+			// Prevent left side from resizing
+			Component lc = splitPane.getLeftComponent();
+			lc.setPreferredSize(lc.getSize());
+
+			pack();
 		}
 	}
 
@@ -783,7 +716,6 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	 * Helper method to update the widths array to track the longest strings in each column.
 	 */
 	private void updateWidths(int[] colWidths, String... colContents) {
-		
 		for (int i=0; i<Math.min(colWidths.length, colContents.length); i++) {
 			colWidths[i] = Math.max(colWidths[i], colContents[i].length());
 		}
