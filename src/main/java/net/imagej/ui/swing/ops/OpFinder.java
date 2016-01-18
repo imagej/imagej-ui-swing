@@ -43,6 +43,8 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -79,6 +81,8 @@ import net.imagej.ops.OpService;
 import net.imagej.ops.OpUtils;
 import net.miginfocom.swing.MigLayout;
 
+import org.ahocorasick.trie.Emit;
+import org.ahocorasick.trie.Trie;
 import org.jdesktop.swingx.JXTreeTable;
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
@@ -143,6 +147,9 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	// Caching web elements
 	private Map<String, Elements> elementsMap;
 
+	// Cache tries for matching
+	private Map<Trie, OpTreeTableNode> tries;
+
 	// For hiding the successLabel
 	private Timer timer;
 	private ActionListener taskPerformer;
@@ -204,6 +211,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	private void initialize() {
 		expandedPaths = new HashSet<>();
 		elementsMap = new HashMap<>();
+		tries = new HashMap<>();
 		model = new OpTreeTableModel();
 		widths = new int[model.getColumnCount()];
 		taskPerformer = new ActionListener() {
@@ -529,7 +537,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 			else {
 				cacheExpandedPaths();
 				OpTreeTableModel tempModel = new OpTreeTableModel();
-				createNodes(tempModel.getRoot(), text);
+				tempModel.getRoot().add(applyFilter(text.toLowerCase(Locale.getDefault())));
 				treeTable.setTreeTableModel(tempModel);
 
 				treeTable.expandAll();
@@ -570,21 +578,69 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	// -- Helper methods --
 
 	/**
+	 * TODO
+	 */
+	private OpTreeTableNode applyFilter(final String filter) {
+
+		// add to this guy..
+		final OpTreeTableNode parent = new OpTreeTableNode("ops", "# @OpService ops",
+				"net.imagej.ops.OpService");
+
+		final Map<Integer, List<OpTreeTableNode>> scoredOps = new HashMap<>();
+		final List<Integer> keys = new ArrayList<>();
+
+		// How many top scores to keep
+		// A higher score means more "fuzziness"
+		int keep = 1;
+
+		// For each Op, parse the filter text
+		// Each fragment scores ((2 * length) - 1)
+		for (final Trie trie : tries.keySet()) {
+			final Collection<Emit> parse = trie.parseText(filter);
+			int score = 0;
+			for (Emit e : parse)
+				score += ((2 * e.getKeyword().length()) - 1);
+
+			// get the positional index of this key
+			final int pos = -(Collections.binarySearch(keys, score) + 1);
+
+			// Same value as another score
+			if (scoredOps.containsKey(score)) {
+				scoredOps.get(score).add(tries.get(trie));
+				if (!keys.contains(score)) keys.add(score, pos);
+			} else {
+				// If we haven't filled our score quota yet
+				// we can freely add this score.
+				if (keys.size() < keep || pos > 0) {
+					final List<OpTreeTableNode> ops = new ArrayList<>();
+					ops.add(tries.get(trie));
+					scoredOps.put(score, ops);
+					keys.add(pos, score);
+					// If we are bumping a score, remove the lowest
+					// key
+					if (keys.size() > keep) {
+						scoredOps.remove(keys.remove(0));
+					}
+				}
+			}
+		}
+
+		final List<OpTreeTableNode> children = parent.getChildren();
+
+		for (int i = keys.size() - 1; i >= 0; i--) {
+			final Integer key = keys.get(i);
+			for (final OpTreeTableNode node : scoredOps.get(key)) children.add(node);
+		}
+
+		return parent;
+	}
+
+	/**
 	 * Helper method to populate the {@link Op} nodes. Ops without a valid name
 	 * will be skipped. Ops with no namespace will be put in a
 	 * {@link #NO_NAMESPACE} category.
 	 */
 	private void createNodes(final OpTreeTableNode root) {
-		createNodes(root, null);
-	}
-
-	/**
-	 * As {@link #createNodes(OpTreeTableNode)} with an option filter to restrict
-	 * nodes matched.
-	 */
-	private void createNodes(final OpTreeTableNode root, final String filter) {
-		final Locale defaultLocale = Locale.getDefault();
-		final String filterLC = filter == null ? "" : filter.toLowerCase(defaultLocale);
 		final OpTreeTableNode parent = new OpTreeTableNode("ops", "# @OpService ops",
 						"net.imagej.ops.OpService");
 		root.add(parent);
@@ -592,9 +648,6 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		// Map namespaces and ops to their parent tree node
 		final Map<String, OpTreeTableNode> namespaces =
 			new HashMap<>();
-
-		Integer maxScore = -1;
-		final Map<Integer, List<OpTreeTableNode>> scoredOps = new HashMap<>();
 
 		// Iterate over all ops
 		for (final OpInfo info : opService.infos()) {
@@ -619,36 +672,47 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 				final OpTreeTableNode opSignature = new OpTreeTableNode(simpleName, codeCall, delegateClass);
 				opSignature.setCommandInfo(info.cInfo());
 
-				if (filterLC.isEmpty()) {
-					opType.add(opSignature);
-					updateWidths(widths, simpleName, codeCall, delegateClass);
-				}
-				else {
-					//NB: FILTERING here
-					int score = fuzzyScore(delegateClass.toLowerCase(defaultLocale), filterLC);
-					if (score > maxScore) {
-						maxScore = score;
-						final List<OpTreeTableNode> bestNodes = new ArrayList<>();
-						scoredOps.put(maxScore, bestNodes);
-					}
-					if (score == maxScore) {
-						final List<OpTreeTableNode> bestNodes = scoredOps.get(maxScore);
-						bestNodes.add(opSignature);
-					}
-				}
+				final Trie trie = new Trie().removeOverlaps();
+				final Set<String> substrings = getSubstringsWithDots(delegateClass.toLowerCase(Locale.getDefault()));
+				for (final String substring : substrings) trie.addKeyword(substring);
+				tries.put(trie, opSignature);
+
+				opType.add(opSignature);
+				updateWidths(widths, simpleName, codeCall, delegateClass);
+			}
+		}
+	}
+
+	/**
+	 * TODO
+	 */
+	private Set<String> getSubstringsWithDots(final String string) {
+		final Set<String> substringsToCheck = new HashSet<>();
+
+		String strOfInterest = string;
+
+		int dotIndex = 0;
+		while (dotIndex >= 0) {
+			final int startIndex = dotIndex;
+			dotIndex = string.indexOf('.', dotIndex + 1);
+
+			if (dotIndex < 0) {
+				strOfInterest = string.substring(startIndex, string.length());
+			}
+			else {
+				substringsToCheck.add(string.substring(startIndex, dotIndex + 1));
 			}
 		}
 
-		if (!scoredOps.isEmpty()) {
-			// Add all ops that scored the best directly to the parent
-			// For filtered views we will expand all the nodes anyway so
-			// the intermediate namespace nodes are unnecessary
-			for (final OpTreeTableNode bestNode : scoredOps.get(maxScore)) {
-				parent.add(bestNode);
+		// iterate over all substring lengths
+		for (int i = 1; i <= strOfInterest.length(); i++) {
+			// iterate over all substring positions
+			for (int j = 0; j < strOfInterest.length() - (i + 1); j++) {
+				substringsToCheck.add(strOfInterest.substring(j, j + i));
 			}
 		}
 
-		pruneEmptyNodes(root);
+		return substringsToCheck;
 	}
 
 	private OpTreeTableNode buildOpHierarchy(final OpTreeTableNode parent, final Map<String, OpTreeTableNode> namespaces,
@@ -659,7 +723,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		OpTreeTableNode prevParent = parent;
 		for (final String ns : namespace.split("\\.")) {
 			sb.append(ns);
-			final String key = sb.toString();
+			final String key = sb.toString().toLowerCase(Locale.getDefault());
 			OpTreeTableNode nsNode = namespaces.get(key);
 			if (nsNode == null) {
 				nsNode = new OpTreeTableNode(ns);
@@ -670,83 +734,6 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		}
 
 		return prevParent;
-	}
-
-	/**
-	 * Fuzzy string scorer for searching for a small substring (the query) in a
-	 * large string (the base). The query string is sacred and all this
-	 * algorithm will only score segments of the base if the query characters
-	 * are a) present and b) in a consistent order. 1 point is given for contains
-	 * matches, or 2 points if the match is directly adjacent to the previous
-	 * match. For example, given a base string of "insects":
-	 * <ul>
-	 * <li>"sec" scores 5</li>
-	 * <li>"set" scores 4</li>
-	 * <li>"sets" scores 6</li>
-	 * <li>"sects" scores 9</li>
-	 * </ul>
-	 */
-	private int fuzzyScore(String base, String query) {
-		// If there's only one character in the query, return 1 or 0
-		if (query.length() < 2) return base.contains(query) ? 1 : 0;
-
-		// Search potential matches fuzzily
-		// All adjacent characters must be found
-		// Matches score 1.
-		// Directly adjacent matches score 2.
-		int idx = 0;
-		char qChar = query.charAt(0);
-		int bestScore = 0;
-		do {
-			// find each starting point
-			idx = base.indexOf(qChar, idx);
-			if (idx >= 0) {
-				// update score for this starting point
-				int score = 1 + fuzzyScore(base, query, ++idx, 1);
-				bestScore = Math.max(bestScore, score);
-			}
-		} while (idx >= 0);
-
-		return bestScore;
-	}
-
-	/**
-	 * Recursive step of {@link #fuzzyScore(String, String)}. Checks for the next instance
-	 * of the {@code queryIndex}th character of the query string, starting at {@code baseIndex}
-	 * in the base string. This position is then used as the starting point to look for
-	 * the next character.
-	 */
-	private int fuzzyScore(String base, String query, int baseIndex, int queryIndex) {
-		if (queryIndex >= query.length() || baseIndex >= base.length()) return 0;
-
-		char qChar = query.charAt(queryIndex);
-		int idx = base.indexOf(qChar, baseIndex);
-		if (idx >= 0) {
-			// Bonus points for adjacent items
-			final int score = (idx - baseIndex == 0) ? 2 : 1;
-			return score + fuzzyScore(base, query, idx + 1, queryIndex + 1);
-		}
-		return 0;
-	}
-
-	/**
-	 * Recursively any node that a) has no children, and b) has no "ReferenceClass" field
-	 *
-	 * @return true if this node should be removed from the child list.
-	 */
-	private boolean pruneEmptyNodes(final OpTreeTableNode node) {
-		boolean removeThis = node.getCodeCall().isEmpty();
-		final List<OpTreeTableNode> preservedChildren = new ArrayList<>();
-
-		for (final OpTreeTableNode child : node.getChildren()) {
-			if (!pruneEmptyNodes(child)) preservedChildren.add(child);
-		}
-
-		node.getChildren().retainAll(preservedChildren);
-
-		removeThis &= node.getChildren().isEmpty();
-
-		return removeThis;
 	}
 
 	/**
@@ -769,7 +756,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	private String getName(String name, final String backupName) {
 		if (name == null || name.isEmpty()) name = backupName;
 
-		return name == null ? "" : name.toLowerCase().trim();
+		return name == null ? "" : name.trim();
 	}
 
 	/**
