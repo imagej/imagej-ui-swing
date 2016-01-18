@@ -121,6 +121,11 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	public static final String NO_NAMESPACE = "(global)";
 	public static final String BASE_JAVADOC_URL = "http://javadoc.imagej.net/ImageJ/";
 
+	// Simple mode
+	private boolean simple = true;
+	private JButton modeButton;
+	private JLabel searchLabel;
+
 	// Sizing fields
 	private int[] widths;
 
@@ -182,7 +187,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		initialize();
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-		mainPane = new JPanel(new MigLayout("", "[][][][][][grow, right]","[grow]"));
+		mainPane = new JPanel(new MigLayout("", "[][][][][][][grow, right]","[grow]"));
 
 		// Build search panel
 		buildTopPanel();
@@ -395,13 +400,14 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	 * TODO
 	 */
 	private void buildTopPanel() {
-		final int searchWidth = 250;
+		final int searchWidth = 160;
 		prompt = new JTextField(searchWidth);
-		final JLabel searchLabel = new JLabel("Filter Ops by Class:  ");
-		mainPane.add(searchLabel);
+		searchLabel = new JLabel();
+		mainPane.add(searchLabel, "w 150!, align right, grow");
 		mainPane.add(prompt, "w " + searchWidth + "!");
 
 		// Build buttons
+		modeButton = new ModeButton();
 		final JButton runButton = new JButton(new ImageIcon(getClass().getResource("/icons/opbrowser/play.png")));
 		final JButton snippetButton = new JButton(new ImageIcon(getClass().getResource("/icons/opbrowser/paperclip.png")));
 		final JButton wikiButton = new JButton(new ImageIcon(getClass().getResource("/icons/opbrowser/globe.png")));
@@ -417,7 +423,8 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		wikiButton.setToolTipText("Learn more about ImageJ Ops");
 		wikiButton.addActionListener(new WikiButtonListener());
 
-		mainPane.add(runButton, "w 32!, h 32!, gapleft 32");
+		mainPane.add(modeButton, "w 150!, h 32!, gapleft 20");
+		mainPane.add(runButton, "w 32!, h 32!, gapleft 20");
 		mainPane.add(snippetButton, "w 32!, h 32!");
 		mainPane.add(wikiButton, "w 32!, h 32!");
 
@@ -794,6 +801,61 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 			timer = new Timer(HIDE_COOLDOWN, taskPerformer);
 			timer.start();
 		}
+	}
+
+	/**
+	 * TODO
+	 */
+	private class ModeButton extends JButton {
+		private final String simpleButtonText = "Advanced Mode";
+		private final String simpleToolTip = "<html>Recommended for advanced users<br/>"
+				+ " and developers<br/>"
+				+ "<ul><li>Browse <b>ALL</b> Ops</li>"
+				+ "<li>See Op parameters</li>"
+				+ "<li>See Op Javadoc</li></ul></html>";
+		private final String advancedButtonText = "Simple Mode";
+		private final String advancedToolTip = "<html>Recommended for new users<br/>"
+				+ " and non-developers</html>";
+
+		private final String simpleFilterLabel = "Filter Ops by Class:  ";
+		private final String advancedFilterLabel = "Filter Ops:  ";
+
+		public ModeButton() {
+			if (simple) {
+				setText(simpleButtonText);
+				setToolTipText(simpleToolTip);
+				searchLabel.setText(simpleFilterLabel);
+			} else {
+				setText(advancedButtonText);
+				setToolTipText(advancedToolTip);
+				searchLabel.setText(advancedFilterLabel);
+			}
+
+			addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if (simple)
+						switchToAdvanced();
+					else if (!simple)
+						switchToSimple();
+
+					simple = !simple;
+				}
+
+				private void switchToAdvanced() {
+					modeButton.setText(advancedButtonText);
+					modeButton.setToolTipText(advancedToolTip);
+				}
+
+				private void switchToSimple() {
+					modeButton.setText(simpleButtonText);
+					modeButton.setToolTipText(simpleToolTip);
+				}
+				
+			});
+		}
+		
 	}
 
 	/**
