@@ -627,6 +627,9 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		final Map<String, OpTreeTableNode> ops =
 			new HashMap<>();
 
+		Integer maxScore = -1;
+		final Map<Integer, List<OpTreeTableNode>> scoredOps = new HashMap<>();
+
 		// Iterate over all ops
 		for (final OpInfo info : opService.infos()) {
 			final String namespace = getName(info.getNamespace(), NO_NAMESPACE);
@@ -642,25 +645,40 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 				final OpTreeTableNode opCategory = getCategory(nsCategory, ops,
 					opName);
 
-				final String delegateClass = info.cInfo().getDelegateClassName();
-				//NB: FILTERING here
-				final String opClass = info.cInfo().getAnnotation().type().getSimpleName().toLowerCase();
-				final String simpleDelegate = delegateClass
-						.substring(delegateClass.lastIndexOf("."), delegateClass.length()).toLowerCase();
-				if (filterLC.isEmpty() || opClass.contains(filterLC) || simpleDelegate.contains(filterLC)) {
-					final String simpleName = OpUtils.simpleString(info.cInfo());
-					final String codeCall = OpUtils.opCall(info.cInfo());
+				final String delegateClass = info.cInfo().getDelegateClassName().toLowerCase();
+				final String simpleName = OpUtils.simpleString(info.cInfo());
+				final String codeCall = OpUtils.opCall(info.cInfo());
 
-					updateWidths(widths, simpleName, codeCall, delegateClass);
+				// Create a leaf node for this particular Op's signature
+				final OpTreeTableNode opSignature = new OpTreeTableNode(simpleName, codeCall, delegateClass);
+				opSignature.setCommandInfo(info.cInfo());
 
-					// Create a leaf node for this particular Op's signature
-					final OpTreeTableNode opSignature = new OpTreeTableNode(
-							simpleName, codeCall, delegateClass);
-
-					opSignature.setCommandInfo(info.cInfo());
-
+				if (filterLC.isEmpty()) {
 					opCategory.add(opSignature);
+					updateWidths(widths, simpleName, codeCall, delegateClass);
 				}
+				else {
+					//NB: FILTERING here
+					int score = fuzzyScore(delegateClass, filterLC);
+					if (score > maxScore) {
+						maxScore = score;
+						final List<OpTreeTableNode> bestNodes = new ArrayList<>();
+						scoredOps.put(maxScore, bestNodes);
+					}
+					if (score == maxScore) {
+						final List<OpTreeTableNode> bestNodes = scoredOps.get(maxScore);
+						bestNodes.add(opSignature);
+					}
+				}
+			}
+		}
+
+		if (!scoredOps.isEmpty()) {
+			// Add all ops that scored the best directly to the parent
+			// For filtered views we will expand all the nodes anyway so
+			// the intermediate namespace nodes are unnecessary
+			for (final OpTreeTableNode bestNode : scoredOps.get(maxScore)) {
+				parent.add(bestNode);
 			}
 		}
 
