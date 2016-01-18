@@ -397,7 +397,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	private void buildTopPanel() {
 		final int searchWidth = 250;
 		prompt = new JTextField(searchWidth);
-		final JLabel searchLabel = new JLabel("Filter Ops:  ");
+		final JLabel searchLabel = new JLabel("Filter Ops by Class:  ");
 		mainPane.add(searchLabel);
 		mainPane.add(prompt, "w " + searchWidth + "!");
 
