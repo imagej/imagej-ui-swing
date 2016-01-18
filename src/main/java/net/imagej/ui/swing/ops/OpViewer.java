@@ -668,6 +668,63 @@ public class OpViewer extends JFrame implements DocumentListener, ActionListener
 	}
 
 	/**
+	 * Fuzzy string scorer for searching for a small substring (the query) in a
+	 * large string (the base). The query string is sacred and all this
+	 * algorithm will only score segments of the base if the query characters
+	 * are a) present and b) in a consistent order. 1 point is given for contains
+	 * matches, or 2 points if the match is directly adjacent to the previous
+	 * match. For example, given a base string of "insects":
+	 * <ul>
+	 * <li>"sec" scores 4</li>
+	 * <li>"set" scores 3</li>
+	 * <li>"sets" scores 6</li>
+	 * <li>"sects" scores 9</li>
+	 * </ul>
+	 */
+	private int fuzzyScore(String base, String query) {
+		// If there's only one character in the query, return 1 or 0
+		if (query.length() < 2) return base.contains(query) ? 1 : 0;
+
+		// Search potential matches fuzzily
+		// All adjacent characters must be found
+		// Matches score 1.
+		// Directly adjacent matches score 2.
+		int idx = 0;
+		char qChar = query.charAt(0);
+		int bestScore = 0;
+		do {
+			// find each starting point
+			idx = base.indexOf(qChar, idx);
+			if (idx >= 0) {
+				// update score for this starting point
+				int score = 1 + fuzzyScore(base, query, ++idx, 1);
+				bestScore = Math.max(bestScore, score);
+			}
+		} while (idx >= 0);
+
+		return bestScore;
+	}
+
+	/**
+	 * Recursive step of {@link #fuzzyScore(String, String)}. Checks for the next instance
+	 * of the {@code queryIndex}th character of the query string, starting at {@code baseIndex}
+	 * in the base string. This position is then used as the starting point to look for
+	 * the next character.
+	 */
+	private int fuzzyScore(String base, String query, int baseIndex, int queryIndex) {
+		if (queryIndex >= query.length() || baseIndex >= base.length()) return 0;
+
+		char qChar = query.charAt(queryIndex);
+		int idx = base.indexOf(qChar, baseIndex);
+		if (idx >= 0) {
+			// Bonus points for adjacent items
+			final int score = (idx - baseIndex == 0) ? 2 : 1;
+			return score + fuzzyScore(base, query, idx + 1, queryIndex + 1);
+		}
+		return 0;
+	}
+
+	/**
 	 * Recursively any node that a) has no children, and b) has no "ReferenceClass" field
 	 *
 	 * @return true if this node should be removed from the child list.
