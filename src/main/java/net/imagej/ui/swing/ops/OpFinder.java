@@ -133,13 +133,14 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	// Child elements
 	private JTextField prompt;
 	private JXTreeTable treeTable;
-	private OpTreeTableModel model;
 	private JLabel successLabel = null;
 	private JEditorPane textPane;
 	private JScrollPane detailsPane;
 	private JButton toggleDetailsButton;
 	private JPanel mainPane;
 	private JSplitPane splitPane;
+	private OpTreeTableModel advModel;
+	private OpTreeTableModel smplModel;
 
 	// Icons
 	private ImageIcon opFail;
@@ -148,13 +149,15 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	private ImageIcon hideDetails;
 
 	// Caching TreePaths
-	private Set<TreePath> expandedPaths;
+	private Set<TreePath> advExpandedPaths;
+	private Set<TreePath> smplExpandedPaths;
 
 	// Caching web elements
 	private Map<String, Elements> elementsMap;
 
 	// Cache tries for matching
-	private Map<Trie, OpTreeTableNode> tries;
+	private Map<Trie, OpTreeTableNode> advTries;
+	private Map<Trie, OpTreeTableNode> smplTries;
 
 	// For hiding the successLabel
 	private Timer timer;
@@ -215,11 +218,14 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	 * 
 	 */
 	private void initialize() {
-		expandedPaths = new HashSet<>();
+		advExpandedPaths = new HashSet<>();
+		smplExpandedPaths = new HashSet<>();
 		elementsMap = new HashMap<>();
-		tries = new HashMap<>();
-		model = new OpTreeTableModel();
-		widths = new int[model.getColumnCount()];
+		advTries = new HashMap<>();
+		smplTries = new HashMap<>();
+		advModel = new OpTreeTableModel(false);
+		smplModel = new OpTreeTableModel(true);
+		widths = new int[advModel.getColumnCount()];
 		taskPerformer = new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent evt) {
@@ -234,10 +240,10 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	 */
 	private void buildTreeTable() {
 		// Populate the nodes
-		createNodes(model.getRoot());
+		createNodes();
 
 		// per-cell tool-tips
-		treeTable = new JXTreeTable(model) {
+		treeTable = new JXTreeTable(simple ? smplModel : advModel) {
 			// Adapted from:
 			// http://stackoverflow.com/a/21281257/1027800
 			@Override
@@ -540,13 +546,14 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 			final String text = doc.getText(0, doc.getLength());
 
 			if (text == null || text.isEmpty()) {
-				treeTable.setTreeTableModel(model);
-				restoreExpandedPaths();
+				treeTable.setTreeTableModel(simple ? smplModel : advModel);
+				restoreExpandedPaths(simple);
 			}
 			else {
-				cacheExpandedPaths();
-				OpTreeTableModel tempModel = new OpTreeTableModel();
-				tempModel.getRoot().add(applyFilter(text.toLowerCase(Locale.getDefault())));
+				cacheExpandedPaths(simple);
+				OpTreeTableModel tempModel = new OpTreeTableModel(simple);
+				tempModel.getRoot()
+						.add(applyFilter(text.toLowerCase(Locale.getDefault()), simple ? smplTries : advTries));
 				treeTable.setTreeTableModel(tempModel);
 
 				treeTable.expandAll();
@@ -559,28 +566,36 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	/**
 	 * Expand all cached TreePaths and clear the cache.
 	 */
-	private void restoreExpandedPaths() {
-		for (final TreePath path : expandedPaths) {
-			treeTable.expandPath(path);
-		}
+	private void restoreExpandedPaths(final boolean isSimple) {
+		final Set<TreePath> paths = isSimple ? smplExpandedPaths : advExpandedPaths;
 
-		expandedPaths.clear();
+		if (paths.isEmpty()) {
+			// expand top row by default
+			treeTable.expandRow(0);
+		}
+		else {
+			for (final TreePath path : paths) {
+				treeTable.expandPath(path);
+			}
+
+			paths.clear();
+		}
 	}
 
 	/**
 	 * If they are not already cached, check which paths are expanded and
 	 * cache them for future restoration.
 	 */
-	private void cacheExpandedPaths() {
+	private void cacheExpandedPaths(final boolean isSimple) {
+		final Set<TreePath> paths = isSimple ? smplExpandedPaths : advExpandedPaths;
+
 		// If paths have already been cached we don't need to do anything.
-		// Paths are only cached when filtering, and restored when done
-		// filtering.
-		if (!expandedPaths.isEmpty()) return;
+		if (!paths.isEmpty()) return;
 
 		// Find and cache the expanded paths
 		for (int i=0; i<treeTable.getRowCount(); i++) {
 			if (treeTable.isExpanded(i))
-				expandedPaths.add(treeTable.getPathForRow(i));
+				paths.add(treeTable.getPathForRow(i));
 		}
 	}
 
@@ -589,7 +604,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	/**
 	 * TODO
 	 */
-	private OpTreeTableNode applyFilter(final String filter) {
+	private OpTreeTableNode applyFilter(final String filter, final Map<Trie, OpTreeTableNode> tries) {
 
 		// add to this guy..
 		final OpTreeTableNode parent = new OpTreeTableNode("ops", "# @OpService ops",
@@ -649,13 +664,18 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	 * will be skipped. Ops with no namespace will be put in a
 	 * {@link #NO_NAMESPACE} category.
 	 */
-	private void createNodes(final OpTreeTableNode root) {
-		final OpTreeTableNode parent = new OpTreeTableNode("ops", "# @OpService ops",
+	private void createNodes() {
+		final OpTreeTableNode advParent = new OpTreeTableNode("ops", "# @OpService ops",
 						"net.imagej.ops.OpService");
-		root.add(parent);
+		final OpTreeTableNode smplParent = new OpTreeTableNode("ops", "# @OpService ops",
+						"net.imagej.ops.OpService");
+		advModel.getRoot().add(advParent);
+		smplModel.getRoot().add(smplParent);
 
 		// Map namespaces and ops to their parent tree node
-		final Map<String, OpTreeTableNode> namespaces =
+		final Map<String, OpTreeTableNode> advNamespaces =
+			new HashMap<>();
+		final Map<String, OpTreeTableNode> smplNamespaces =
 			new HashMap<>();
 
 		// Iterate over all ops
@@ -671,7 +691,8 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 				// There is one node per namespace.
 				// Then a general Op type node, the leaves of which are the actual
 				// implementations.
-				final OpTreeTableNode opType = buildOpHierarchy(parent, namespaces, pathToOp);
+				final OpTreeTableNode advOpType = buildOpHierarchy(advParent, advNamespaces, pathToOp);
+				final OpTreeTableNode smplOpType = buildOpHierarchy(smplParent, smplNamespaces, pathToOp);
 
 				final String delegateClass = info.cInfo().getDelegateClassName();
 				final String simpleName = OpUtils.simpleString(info.cInfo());
@@ -684,12 +705,44 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 				final Trie trie = new Trie().removeOverlaps();
 				final Set<String> substrings = getSubstringsWithDots(delegateClass.toLowerCase(Locale.getDefault()));
 				for (final String substring : substrings) trie.addKeyword(substring);
-				tries.put(trie, opSignature);
+				advTries.put(trie, opSignature);
+				advOpType.add(opSignature);
 
-				opType.add(opSignature);
+				if (isSimple(pathToOp)) {
+					smplTries.put(trie, opSignature);
+					smplOpType.add(opSignature);
+				}
+
 				updateWidths(widths, simpleName, codeCall, delegateClass);
 			}
 		}
+
+		pruneEmptyNodes(smplParent);
+	}
+
+	private boolean isSimple(final String pathToOp) {
+		//FIXME
+		return pathToOp.contains("math");
+	}
+
+	/**
+	 * Recursively any node that a) has no children, and b) has no "ReferenceClass" field
+	 *
+	 * @return true if this node should be removed from the child list.
+	 */
+	private boolean pruneEmptyNodes(final OpTreeTableNode node) {
+		boolean removeThis = node.getCodeCall().isEmpty();
+		final List<OpTreeTableNode> preservedChildren = new ArrayList<>();
+
+		for (final OpTreeTableNode child : node.getChildren()) {
+			if (!pruneEmptyNodes(child)) preservedChildren.add(child);
+		}
+
+		node.getChildren().retainAll(preservedChildren);
+
+		removeThis &= node.getChildren().isEmpty();
+
+		return removeThis;
 	}
 
 	/**
@@ -823,11 +876,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		private final String advancedFilterLabel = "Filter Ops by Class:  ";
 
 		public ModeButton() {
-			if (simple) {
-				setSimpleState();
-			} else {
-				setAdvancedState();
-			}
+			setState(simple);
 
 			addActionListener(new ActionListener() {
 
@@ -842,26 +891,25 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 				}
 
 				private void switchToAdvanced() {
-					modeButton.setAdvancedState();
+					modeButton.setState(false);
 				}
 
 				private void switchToSimple() {
-					modeButton.setSimpleState();
+					modeButton.setState(true);
 				}
 				
 			});
 		}
 
-		public void setSimpleState() {
-			setText(simpleButtonText);
-			setToolTipText(simpleToolTip);
-			searchLabel.setText(simpleFilterLabel);
-		}
-
-		public void setAdvancedState() {
-			setText(advancedButtonText);
-			setToolTipText(advancedToolTip);
-			searchLabel.setText(advancedFilterLabel);
+		public void setState(final boolean simple) {
+			setText(simple ? simpleButtonText : advancedButtonText);
+			setToolTipText(simple ? simpleToolTip : advancedToolTip);
+			searchLabel.setText(simple ?simpleFilterLabel : advancedFilterLabel);
+			if (treeTable != null) {
+				treeTable.setTreeTableModel(simple ? smplModel : advModel);
+				cacheExpandedPaths(!simple);
+				restoreExpandedPaths(simple);
+			}
 		}
 	}
 
