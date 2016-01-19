@@ -63,6 +63,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
@@ -123,7 +124,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 
 	// Simple mode
 	private boolean simple = true;
-	private JButton modeButton;
+	private ModeButton modeButton;
 	private JLabel searchLabel;
 
 	// Sizing fields
@@ -403,7 +404,8 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		final int searchWidth = 160;
 		prompt = new JTextField(searchWidth);
 		searchLabel = new JLabel();
-		mainPane.add(searchLabel, "w 150!, align right, grow");
+		searchLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		mainPane.add(searchLabel, "w 145!");
 		mainPane.add(prompt, "w " + searchWidth + "!");
 
 		// Build buttons
@@ -817,18 +819,14 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		private final String advancedToolTip = "<html>Recommended for new users<br/>"
 				+ " and non-developers</html>";
 
-		private final String simpleFilterLabel = "Filter Ops by Class:  ";
-		private final String advancedFilterLabel = "Filter Ops:  ";
+		private final String simpleFilterLabel = "Filter Ops:  ";
+		private final String advancedFilterLabel = "Filter Ops by Class:  ";
 
 		public ModeButton() {
 			if (simple) {
-				setText(simpleButtonText);
-				setToolTipText(simpleToolTip);
-				searchLabel.setText(simpleFilterLabel);
+				setSimpleState();
 			} else {
-				setText(advancedButtonText);
-				setToolTipText(advancedToolTip);
-				searchLabel.setText(advancedFilterLabel);
+				setAdvancedState();
 			}
 
 			addActionListener(new ActionListener() {
@@ -844,18 +842,27 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 				}
 
 				private void switchToAdvanced() {
-					modeButton.setText(advancedButtonText);
-					modeButton.setToolTipText(advancedToolTip);
+					modeButton.setAdvancedState();
 				}
 
 				private void switchToSimple() {
-					modeButton.setText(simpleButtonText);
-					modeButton.setToolTipText(simpleToolTip);
+					modeButton.setSimpleState();
 				}
 				
 			});
 		}
-		
+
+		public void setSimpleState() {
+			setText(simpleButtonText);
+			setToolTipText(simpleToolTip);
+			searchLabel.setText(simpleFilterLabel);
+		}
+
+		public void setAdvancedState() {
+			setText(advancedButtonText);
+			setToolTipText(advancedToolTip);
+			searchLabel.setText(advancedFilterLabel);
+		}
 	}
 
 	/**
