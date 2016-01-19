@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import javax.script.ScriptException;
 import javax.swing.ImageIcon;
@@ -59,6 +60,7 @@ import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
@@ -127,6 +129,9 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	private ModeButton modeButton;
 	private JLabel searchLabel;
 
+	// Off-EDT work
+	private Future<?> lastRun;
+
 	// Sizing fields
 	private int[] widths;
 
@@ -139,6 +144,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	private JButton toggleDetailsButton;
 	private JPanel mainPane;
 	private JSplitPane splitPane;
+	private JProgressBar progressBar;
 	private OpTreeTableModel advModel;
 	private OpTreeTableModel smplModel;
 
@@ -160,8 +166,8 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	private Map<Trie, OpTreeTableNode> smplTries;
 
 	// For hiding the successLabel
-	private Timer timer;
-	private ActionListener taskPerformer;
+	private Timer successTimer;
+	private Timer progressTimer;
 
 	@Parameter
 	private StatusService statusService;
@@ -227,13 +233,19 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		advModel = new OpTreeTableModel(false);
 		smplModel = new OpTreeTableModel(true);
 		widths = new int[advModel.getColumnCount()];
-		taskPerformer = new ActionListener() {
+		successTimer = new Timer(HIDE_COOLDOWN,  new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent evt) {
 				successLabel.setVisible(false);
 			}
-		};
-		timer = new Timer(HIDE_COOLDOWN, taskPerformer);
+		});
+
+		progressTimer = new Timer(HIDE_COOLDOWN,  new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent evt) {
+				progressBar.setVisible(false);
+			}
+		});
 	}
 
 	/**
@@ -325,7 +337,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 							clipboard.setContents(new StringSelection(text), null);
 							setSuccessIcon(opSuccess);
 						}
-						queueHide();
+						successTimer.restart();
 					}
 				}
 			}
@@ -465,12 +477,27 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	 * TODO
 	 */
 	private void buildBottomPanel() {
+		progressBar = new JProgressBar(SwingConstants.HORIZONTAL, 0, 100);
+		mainPane.add(progressBar, "w 100!");
+		progressBar.setVisible(false);
+
 		hideDetails = new ImageIcon(getClass().getResource("/icons/opbrowser/arrow_left.png"));
 		expandDetails = new ImageIcon(getClass().getResource("/icons/opbrowser/arrow_right.png"));
 		toggleDetailsButton = new JButton(hideDetails);
 		toggleDetailsButton.setToolTipText("Show / Hide Details");
 		toggleDetailsButton.addActionListener(this);
 		mainPane.add(toggleDetailsButton, "span, align right, w 32!, h 32!");
+	}
+
+	/**
+	 * TODO
+	 */
+	private void setProgress(final int progress) {
+		progressBar.setVisible(true);
+		progressBar.setValue(progress);
+		if (progress >= progressBar.getMaximum())
+			progressTimer.restart();
+		else progressTimer.stop();
 	}
 
 	@Override
@@ -554,13 +581,11 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 				treeTable.setTreeTableModel(simple ? smplModel : advModel);
 				restoreExpandedPaths(simple);
 			} else {
-				cacheExpandedPaths(simple);
-				OpTreeTableModel tempModel = new OpTreeTableModel(simple);
-				tempModel.getRoot()
-						.add(applyFilter(text.toLowerCase(Locale.getDefault()), simple ? smplTries : advTries));
-				treeTable.setTreeTableModel(tempModel);
-
-				treeTable.expandAll();
+				final FilterRunner filterRunner = new FilterRunner(text);
+				if (lastRun != null) {
+					lastRun.cancel(true);
+				}
+				lastRun = threadService.run(filterRunner);
 			}
 		} catch (final BadLocationException exc) {
 			logService.error(exc);
@@ -605,6 +630,24 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 
 	// -- Helper methods --
 
+	private class FilterRunner implements Runnable {
+		private String text;
+
+		public FilterRunner(final String text){
+			this.text = text;
+		}
+
+		@Override
+		public void run() {
+			OpTreeTableModel tempModel = new OpTreeTableModel(simple);
+			tempModel.getRoot()
+					.add(applyFilter(text.toLowerCase(Locale.getDefault()), simple ? smplTries : advTries));
+			treeTable.setTreeTableModel(tempModel);
+
+			treeTable.expandAll();
+		}
+	}
+
 	/**
 	 * TODO
 	 */
@@ -620,10 +663,19 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		// How many top scores to keep
 		// A higher score means more "fuzziness"
 		int keep = 1;
+		int count = 0;
+		int nextProgress = 5;
 
 		// For each Op, parse the filter text
 		// Each fragment scores ((2 * length) - 1)
 		for (final Trie trie : tries.keySet()) {
+			count++;
+			if (Math.floor((count * 100d) / tries.keySet().size()) == nextProgress) {
+				setProgress(nextProgress);
+				nextProgress += 5;
+			}
+
+
 			final Collection<Emit> parse = trie.parseText(filter);
 			int score = 0;
 			for (Emit e : parse)
@@ -659,6 +711,8 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 			final Integer key = keys.get(i);
 			for (final OpTreeTableNode node : scoredOps.get(key)) children.add(node);
 		}
+
+		setProgress(100);
 
 		return parent;
 	}
@@ -875,17 +929,6 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	/**
 	 * TODO
 	 */
-	private void queueHide() {
-		synchronized(timer) {
-			timer.stop();
-			timer = new Timer(HIDE_COOLDOWN, taskPerformer);
-			timer.start();
-		}
-	}
-
-	/**
-	 * TODO
-	 */
 	private class ModeButton extends JButton {
 		private final String simpleButtonText = "Advanced Mode";
 		private final String simpleToolTip = "<html>Recommended for advanced users<br/>"
@@ -1043,12 +1086,12 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 
 		public void setPass() {
 			setSuccessIcon(opSuccess);
-			queueHide();
+			successTimer.restart();
 		}
 
 		public void setFail() {
 			setSuccessIcon(opFail);
-			queueHide();
+			successTimer.restart();
 		}
 	}
 }
