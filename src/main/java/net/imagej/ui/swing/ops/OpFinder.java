@@ -1010,13 +1010,13 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	 * TODO
 	 */
 	private class ModeButton extends JButton {
-		private final String simpleButtonText = "Advanced Mode";
+		private final String simpleButtonText = "Developer View";
 		private final String simpleToolTip = "<html>Recommended for advanced users<br/>"
 				+ " and developers<br/>"
 				+ "<ul><li>Browse <b>ALL</b> Ops</li>"
 				+ "<li>See Op parameters</li>"
 				+ "<li>See Op Javadoc</li></ul></html>";
-		private final String advancedButtonText = "Simple Mode";
+		private final String advancedButtonText = "User View";
 		private final String advancedToolTip = "<html>Recommended for new users<br/>"
 				+ " and non-developers</html>";
 
