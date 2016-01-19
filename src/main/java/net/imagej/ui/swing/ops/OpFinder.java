@@ -346,11 +346,11 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 						}
 
 						if (text.isEmpty()) {
-							setSuccessIcon(opFail);
+							copyFail();
 						} else {
 							final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 							clipboard.setContents(new StringSelection(text), null);
-							setSuccessIcon(opSuccess);
+							copyPass();
 						}
 						successTimer.restart();
 					}
@@ -460,23 +460,25 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		snippetButton.setToolTipText(
 				"<html>Copy the selected code snippet to your clipboard.<br />"
 						+ "You can also double-click a cell to copy its contents.</html>");
-		snippetButton.addActionListener(new SnippetButtonListener());
+		snippetButton.addActionListener(new CopyButtonListener());
 
 		wikiButton.setToolTipText("Learn more about ImageJ Ops");
 		wikiButton.addActionListener(new WikiButtonListener());
 
-		mainPane.add(modeButton, "w 150!, h 32!, gapleft 20");
-		mainPane.add(runButton, "w 32!, h 32!, gapleft 20");
+		mainPane.add(modeButton, "w 145!, h 32!, gapleft 15");
+		mainPane.add(runButton, "w 32!, h 32!, gapleft 15");
 		mainPane.add(snippetButton, "w 32!, h 32!");
 		mainPane.add(wikiButton, "w 32!, h 32!");
 
 		// These icons are used for visual feedback after clicking a button
 		opFail = new ImageIcon(getClass().getResource("/icons/opbrowser/redx.png"));
 		opSuccess = new ImageIcon(getClass().getResource("/icons/opbrowser/greencheck.png"));
-		successLabel = new JLabel(opSuccess);
+		successLabel = new JLabel();
+		successLabel.setHorizontalTextPosition(SwingConstants.LEFT);
+		successLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		successLabel.setVisible(false);
 
-		mainPane.add(successLabel, "h 20!, gapright 6, wrap");
+		mainPane.add(successLabel, "h 20!, w 155!, wrap");
 
 		searchField.getDocument().addDocumentListener(this);
 	}
@@ -965,6 +967,32 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	}
 
 	/**
+	 * TODO
+	 */
+	private void copyPass() {
+		setSuccessIcon(opSuccess);
+		successLabel.setText("copied ");
+		successTimer.restart();
+	}
+
+	/**
+	 * TODO
+	 */
+	private void copyFail() {
+		setSuccessIcon(opFail);
+		successLabel.setText("no selection ");
+		successTimer.restart();
+	}
+
+	/**
+	 * TODO
+	 */
+	private void setSuccessIcon(final ImageIcon icon) {
+		successLabel.setVisible(true);
+		successLabel.setIcon(icon);
+	}
+
+	/**
 	 * Helper method to get a properly formatted name. {@code name} is tried
 	 * first, then {@code backupName} if needed (i.e. {@code name} is {@code null}
 	 * or empty).
@@ -994,14 +1022,6 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	private OpTreeTableNode getNodeAtRow(final int row) {
 		final TreePath path = treeTable.getPathForRow(row);
 		return path == null ? null : (OpTreeTableNode) path.getPath()[path.getPathCount() - 1];
-	}
-
-	/**
-	 * TODO
-	 */
-	public void setSuccessIcon(final ImageIcon icon) {
-		successLabel.setVisible(true);
-		successLabel.setIcon(icon);
 	}
 
 	/**
@@ -1068,7 +1088,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	/**
 	 * Button action listener to open the ImageJ Ops wiki page
 	 */
-	private class WikiButtonListener extends OpsViewerButtonListener {
+	private class WikiButtonListener implements ActionListener {
 		@Override
 		public void actionPerformed(final ActionEvent e) {
 			try {
@@ -1080,51 +1100,20 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	}
 
 	/**
-	 * Button action listener to copy selected row's code snippet to clipboard
-	 */
-	private class SnippetButtonListener extends OpsViewerButtonListener {
-		@Override
-		public void actionPerformed(final ActionEvent e) {
-			final OpTreeTableNode selectedNode = getSelectedNode();
-
-			String codeCall;
-
-			if (selectedNode == null || (codeCall = selectedNode.getCodeCall()).isEmpty()) {
-				statusService.clearStatus();
-				statusService.showStatus("No code to copy (is an Op row selected?)");
-				setFail();
-			} else {
-				statusService.showStatus("Op copied to clipboard!");
-				final StringSelection stringSelection = new StringSelection(codeCall);
-				final Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
-				clpbrd.setContents(stringSelection, null);
-				setPass();
-			}
-		}
-	}
-
-	/**
 	 * Button action listener to run the selected row's code snippet via the
 	 * {@link OpService}.
 	 */
-	private class RunButtonListener extends OpsViewerButtonListener {
+	private class RunButtonListener implements ActionListener {
 		@Override
 		public void actionPerformed(final ActionEvent e) {
 			final OpTreeTableNode selectedNode = getSelectedNode();
 
-			if (selectedNode == null || selectedNode.getCommandInfo() == null) {
-				statusService.clearStatus();
-				statusService.showStatus("No Op selected or Op name not found");
-				setFail();
-			} else {
-				try {
-					final String script = makeScript(selectedNode);
-					scriptService.run("op_browser.py", script, true);
-				} catch (IOException | ScriptException | NoSuchFieldException | SecurityException
-						| InstantiationException | IllegalAccessException | ClassNotFoundException exc) {
-					logService.error(exc);
-				}
-				setPass();
+			try {
+				final String script = makeScript(selectedNode);
+				scriptService.run("op_browser.py", script, true);
+			} catch (IOException | ScriptException | NoSuchFieldException | SecurityException | InstantiationException
+					| IllegalAccessException | ClassNotFoundException exc) {
+				logService.error(exc);
 			}
 		}
 
@@ -1164,19 +1153,29 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	}
 
 	/**
-	 * Abstract helper class for button {@link ActionListener}s
+	 * TODO
 	 */
-	private abstract class OpsViewerButtonListener implements ActionListener {
+	private class CopyButtonListener implements ActionListener {
 
-		public void setPass() {
-			setSuccessIcon(opSuccess);
-			successTimer.restart();
+		@Override
+		public void actionPerformed(final ActionEvent e) {
+			final OpTreeTableNode selectedNode = getSelectedNode();
+
+			String codeCall;
+
+			if (selectedNode == null || (codeCall = selectedNode.getCodeCall()).isEmpty()) {
+				statusService.clearStatus();
+				statusService.showStatus("No code to copy (is an Op row selected?)");
+				copyFail();
+			} else {
+				statusService.showStatus("Op copied to clipboard!");
+				final StringSelection stringSelection = new StringSelection(codeCall);
+				final Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+				clpbrd.setContents(stringSelection, null);
+				copyPass();
+			}
 		}
 
-		public void setFail() {
-			setSuccessIcon(opFail);
-			successTimer.restart();
-		}
 	}
 
 	private class HTMLFetcher extends InterruptableRunner {
