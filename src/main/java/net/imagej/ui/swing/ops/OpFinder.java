@@ -130,7 +130,8 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	private JLabel searchLabel;
 
 	// Off-EDT work
-	private Future<?> lastRun;
+	private Future<?> lastFilter;
+	private Future<?> lastHTMLReq;
 
 	// Sizing fields
 	private int[] widths;
@@ -159,7 +160,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	private Set<TreePath> smplExpandedPaths;
 
 	// Caching web elements
-	private Map<String, Elements> elementsMap;
+	private Map<String, String> elementsMap;
 
 	// Cache tries for matching
 	private Map<Trie, OpTreeTableNode> advTries;
@@ -349,44 +350,63 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 				final OpTreeTableNode n = getNodeAtRow(treeTable.getSelectedRow());
 				if (n != null && detailsPane.isVisible()) {
 					String newText = n.getReferenceClass();
-					if (!newText.isEmpty()){
-						try {
-							newText = newText.replaceAll("\\.", "/");
-							if (newText.contains("$")) {
-								// For nested classes, replace $ with a URL-safe '.'
-								final String suffix = newText.substring(newText.lastIndexOf("$"));
-								newText = newText.replace(suffix, "%2E" + suffix.substring(1));
-							}
-							final StringBuilder sb = new StringBuilder();
-							sb.append(BASE_JAVADOC_URL);
-							sb.append(newText);
-							sb.append(".html");
-							final String url = sb.toString();
-							Elements elements;
+					if (!newText.isEmpty()) {
+						newText = newText.replaceAll("\\.", "/");
+						if (newText.contains("$")) {
+							// For nested classes, replace $ with a URL-safe '.'
+							final String suffix = newText.substring(newText.lastIndexOf("$"));
+							newText = newText.replace(suffix, "%2E" + suffix.substring(1));
+						}
+						final String requestedClass = newText;
+						final StringBuilder sb = new StringBuilder();
+						sb.append(BASE_JAVADOC_URL);
+						sb.append(newText);
+						sb.append(".html");
+						final String url = sb.toString();
 
-							if (elementsMap.containsKey(url)) elements = elementsMap.get(url);
-							else {
-								final org.jsoup.nodes.Document doc = Jsoup
-										.connect(sb.toString()).get();
-								elements = doc.select("div.header");
-								elements.addAll(doc.select("div.contentContainer"));
-								elementsMap.put(url, elements);
+						synchronized (elementsMap) {
+							if (elementsMap.containsKey(url)) {
+								textPane.setText(elementsMap.get(url));
+								scrollToTop();
+							} else {
+								if (lastHTMLReq != null)
+									lastHTMLReq.cancel(true);
+
+								lastHTMLReq = threadService.run(new Runnable() {
+									@Override
+									public void run() {
+										try {
+											final org.jsoup.nodes.Document doc = Jsoup.connect(sb.toString()).get();
+											Elements elements = doc.select("div.header");
+											elements.addAll(doc.select("div.contentContainer"));
+											synchronized (elementsMap) {
+												elementsMap.put(url, elements.html());
+											}
+										} catch (final IOException exc) {
+											synchronized (elementsMap) {
+												elementsMap.put(url, "Javadoc not available for: " + requestedClass);
+											}
+										}
+										textPane.setText(elementsMap.get(url));
+										scrollToTop();
+									}
+								});
 							}
-							textPane.setText(elements.html());
-						} catch (IOException exc) {
-							textPane.setText("Javadoc not available for: " + newText);
 						}
 
-						// scroll to 0,0
-						SwingUtilities.invokeLater(new Runnable() {
-							@Override
-							public void run() {
-								detailsPane.getVerticalScrollBar().setValue(0);
-								detailsPane.getHorizontalScrollBar().setValue(0);
-							}
-						});
 					}
 				}
+			}
+
+			private void scrollToTop() {
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						// scroll to 0,0
+						detailsPane.getVerticalScrollBar().setValue(0);
+						detailsPane.getHorizontalScrollBar().setValue(0);
+					}
+				});
 			}
 		});
 
@@ -582,10 +602,10 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 				restoreExpandedPaths(simple);
 			} else {
 				final FilterRunner filterRunner = new FilterRunner(text);
-				if (lastRun != null) {
-					lastRun.cancel(true);
+				if (lastFilter != null) {
+					lastFilter.cancel(true);
 				}
-				lastRun = threadService.run(filterRunner);
+				lastFilter = threadService.run(filterRunner);
 			}
 		} catch (final BadLocationException exc) {
 			logService.error(exc);
@@ -640,11 +660,17 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		@Override
 		public void run() {
 			OpTreeTableModel tempModel = new OpTreeTableModel(simple);
-			tempModel.getRoot()
-					.add(applyFilter(text.toLowerCase(Locale.getDefault()), simple ? smplTries : advTries));
-			treeTable.setTreeTableModel(tempModel);
+			tempModel.getRoot().add(applyFilter(text.toLowerCase(Locale.getDefault()), simple ? smplTries : advTries));
+			SwingUtilities.invokeLater(new Runnable() {
 
-			treeTable.expandAll();
+				@Override
+				public void run() {
+					// Don't update AWT stuff off the EDT
+					treeTable.setTreeTableModel(tempModel);
+
+					treeTable.expandAll();
+				}
+			});
 		}
 	}
 
