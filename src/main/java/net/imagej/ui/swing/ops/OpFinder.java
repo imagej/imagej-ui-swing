@@ -191,6 +191,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		initialize();
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
+		//NB top panel defines column count
 		mainPane = new JPanel(new MigLayout("", "[][][][][][][grow, right]","[grow]"));
 
 		// Build search panel
@@ -677,6 +678,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 			new HashMap<>();
 		final Map<String, OpTreeTableNode> smplNamespaces =
 			new HashMap<>();
+		final Set<String> smplOps = new HashSet<>();
 
 		// Iterate over all ops
 		for (final OpInfo info : opService.infos()) {
@@ -702,14 +704,13 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 				final OpTreeTableNode opSignature = new OpTreeTableNode(simpleName, codeCall, delegateClass);
 				opSignature.setCommandInfo(info.cInfo());
 
-				final Trie trie = new Trie().removeOverlaps();
-				final Set<String> substrings = getSubstringsWithDots(delegateClass.toLowerCase(Locale.getDefault()));
-				for (final String substring : substrings) trie.addKeyword(substring);
-				advTries.put(trie, opSignature);
+				final Trie advTrie = buildTries(delegateClass, '.');
+				advTries.put(advTrie, opSignature);
 				advOpType.add(opSignature);
 
-				if (isSimple(pathToOp)) {
-					smplTries.put(trie, opSignature);
+				if (isSimple(pathToOp, simpleName, smplOps)) {
+					final Trie smplTrie = buildTries(simpleName);
+					smplTries.put(smplTrie, opSignature);
 					smplOpType.add(opSignature);
 				}
 
@@ -720,9 +721,29 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		pruneEmptyNodes(smplParent);
 	}
 
-	private boolean isSimple(final String pathToOp) {
+	/**
+	 * TODO
+	 */
+	private Trie buildTries(final String rawDict, final char... delim) {
+		final Trie trie = new Trie().removeOverlaps();
+		final Set<String> substrings = getSubstringsWithDelim(rawDict.toLowerCase(Locale.getDefault()), delim);
+		for (final String substring : substrings)
+			trie.addKeyword(substring);
+
+		return trie;
+	}
+
+	/**
+	 * TODO
+	 */
+	private boolean isSimple(final String pathToOp, final String simpleName, final Set<String> smplOps) {
 		//FIXME
-		return pathToOp.contains("math");
+		if (!smplOps.contains(simpleName) && pathToOp.contains("math")) {
+			smplOps.add(simpleName);
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -748,21 +769,22 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	/**
 	 * TODO
 	 */
-	private Set<String> getSubstringsWithDots(final String string) {
+	private Set<String> getSubstringsWithDelim(final String string, final char... delims) {
 		final Set<String> substringsToCheck = new HashSet<>();
 
 		String strOfInterest = string;
 
-		int dotIndex = 0;
-		while (dotIndex >= 0) {
-			final int startIndex = dotIndex;
-			dotIndex = string.indexOf('.', dotIndex + 1);
+		for (final char delim : delims) {
+			int dotIndex = 0;
+			while (dotIndex >= 0) {
+				final int startIndex = dotIndex;
+				dotIndex = string.indexOf(delim, dotIndex + 1);
 
-			if (dotIndex < 0) {
-				strOfInterest = string.substring(startIndex, string.length());
-			}
-			else {
-				substringsToCheck.add(string.substring(startIndex, dotIndex + 1));
+				if (dotIndex < 0) {
+					strOfInterest = string.substring(startIndex, string.length());
+				} else {
+					substringsToCheck.add(string.substring(startIndex, dotIndex + 1));
+				}
 			}
 		}
 
@@ -882,10 +904,8 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					if (simple)
-						switchToAdvanced();
-					else if (!simple)
-						switchToSimple();
+					if (simple) switchToAdvanced();
+					else switchToSimple();
 
 					simple = !simple;
 				}
@@ -906,8 +926,8 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 			setToolTipText(simple ? simpleToolTip : advancedToolTip);
 			searchLabel.setText(simple ?simpleFilterLabel : advancedFilterLabel);
 			if (treeTable != null) {
-				treeTable.setTreeTableModel(simple ? smplModel : advModel);
 				cacheExpandedPaths(!simple);
+				treeTable.setTreeTableModel(simple ? smplModel : advModel);
 				restoreExpandedPaths(simple);
 			}
 		}
