@@ -844,8 +844,10 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		simpleName = simpleName.replaceAll("ArrayImg|PlanarImg", "Img");
 		simpleName = simpleName.replaceAll("\\(int |\\(short |\\(long |\\(double |\\(float |\\(byte ", "(number ");
 		simpleName = simpleName.replaceAll(" int | short | long | double | float | byte ", " number ");
+		simpleName = simpleName.replaceAll(" [a-zA-Z0-9]*(,|\\))", "$1");
+		final int splitPoint = simpleName.substring(0, simpleName.indexOf('(')).lastIndexOf(' ');
 
-		return simpleName;
+		return simpleName.substring(splitPoint + 1);
 	}
 
 	/**
