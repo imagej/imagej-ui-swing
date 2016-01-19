@@ -41,6 +41,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,7 +52,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Future;
 
 import javax.script.ScriptException;
 import javax.swing.ImageIcon;
@@ -133,8 +133,8 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	private Set<Class<?>> simpleInputs;
 
 	// Off-EDT work
-	private Future<?> lastFilter;
-	private Future<?> lastHTMLReq;
+	private FilterRunner lastFilter;
+	private HTMLFetcher lastHTMLReq;
 
 	// Sizing fields
 	private int[] widths;
@@ -383,44 +383,18 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 								textPane.setText(elementsMap.get(url));
 								scrollToTop();
 							} else {
-								if (lastHTMLReq != null)
-									lastHTMLReq.cancel(true);
+								if (lastHTMLReq != null && !lastHTMLReq.isDone())
+									lastHTMLReq.stop();
 
-								lastHTMLReq = threadService.run(new Runnable() {
-									@Override
-									public void run() {
-										try {
-											final org.jsoup.nodes.Document doc = Jsoup.connect(sb.toString()).get();
-											Elements elements = doc.select("div.header");
-											elements.addAll(doc.select("div.contentContainer"));
-											synchronized (elementsMap) {
-												elementsMap.put(url, elements.html());
-											}
-										} catch (final IOException exc) {
-											synchronized (elementsMap) {
-												elementsMap.put(url, "Javadoc not available for: " + requestedClass);
-											}
-										}
-										textPane.setText(elementsMap.get(url));
-										scrollToTop();
-									}
-								});
+								lastHTMLReq = new HTMLFetcher(sb, url, requestedClass);
+								threadService.run(lastHTMLReq);
 							}
 						}
 					}
 				}
 			}
 
-			private void scrollToTop() {
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						// scroll to 0,0
-						detailsPane.getVerticalScrollBar().setValue(0);
-						detailsPane.getHorizontalScrollBar().setValue(0);
-					}
-				});
-			}
+
 		});
 
 		// Space the columns slightly
@@ -436,6 +410,20 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 				new JScrollPane(treeTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 						ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED),
 				"span, wrap, grow, w " + preferredWidth/2 + ":" + preferredWidth + ", h " + MAIN_WINDOW_HEIGHT);
+	}
+
+	/**
+	 * TODO
+	 */
+	private void scrollToTop() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				// scroll to 0,0
+				detailsPane.getVerticalScrollBar().setValue(0);
+				detailsPane.getHorizontalScrollBar().setValue(0);
+			}
+		});
 	}
 
 	/**
@@ -625,8 +613,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 			final String text = doc.getText(0, doc.getLength());
 
 			if (lastFilter != null) {
-				lastFilter.cancel(true);
-				progressBar.setValue(0);
+				lastFilter.stop();
 			}
 
 			if (text == null || text.isEmpty()) {
@@ -634,8 +621,8 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 				restoreExpandedPaths(simple, true);
 			} else {
 				cacheExpandedPaths(simple);
-				final FilterRunner filterRunner = new FilterRunner(text);
-				lastFilter = threadService.run(filterRunner);
+				lastFilter = new FilterRunner(text);
+				threadService.run(lastFilter);
 			}
 		} catch (final BadLocationException exc) {
 			logService.error(exc);
@@ -681,7 +668,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 
 	// -- Helper methods --
 
-	private class FilterRunner implements Runnable {
+	private class FilterRunner extends InterruptableRunner {
 		private String text;
 
 		public FilterRunner(final String text){
@@ -691,87 +678,100 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		@Override
 		public void run() {
 			OpTreeTableModel tempModel = new OpTreeTableModel(simple);
-			tempModel.getRoot().add(applyFilter(text.toLowerCase(Locale.getDefault()), simple ? smplTries : advTries));
-			SwingUtilities.invokeLater(new Runnable() {
+			final OpTreeTableNode filtered = applyFilter(text.toLowerCase(Locale.getDefault()),
+					simple ? smplTries : advTries);
 
-				@Override
-				public void run() {
-					// Don't update AWT stuff off the EDT
-					treeTable.setTreeTableModel(tempModel);
+			if (filtered == null) return;
 
-					treeTable.expandAll();
-				}
-			});
-		}
-	}
+			tempModel.getRoot().add(filtered);
 
-	/**
-	 * TODO
-	 */
-	private OpTreeTableNode applyFilter(final String filter, final Map<Trie, OpTreeTableNode> tries) {
+			if (poll()) return;
 
-		// add to this guy..
-		final OpTreeTableNode parent = new OpTreeTableNode("ops", "# @OpService ops",
-				"net.imagej.ops.OpService");
+			try {
+				SwingUtilities.invokeAndWait(new Runnable() {
 
-		final Map<Integer, List<OpTreeTableNode>> scoredOps = new HashMap<>();
-		final List<Integer> keys = new ArrayList<>();
+					@Override
+					public void run() {
+						// Don't update AWT stuff off the EDT
+						treeTable.setTreeTableModel(tempModel);
 
-		// How many top scores to keep
-		// A higher score means more "fuzziness"
-		int keep = 1;
-		int count = 0;
-		int nextProgress = 5;
-
-		// For each Op, parse the filter text
-		// Each fragment scores ((2 * length) - 1)
-		for (final Trie trie : tries.keySet()) {
-			count++;
-			if (Math.floor((count * 100d) / tries.keySet().size()) == nextProgress) {
-				setProgress(nextProgress);
-				nextProgress += 5;
+						treeTable.expandAll();
+					}
+				});
+			} catch (InvocationTargetException | InterruptedException exc) {
+				logService.error(exc);
 			}
+		}
 
+		/**
+		 * TODO
+		 */
+		private OpTreeTableNode applyFilter(final String filter, final Map<Trie, OpTreeTableNode> tries) {
 
-			final Collection<Emit> parse = trie.parseText(filter);
-			int score = 0;
-			for (Emit e : parse)
-				score += ((2 * e.getKeyword().length()) - 1);
+			// add to this guy..
+			final OpTreeTableNode parent = new OpTreeTableNode("ops", "# @OpService ops", "net.imagej.ops.OpService");
 
-			// get the positional index of this key
-			final int pos = -(Collections.binarySearch(keys, score) + 1);
+			final Map<Integer, List<OpTreeTableNode>> scoredOps = new HashMap<>();
+			final List<Integer> keys = new ArrayList<>();
 
-			// Same value as another score
-			if (scoredOps.containsKey(score)) {
-				scoredOps.get(score).add(tries.get(trie));
-				if (!keys.contains(score)) keys.add(score, pos);
-			} else {
-				// If we haven't filled our score quota yet
-				// we can freely add this score.
-				if (keys.size() < keep || pos > 0) {
-					final List<OpTreeTableNode> ops = new ArrayList<>();
-					ops.add(tries.get(trie));
-					scoredOps.put(score, ops);
-					keys.add(pos, score);
-					// If we are bumping a score, remove the lowest
-					// key
-					if (keys.size() > keep) {
-						scoredOps.remove(keys.remove(0));
+			// How many top scores to keep
+			// A higher score means more "fuzziness"
+			int keep = 1;
+			int count = 0;
+			double nextProgress = 0.05;
+
+			// For each Op, parse the filter text
+			// Each fragment scores ((2 * length) - 1)
+			for (final Trie trie : tries.keySet()) {
+				count++;
+				if (((double)count  / tries.keySet().size()) >= nextProgress) {
+					if (poll()) return null;
+					setProgress((int)(nextProgress * 100));
+					nextProgress += 0.05;
+				}
+
+				final Collection<Emit> parse = trie.parseText(filter);
+				int score = 0;
+				for (Emit e : parse)
+					score += ((2 * e.getKeyword().length()) - 1);
+
+				// get the positional index of this key
+				final int pos = -(Collections.binarySearch(keys, score) + 1);
+
+				// Same value as another score
+				if (scoredOps.containsKey(score)) {
+					scoredOps.get(score).add(tries.get(trie));
+					if (!keys.contains(score))
+						keys.add(score, pos);
+				} else {
+					// If we haven't filled our score quota yet
+					// we can freely add this score.
+					if (keys.size() < keep || pos > 0) {
+						final List<OpTreeTableNode> ops = new ArrayList<>();
+						ops.add(tries.get(trie));
+						scoredOps.put(score, ops);
+						keys.add(pos, score);
+						// If we are bumping a score, remove the lowest
+						// key
+						if (keys.size() > keep) {
+							scoredOps.remove(keys.remove(0));
+						}
 					}
 				}
 			}
+
+			final List<OpTreeTableNode> children = parent.getChildren();
+
+			for (int i = keys.size() - 1; i >= 0; i--) {
+				final Integer key = keys.get(i);
+				for (final OpTreeTableNode node : scoredOps.get(key))
+					children.add(node);
+			}
+
+			setProgress(100);
+
+			return parent;
 		}
-
-		final List<OpTreeTableNode> children = parent.getChildren();
-
-		for (int i = keys.size() - 1; i >= 0; i--) {
-			final Integer key = keys.get(i);
-			for (final OpTreeTableNode node : scoredOps.get(key)) children.add(node);
-		}
-
-		setProgress(100);
-
-		return parent;
 	}
 
 	/**
@@ -873,9 +873,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 					if (acceptedClass.isAssignableFrom(inputType)) {
 						smplOps.add(simpleName);
 						return true;
-
 					}
-
 				}
 			}
 		}
@@ -1178,6 +1176,57 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		public void setFail() {
 			setSuccessIcon(opFail);
 			successTimer.restart();
+		}
+	}
+
+	private class HTMLFetcher extends InterruptableRunner {
+
+		private String url;
+		private String requestedClass;
+		private StringBuilder sb;
+
+		public HTMLFetcher(final StringBuilder sb, final String url, final String requestedClass) {
+			this.url = url;
+			this.requestedClass = requestedClass;
+			this.sb = sb;
+		}
+
+		@Override
+		public void run() {
+			try {
+				final org.jsoup.nodes.Document doc = Jsoup.connect(sb.toString()).get();
+				Elements elements = doc.select("div.header");
+				elements.addAll(doc.select("div.contentContainer"));
+				synchronized (elementsMap) {
+					elementsMap.put(url, elements.html());
+				}
+			} catch (final IOException exc) {
+				synchronized (elementsMap) {
+					elementsMap.put(url, "Javadoc not available for: " + requestedClass);
+				}
+			}
+			if (poll()) return;
+			textPane.setText(elementsMap.get(url));
+			scrollToTop();
+
+			stop();
+		}
+		
+	}
+
+	private abstract class InterruptableRunner implements Runnable {
+		private boolean stop = false;
+	
+		public synchronized boolean poll() {
+			return stop;
+		}
+
+		public synchronized void stop() {
+			stop = true;
+		}
+
+		public synchronized boolean isDone() {
+			return stop;
 		}
 	}
 }
