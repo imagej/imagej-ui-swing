@@ -91,7 +91,6 @@ import org.jdesktop.swingx.JXTreeTable;
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
 import org.scijava.Context;
-import org.scijava.app.StatusService;
 import org.scijava.command.CommandInfo;
 import org.scijava.log.LogService;
 import org.scijava.module.ModuleItem;
@@ -172,9 +171,6 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	// For hiding the successLabel
 	private Timer successTimer;
 	private Timer progressTimer;
-
-	@Parameter
-	private StatusService statusService;
 
 	@Parameter
 	private OpService opService;
@@ -302,10 +298,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 								else name += " namespace";
 							}
 							return name;
-						case 1:
-							return n.getCodeCall();
-						case 2:
-							return n.getReferenceClass();
+						default: return (String) treeTable.getValueAt(rowIndex, colIndex);
 						}
 					}
 				} catch (RuntimeException e1) {
@@ -330,20 +323,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 					final OpTreeTableNode n = getNodeAtRow(rowIndex);
 
 					if (n != null) {
-						String text;
-						switch (colIndex) {
-						case 0:
-							text = n.getName();
-							break;
-						case 1:
-							text = n.getCodeCall();
-							break;
-						case 2:
-							text = n.getReferenceClass();
-							break;
-						default:
-							text = "";
-						}
+						final String text = treeTable.getValueAt(rowIndex, colIndex).toString();
 
 						if (text.isEmpty()) {
 							copyFail();
@@ -1159,17 +1139,20 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 
 		@Override
 		public void actionPerformed(final ActionEvent e) {
-			final OpTreeTableNode selectedNode = getSelectedNode();
 
-			String codeCall;
+			final int rowIndex = treeTable.getSelectedRow();
+			final int colIndex = treeTable.getSelectedColumn();
 
-			if (selectedNode == null || (codeCall = selectedNode.getCodeCall()).isEmpty()) {
-				statusService.clearStatus();
-				statusService.showStatus("No code to copy (is an Op row selected?)");
+			String toCopy;
+
+			if (rowIndex < 0) toCopy = "";
+			else if (colIndex < 0) toCopy = getSelectedNode().getCodeCall();
+			else toCopy = treeTable.getValueAt(rowIndex, colIndex).toString();
+
+			if (toCopy.isEmpty()) {
 				copyFail();
 			} else {
-				statusService.showStatus("Op copied to clipboard!");
-				final StringSelection stringSelection = new StringSelection(codeCall);
+				final StringSelection stringSelection = new StringSelection(toCopy);
 				final Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
 				clpbrd.setContents(stringSelection, null);
 				copyPass();
