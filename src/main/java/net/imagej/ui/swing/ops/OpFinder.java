@@ -131,7 +131,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	private int[] widths;
 
 	// Child elements
-	private JTextField prompt;
+	private JTextField searchField;
 	private JXTreeTable treeTable;
 	private JLabel successLabel = null;
 	private JEditorPane textPane;
@@ -409,11 +409,11 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	 */
 	private void buildTopPanel() {
 		final int searchWidth = 160;
-		prompt = new JTextField(searchWidth);
+		searchField = new JTextField(searchWidth);
 		searchLabel = new JLabel();
 		searchLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		mainPane.add(searchLabel, "w 145!");
-		mainPane.add(prompt, "w " + searchWidth + "!");
+		mainPane.add(searchField, "w " + searchWidth + "!");
 
 		// Build buttons
 		modeButton = new ModeButton();
@@ -445,7 +445,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 
 		mainPane.add(successLabel, "h 20!, gapright 6, wrap");
 
-		prompt.getDocument().addDocumentListener(this);	
+		searchField.getDocument().addDocumentListener(this);
 	}
 
 	/**
@@ -543,14 +543,17 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	 */
 	private void filterOps(final DocumentEvent e) {
 		final Document doc = e.getDocument();
+		filterOps(doc);
+	}
+
+	private void filterOps(final Document doc) {
 		try {
 			final String text = doc.getText(0, doc.getLength());
 
 			if (text == null || text.isEmpty()) {
 				treeTable.setTreeTableModel(simple ? smplModel : advModel);
 				restoreExpandedPaths(simple);
-			}
-			else {
+			} else {
 				cacheExpandedPaths(simple);
 				OpTreeTableModel tempModel = new OpTreeTableModel(simple);
 				tempModel.getRoot()
@@ -908,6 +911,8 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 					else switchToSimple();
 
 					simple = !simple;
+
+					filterOps(searchField.getDocument());
 				}
 
 				private void switchToAdvanced() {
