@@ -821,6 +821,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 
 				if (isSimple(info.cInfo(), simpleName, smplOps)) {
 					final OpTreeTableNode simpleOp = new OpTreeTableNode(simpleName, codeCall, delegateClass);
+					simpleOp.setCommandInfo(info.cInfo());
 					final Trie smplTrie = buildTries(simpleName);
 					smplTries.put(smplTrie, simpleOp);
 					smplOpType.add(simpleOp);
