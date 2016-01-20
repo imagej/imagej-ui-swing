@@ -34,6 +34,7 @@ import org.scijava.command.Command;
 import org.scijava.command.ContextCommand;
 import org.scijava.menu.MenuConstants;
 import org.scijava.plugin.Menu;
+import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 /**
@@ -47,9 +48,12 @@ import org.scijava.plugin.Plugin;
 	@Menu(label = "Find Ops...", weight = 22, accelerator = "shift L") }, headless = false)
 public class FindOps extends ContextCommand {
 
+	@Parameter
+	private OpFinderService opFinderService;
+	
 	@Override
 	public void run() {
-		new OpFinder(getContext()).setVisible(true);
+		opFinderService.showOpFinder();
 	}
 
 }

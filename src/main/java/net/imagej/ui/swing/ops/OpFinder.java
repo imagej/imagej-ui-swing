@@ -214,11 +214,6 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, mainPane, null);
 		add(splitPane);
-
-		pack();
-
-		setLocationRelativeTo(null); // center on screen
-		requestFocus();
 	}
 
 	/**
