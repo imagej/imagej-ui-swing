@@ -532,6 +532,12 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		}
 	}
 
+	@Override
+	public void requestFocus() {
+		super.requestFocus();
+		searchField.requestFocusInWindow();
+	}
+
 	/**
 	 * TODO
 	 */
