@@ -156,6 +156,8 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	private ImageIcon opSuccess;
 	private ImageIcon expandDetails;
 	private ImageIcon hideDetails;
+	private ImageIcon useView;
+	private ImageIcon devView;
 
 	// Caching TreePaths
 	private Set<TreePath> advExpandedPaths;
@@ -422,6 +424,10 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		searchLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		mainPane.add(searchLabel, "w 145!");
 		mainPane.add(searchField, "w " + searchWidth + "!");
+
+		// mode button icons
+		useView = new ImageIcon(getClass().getResource("/icons/opbrowser/view_use.png"));
+		devView = new ImageIcon(getClass().getResource("/icons/opbrowser/view_dev.png"));
 
 		// Build buttons
 		modeButton = new ModeButton();
@@ -1003,15 +1009,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	 * TODO
 	 */
 	private class ModeButton extends JButton {
-		private final String simpleButtonText = "Developer View";
-		private final String simpleToolTip = "<html>Recommended for advanced users<br/>"
-				+ " and developers<br/>"
-				+ "<ul><li>Browse <b>ALL</b> Ops</li>"
-				+ "<li>See Op parameters</li>"
-				+ "<li>See Op Javadoc</li></ul></html>";
-		private final String advancedButtonText = "User View";
-		private final String advancedToolTip = "<html>Recommended for new users<br/>"
-				+ " and non-developers</html>";
+		private final String toolTip = "Toggle User and Developer views";
 
 		private final String simpleFilterLabel = "Filter Ops:  ";
 		private final String advancedFilterLabel = "Filter Ops by Class:  ";
@@ -1043,8 +1041,8 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		}
 
 		public void setLabels(final boolean simple) {
-			setText(simple ? simpleButtonText : advancedButtonText);
-			setToolTipText(simple ? simpleToolTip : advancedToolTip);
+			setIcon(simple ? useView : devView);
+			setToolTipText(toolTip);
 			searchLabel.setText(simple ?simpleFilterLabel : advancedFilterLabel);
 		}
 
