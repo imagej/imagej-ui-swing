@@ -328,7 +328,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 						final String text = treeTable.getValueAt(rowIndex, colIndex).toString();
 
 						if (text.isEmpty()) {
-							copyFail();
+							selectFail();
 						} else {
 							final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 							clipboard.setContents(new StringSelection(text), null);
@@ -966,7 +966,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	/**
 	 * TODO
 	 */
-	private void copyFail() {
+	private void selectFail() {
 		setSuccessIcon(opFail);
 		successLabel.setText("no selection ");
 		successTimer.restart();
@@ -1084,9 +1084,14 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		@Override
 		public void actionPerformed(final ActionEvent e) {
 			final OpTreeTableNode selectedNode = getSelectedNode();
+			CommandInfo cInfo;
+			if (selectedNode == null || (cInfo = selectedNode.getCommandInfo()) == null) {
+				selectFail();
+				return;
+			}
 
 			try {
-				final String script = makeScript(selectedNode);
+				final String script = makeScript(cInfo);
 				scriptService.run("op_browser.py", script, true);
 			} catch (IOException | ScriptException | NoSuchFieldException | SecurityException | InstantiationException
 					| IllegalAccessException | ClassNotFoundException exc) {
@@ -1097,8 +1102,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 		/**
 		 * TODO
 		 */
-		private String makeScript(final OpTreeTableNode node) throws NoSuchFieldException, SecurityException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-			final CommandInfo cInfo = node.getCommandInfo();
+		private String makeScript(final CommandInfo cInfo) throws NoSuchFieldException, SecurityException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 			final StringBuffer sb = new StringBuffer();
 			sb.append("# @OpService ops\n");
 			int i = 1;
@@ -1147,7 +1151,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 			else toCopy = treeTable.getValueAt(rowIndex, colIndex).toString();
 
 			if (toCopy.isEmpty()) {
-				copyFail();
+				selectFail();
 			} else {
 				final StringSelection stringSelection = new StringSelection(toCopy);
 				final Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
