@@ -123,9 +123,11 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	public static final String WINDOW_WIDTH = "op.viewer.width";
 	public static final String NO_NAMESPACE = "(global)";
 	public static final String BASE_JAVADOC_URL = "http://javadoc.imagej.net/ImageJ/";
+	public static final String SIMPLE_KEY = "net.imagej.ui.swing.ops.opfinder.simple";
+
+	private boolean simple = true;
 
 	// Simple mode
-	private boolean simple = true;
 	private ModeButton modeButton;
 	private JLabel searchLabel;
 	private boolean autoToggle = true;
@@ -216,6 +218,9 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, mainPane, null);
 		add(splitPane);
+
+		// Restore old state if not simple
+		setState(prefService.getBoolean(SIMPLE_KEY, true));
 	}
 
 	/**
@@ -556,11 +561,13 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 			toggleDetailsButton.setIcon(hideDetails);
 		}
 
-		// Prevent left side from resizing
-		Component lc = splitPane.getLeftComponent();
-		lc.setPreferredSize(lc.getSize());
+		if (isVisible()) {
+			// Prevent left side from resizing
+			Component lc = splitPane.getLeftComponent();
+			lc.setPreferredSize(lc.getSize());
 
-		pack();
+			pack();
+		}
 	}
 
 	// -- DocumentListener methods --
@@ -1008,6 +1015,27 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	/**
 	 * TODO
 	 */
+	public void setState(final boolean toMode) {
+		if (toMode != simple) {
+			simple = toMode;
+			prefService.put(SIMPLE_KEY, simple);
+			modeButton.setLabels(toMode);
+			if (treeTable != null) {
+				cacheExpandedPaths(!toMode);
+				treeTable.setTreeTableModel(toMode ? smplModel : advModel);
+				restoreExpandedPaths(toMode, false);
+			}
+
+			if (autoToggle)
+				toggleDetails();
+
+			filterOps(searchField.getDocument());
+		}
+	}
+
+	/**
+	 * TODO
+	 */
 	private class ModeButton extends JButton {
 		private final String toolTip = "Toggle User and Developer views";
 
@@ -1021,22 +1049,8 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					if (simple) switchToAdvanced();
-					else switchToSimple();
-
-					simple = !simple;
-
-					filterOps(searchField.getDocument());
+					setState(!simple);
 				}
-
-				private void switchToAdvanced() {
-					modeButton.setState(false);
-				}
-
-				private void switchToSimple() {
-					modeButton.setState(true);
-				}
-				
 			});
 		}
 
@@ -1046,16 +1060,6 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 			searchLabel.setText(simple ?simpleFilterLabel : advancedFilterLabel);
 		}
 
-		public void setState(final boolean simple) {
-			setLabels(simple);
-			if (treeTable != null) {
-				cacheExpandedPaths(!simple);
-				treeTable.setTreeTableModel(simple ? smplModel : advModel);
-				restoreExpandedPaths(simple, false);
-			}
-
-			if (autoToggle) toggleDetails();
-		}
 	}
 
 	/**
