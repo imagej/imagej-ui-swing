@@ -505,7 +505,7 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 	private void setProgress(final int progress) {
 		progressBar.setVisible(true);
 		progressBar.setValue(progress);
-		if (progress >= progressBar.getMaximum())
+		if (progress >= progressBar.getMaximum() || progress <= progressBar.getMinimum())
 			progressTimer.restart();
 		else progressTimer.stop();
 	}
@@ -669,6 +669,12 @@ public class OpFinder extends JFrame implements DocumentListener, ActionListener
 
 		public FilterRunner(final String text){
 			this.text = text;
+		}
+
+		@Override
+		public synchronized void stop() {
+			super.stop();
+			setProgress(0);
 		}
 
 		@Override
