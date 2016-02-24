@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>imagej-ui-swing</artifactId>
-	<version>0.17.2-SNAPSHOT</version>
+	<version>0.17.2</version>
 
 	<name>ImageJ UI: Swing</name>
 	<description>ImageJ UI for Java Swing.</description>
@@ -113,7 +113,7 @@
 	<scm>
 		<connection>scm:git:git://github.com/imagej/imagej-ui-swing</connection>
 		<developerConnection>scm:git:git@github.com:imagej/imagej-ui-swing</developerConnection>
-		<tag>HEAD</tag>
+		<tag>imagej-ui-swing-0.17.2</tag>
 		<url>https://github.com/imagej/imagej-ui-swing</url>
 	</scm>
 	<issueManagement>
