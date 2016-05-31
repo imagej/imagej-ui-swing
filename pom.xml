@@ -119,6 +119,7 @@
 
 	<properties>
 		<scijava.jvm.version>1.8</scijava.jvm.version>
+		<reflections.version>0.9.10</reflections.version>
 	</properties>
 
 	<repositories>
@@ -201,6 +202,11 @@
 			<groupId>org.jhotdraw</groupId>
 			<artifactId>jhotdraw</artifactId>
 			<version>7.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>${reflections.version}</version>
 		</dependency>
 
 		<!-- Runtime ImageJ dependencies -->
