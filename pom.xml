@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>imagej-ui-swing</artifactId>
-	<version>0.20.1-SNAPSHOT</version>
+	<version>0.21.0-SNAPSHOT</version>
 
 	<name>ImageJ UI: Swing</name>
 	<description>ImageJ UI for Java Swing.</description>
@@ -49,10 +49,6 @@
 			<properties><id>bdezonia</id></properties>
 		</contributor>
 		<contributor>
-			<name>Jonathan Hale</name>
-			<properties><id>Squareys</id></properties>
-		</contributor>
-		<contributor>
 			<name>Lee Kamentsky</name>
 			<url>http://imagej.net/User:Leek</url>
 			<properties><id>LeeKamentsky</id></properties>
@@ -73,11 +69,6 @@
 			<properties><id>hinerm</id></properties>
 		</contributor>
 		<contributor>
-			<name>Samuel Inverso</name>
-			<url>http://imagej.net/User:Sinverso</url>
-			<properties><id>sinverso</id></properties>
-		</contributor>
-		<contributor>
 			<name>Benjamin Nanes</name>
 			<url>http://imagej.net/User:Bnanes</url>
 			<properties><id>bnanes</id></properties>
@@ -86,11 +77,6 @@
 			<name>David Pinto</name>
 			<url>http://imagej.net/User:Carandraug</url>
 			<properties><id>carandraug</id></properties>
-		</contributor>
-		<contributor>
-			<name>Luke Stuyvenberg</name>
-			<url>http://imagej.net/User:Stuyvenberg</url>
-			<properties><id>stuyvenberg</id></properties>
 		</contributor>
 	</contributors>
 
@@ -162,24 +148,8 @@
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-ui-swing</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.scijava</groupId>
-			<artifactId>scripting-java</artifactId>
-		</dependency>
 
 		<!-- Third-party dependencies -->
-		<dependency>
-			<groupId>com.fifesoft</groupId>
-			<artifactId>rsyntaxtextarea</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.fifesoft</groupId>
-			<artifactId>autocomplete</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.fifesoft</groupId>
-			<artifactId>languagesupport</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>com.miglayout</groupId>
 			<artifactId>miglayout</artifactId>
@@ -200,18 +170,6 @@
 			<groupId>net.imagej</groupId>
 			<artifactId>imagej-ui-awt</artifactId>
 			<scope>runtime</scope>
-		</dependency>
-
-		<!-- Test dependencies -->
-		<dependency>
-			<groupId>org.scijava</groupId>
-			<artifactId>scripting-beanshell</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.scijava</groupId>
-			<artifactId>scripting-javascript</artifactId>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
