@@ -31,12 +31,15 @@
 
 package net.imagej.ui.swing.updater;
 
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.Authenticator;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -99,6 +102,8 @@ public class ImageJUpdater implements UpdaterUI {
 		if (log == null) {
 			log = UpdaterUtil.getLogService();
 		}
+
+		if (errorIfNetworkInaccessible(log)) return;
 
 		String imagejDirProperty = System.getProperty("imagej.dir");
 		final File imagejRoot = imagejDirProperty != null ? new File(imagejDirProperty) :
@@ -281,7 +286,6 @@ public class ImageJUpdater implements UpdaterUI {
 	 * If this seems to be the Debian packaged version of ImageJ, then produce an
 	 * error and return true. Otherwise return false.
 	 */
-
 	public static boolean errorIfDebian() {
 		// If this is the Debian / Ubuntu packaged version, then
 		// insist that the user uses apt-get / synaptic instead:
@@ -293,6 +297,84 @@ public class ImageJUpdater implements UpdaterUI {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * If there is no network connection, then produce an error and return true.
+	 * Otherwise return false.
+	 */
+	public static boolean errorIfNetworkInaccessible(final LogService log) {
+		try {
+			testNetworkConnection();
+		}
+		catch (final SecurityException | IOException exc) {
+			if (log != null) log.error(exc);
+			final String message = "Cannot connect to the Internet.\n" +
+				"Do you have a network connection?\n" +
+				"Are your proxy settings correct?";
+			UpdaterUserInterface.get().error(message);
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Check whether we can connect to the Internet. If we cannot connect, we will
+	 * not be able to update.
+	 * 
+	 * @throws IOException if anything goes wrong.
+	 */
+	private static void testNetworkConnection() throws IOException {
+		// NB: Remember initial static state, to be reset afterward.
+		final boolean followRedirects = HttpURLConnection.getFollowRedirects();
+
+		try {
+			HttpURLConnection.setFollowRedirects(false);
+			final URL url = new URL("http://imagej.net/");
+			final URLConnection urlConn = url.openConnection();
+			if (!(urlConn instanceof HttpURLConnection)) {
+				throw new IOException("Unexpected connection type: " + //
+						urlConn.getClass().getName());
+			}
+			final HttpURLConnection httpConn = (HttpURLConnection) urlConn;
+
+			// Perform some sanity checks.
+			final int code = httpConn.getResponseCode();
+			if (code != 301) {
+				throw new IOException("Unexpected response code: " + code);
+			}
+			final String message = httpConn.getResponseMessage();
+			if (!"Moved Permanently".equals(message)) {
+				throw new IOException("Unexpected response message: " + message);
+			}
+			final long length = httpConn.getContentLengthLong();
+			if (length < 250 || length > 500) {
+				throw new IOException("Unexpected response length: " + length);
+			}
+
+			// Header looks reasonable; now let's check the content to be sure.
+			final byte[] content = new byte[(int) length];
+			try (final DataInputStream din = //
+					new DataInputStream(httpConn.getInputStream()))
+			{
+				din.readFully(content);
+			}
+			final String s = new String(content, "UTF-8");
+			if (!s.matches("(?s).*<html>.*" +
+					"<head>.*<title>301 Moved Permanently</title>.*</head>.*" + //
+					"<body>.*<h1>Moved Permanently</h1>.*" + //
+					"<a href=\"http://imagej.net/Welcome\">" + //
+					".*</body></html>.*"))
+			{
+				throw new IOException("Unexpected response:\n" + s);
+			}
+		}
+		finally {
+			// NB: Reset static state back to previous.
+			if (followRedirects != HttpURLConnection.getFollowRedirects()) {
+				HttpURLConnection.setFollowRedirects(followRedirects);
+			}
+		}
 	}
 
 	protected static boolean moveOutOfTheWay(final File file) {
