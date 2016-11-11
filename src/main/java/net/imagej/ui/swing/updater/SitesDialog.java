@@ -468,6 +468,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 
 	@Override
 	public void dispose() {
+		table.editCellAt(0,0);
 		super.dispose();
 		updaterFrame.updateFilesTable();
 		updaterFrame.enableApplyOrUpload();
