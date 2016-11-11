@@ -282,6 +282,14 @@ public class SitesDialog extends JDialog implements ActionListener {
 
 	private void addNew() {
 		add(new UpdateSite(makeUniqueSiteName("New"), "", "", "", null, null, 0l));
+
+		table.changeSelection( table.getRowCount()-1, 2, false, false);
+
+		if (table.editCellAt(table.getRowCount()-1, 2))
+		{
+			Component editor = table.getEditorComponent();
+			editor.requestFocusInWindow();
+		}
 	}
 
 	private final static String PERSONAL_SITES_URL = "http://sites.imagej.net/";
