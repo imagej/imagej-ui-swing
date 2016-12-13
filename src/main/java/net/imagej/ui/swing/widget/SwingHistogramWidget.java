@@ -90,6 +90,7 @@ public class SwingHistogramWidget extends SwingInputWidget<HistogramBundle>
 	public void set(final WidgetModel model) {
 		super.set(model);
 		bundle = (HistogramBundle) model.getValue();
+		// TODO: reconcile with Plot?
 		chartPanel = makeChartPanel(bundle);
 		bundle.setHasChanges(false);
 		getComponent().add(chartPanel);
