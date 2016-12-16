@@ -31,7 +31,7 @@
 
 package net.imagej.ui.swing.viewer.plot;
 
-import net.imagej.ui.swing.viewer.plot.jfreechart.JfcPlot;
+import net.imagej.ui.swing.viewer.plot.jfreechart.JfcPlotGenerator;
 import net.imagej.ui.viewer.plot.AbstractPlotDisplayViewer;
 
 import org.scijava.display.Display;
@@ -42,7 +42,7 @@ import org.scijava.ui.viewer.DisplayViewer;
 import org.scijava.ui.viewer.DisplayWindow;
 
 /**
- * A Swing {@link JfcPlot} display viewer, which displays plots using JFreeChart.
+ * A Swing {@link JfcPlotGenerator} display viewer, which displays plots using JFreeChart.
  * 
  * @author Curtis Rueden
  */

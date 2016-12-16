@@ -36,12 +36,6 @@ import org.jfree.chart.JFreeChart;
 /**
  * @author Matthias Arzt
  */
-public interface JfcPlot {
-
-	void setTitle(String title);
-
-	String getTitle();
-
-	// FIXME add functions beeing very likely to be general for Diagrams
+public interface JfcPlotGenerator {
 	JFreeChart getJFreeChart();
 }

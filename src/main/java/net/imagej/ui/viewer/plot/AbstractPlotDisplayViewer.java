@@ -31,7 +31,8 @@
 
 package net.imagej.ui.viewer.plot;
 
-import net.imagej.ui.swing.viewer.plot.jfreechart.JfcPlot;
+import net.imagej.plot.XYPlot;
+import net.imagej.ui.swing.viewer.plot.jfreechart.JfcPlotGenerator;
 import net.imagej.ui.swing.viewer.plot.jfreechart.PlotDisplay;
 import net.imagej.ui.swing.viewer.plot.jfreechart.PlotDisplayViewer;
 
@@ -39,12 +40,12 @@ import org.scijava.display.Display;
 import org.scijava.ui.viewer.AbstractDisplayViewer;
 
 /**
- * Implements the UI-independent elements of a {@link JfcPlot} viewer.
+ * Implements the UI-independent elements of a {@link JfcPlotGenerator} viewer.
  * 
  * @author Curtis Rueden
  */
 public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<JfcPlot> implements PlotDisplayViewer
+	AbstractDisplayViewer<XYPlot> implements PlotDisplayViewer
 {
 
 	@Override

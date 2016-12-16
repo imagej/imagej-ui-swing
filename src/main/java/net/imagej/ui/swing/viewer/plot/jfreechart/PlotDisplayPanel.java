@@ -31,13 +31,11 @@
 
 package net.imagej.ui.swing.viewer.plot.jfreechart;
 
-import net.imagej.ui.swing.viewer.plot.jfreechart.JfcPlot;
-import net.imagej.ui.swing.viewer.plot.jfreechart.PlotDisplay;
 import org.scijava.ui.viewer.DisplayPanel;
 
 /**
  * This is a panel that can go inside a display window. It displays
- * {@link JfcPlot}s.
+ * {@link JfcPlotGenerator}s.
  * 
  * @author Curtis Rueden
  */

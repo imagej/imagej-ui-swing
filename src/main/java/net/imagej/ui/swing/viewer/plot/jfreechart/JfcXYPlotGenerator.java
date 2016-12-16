@@ -1,12 +1,12 @@
 package net.imagej.ui.swing.viewer.plot.jfreechart;
 
 import net.imagej.plot.*;
+import net.imagej.plot.XYSeries;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.LogAxis;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.data.xy.*;
 
 import java.awt.*;
 import java.util.Collection;
@@ -15,35 +15,40 @@ import java.util.Iterator;
 /**
  * @author Matthias Arzt
  */
-// FIXME make JfcScatterPlot an interface and implement the JFreeChart in JFreeChartScatterPlot
-public class JfcScatterPlot implements ScatterPlot, JfcPlot {
+// FIXME make JfcXYPlotGenerator an interface and implement the JFreeChart in JFreeChartXYPlot
+public class JfcXYPlotGenerator implements JfcPlotGenerator {
 
-	private String chartTitle;
+	private XYPlot xyPlot;
+	private JFreeChart jFreeChart;
 	private XYSeriesCollection seriesCollection;
-	private JFreeChart chart;
-	private NumberAxis xAxis;
-	private NumberAxis yAxis;
 
-	JfcScatterPlot() {
+	public JfcXYPlotGenerator(XYPlot xyPlot) { this.xyPlot = xyPlot; }
+
+	@Override
+	public JFreeChart getJFreeChart() {
 		seriesCollection = new XYSeriesCollection();
-		chartTitle = null;
-		xAxis = new DefaultValueAxis();
-		yAxis = new DefaultValueAxis();
-		chart = ChartFactory.createXYLineChart(chartTitle, "", "", seriesCollection);
+		jFreeChart = ChartFactory.createXYLineChart("", "", "", seriesCollection);
+		jFreeChart.getXYPlot().setDomainAxis(getJFreeChartAxis(xyPlot.getXAxis()));
+		jFreeChart.getXYPlot().setRangeAxis(getJFreeChartAxis(xyPlot.getYAxis()));
+		jFreeChart.setTitle(xyPlot.getTitle());
+		addAllSeries();
+		return jFreeChart;
 	}
 
-	public SeriesStyle createSeriesStyle() {
-		return new JfcSeriesStyle();
+	private void addAllSeries() {
+		int id = 0;
+		for(XYSeries series : xyPlot.getSeriesCollection())
+			addSeries(id, series);
 	}
 
-	public void addSeries(String label, Collection<Double> xs, Collection<Double> ys, SeriesStyle style) {
-		SortedLabel uniqueLabel = new SortedLabel(label);
-		addSeriesData(uniqueLabel, xs, ys);
-		setSeriesStyle(uniqueLabel, style);
+	private void addSeries(int id, XYSeries series) {
+		SortedLabel uniqueLabel = new SortedLabel(id, series.getLabel());
+		addSeriesData(uniqueLabel, series.getXValues(), series.getYValues());
+		setSeriesStyle(uniqueLabel, series.getStyle());
 	}
 
 	private void addSeriesData(SortedLabel uniqueLabel, Collection<Double> xs, Collection<Double> ys) {
-		XYSeries series = new XYSeries(uniqueLabel);
+		org.jfree.data.xy.XYSeries series = new org.jfree.data.xy.XYSeries(uniqueLabel);
 		Iterator<Double> xi = xs.iterator();
 		Iterator<Double> yi = ys.iterator();
 		while (xi.hasNext() && yi.hasNext())
@@ -56,33 +61,11 @@ public class JfcScatterPlot implements ScatterPlot, JfcPlot {
 			return;
 		Color color = style.getColor();
 		XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer)
-			chart.getXYPlot().getRendererForDataset(seriesCollection);
+				jFreeChart.getXYPlot().getRendererForDataset(seriesCollection);
 		int index = seriesCollection.getSeriesIndex(label);
 		if (color != null) renderer.setSeriesPaint(index, color);
 		JfcLineStyles.modifyRenderer(renderer, index, style.getLineStyle());
 		JfcMarkerStyles.modifyRenderer(renderer, index, style.getMarkerStyle());
-	}
-
-	public NumberAxis getXAxis() { return xAxis; };
-
-	public NumberAxis getYAxis() { return yAxis; };
-
-	@Override
-	public void setTitle(String title) {
-		this.chartTitle = title;
-	}
-
-	@Override
-	public String getTitle() {
-		return chartTitle;
-	}
-
-	@Override
-	public JFreeChart getJFreeChart() {
-		chart.getXYPlot().setDomainAxis(getJFreeChartAxis(xAxis));
-		chart.getXYPlot().setRangeAxis(getJFreeChartAxis(yAxis));
-		chart.setTitle(getTitle());
-		return chart;
 	}
 
 	private org.jfree.chart.axis.ValueAxis getJFreeChartAxis(NumberAxis v) {
@@ -105,10 +88,8 @@ public class JfcScatterPlot implements ScatterPlot, JfcPlot {
 		}
 	}
 
-	private int numberOfLabels = 0;
-
 	private class SortedLabel implements Comparable<SortedLabel> {
-		SortedLabel(String label) { this.label = label; id = numberOfLabels++; }
+		SortedLabel(final int id, final String label) { this.label = label; this.id = id; }
 		@Override public String toString() { return label; }
 		@Override public int compareTo(SortedLabel o) { return Integer.compare(id, o.id); }
 		private String label;

@@ -37,6 +37,7 @@ import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.ui.UIService;
 
+import javax.sound.sampled.Line;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,13 +51,15 @@ import java.util.Collection;
 
 public class TempMain {
 
+	private UIService ui;
+
+	private LogService log;
+
+	private PlotService plotService;
+
 	public static void main(final String... args) {
 		new TempMain();
 	}
-
-	private UIService ui;
-	private LogService log;
-	private PlotService plotService;
 
 	public TempMain()
 	{
@@ -71,16 +74,15 @@ public class TempMain {
 	}
 
 	private void plotLineStyles() {
-		ScatterPlot plot = plotService.createScatterPlot();
+		XYPlot plot = plotService.createXYPlot();
 		plot.setTitle("Line Styles");
 		Collection<Double> xs = collection(0.0,1.0);
 		LineStyle[] lineStyles = LineStyle.values();
-		SeriesStyle style = plot.createSeriesStyle();
-		style.setColor(Color.BLACK);
 		for(int i = 0; i < lineStyles.length; i++) {
-			style.setLineStyle(lineStyles[i]);
+			SeriesStyle style = plot.createSeriesStyle(Color.BLACK, lineStyles[i], MarkerStyle.CIRCLE);
 			double y = i * 1.0;
-			plot.addSeries(lineStyles[i].toString(), xs, collection(y,y), style);
+			XYSeries series = plot.createXYSeries(lineStyles[i].toString(), xs, collection(y,y), style);
+			plot.getSeriesCollection().add(series);
 		}
 		plot.getXAxis().setManualRange(-1.0, 2.0);
 		plot.getYAxis().setManualRange(-1.0, (double) lineStyles.length);
@@ -88,15 +90,15 @@ public class TempMain {
 	}
 
 	private void plotMarkerStyles() {
-		ScatterPlot plot = plotService.createScatterPlot();
+		XYPlot plot = plotService.createXYPlot();
 		plot.setTitle("Marker Styles");
-		SeriesStyle style = plot.createSeriesStyle();
 		Collection<Double> xs = collection(0.0,1.0);
 		MarkerStyle[] markerStyles = MarkerStyle.values();
 		for(int i = 0; i < markerStyles.length; i++) {
-			style.setMarkerStyle(markerStyles[i]);
+			SeriesStyle style = plot.createSeriesStyle(null, null, markerStyles[i]);
 			double y = i * 1.0;
-			plot.addSeries(markerStyles[i].toString(), xs, collection(y,y), style);
+			XYSeries series = plot.createXYSeries(markerStyles[i].toString(), xs, collection(y,y), style);
+			plot.getSeriesCollection().add(series);
 		}
 		plot.getXAxis().setManualRange(-1.0, 2.0);
 		plot.getYAxis().setManualRange(-1.0, (double) markerStyles.length);
@@ -104,16 +106,16 @@ public class TempMain {
 	}
 
 	private void plotLogarithmic() {
-		ScatterPlot plot = plotService.createScatterPlot();
+		XYPlot plot = plotService.createXYPlot();
 		plot.setTitle("Logarithmic");
-		SeriesStyle style = plot.createSeriesStyle();
 		Collection<Double> xs = new ArrayList<>();
 		Collection<Double> ys = new ArrayList<>();
 		for(double x = 0; x < 10; x += 0.1) {
 			xs.add(x);
 			ys.add(Math.exp(Math.sin(x)));
 		}
-		plot.addSeries("exp(sin(x))", xs, ys, style);
+		XYSeries series = plot.createXYSeries("exp(sin(x))", xs, ys, null);
+		plot.getSeriesCollection().add(series);
 		plot.getXAxis().setAutoRange(true, false);
 		plot.getYAxis().setAutoRange(true, true);
 		plot.getYAxis().setLogarithmic(true);

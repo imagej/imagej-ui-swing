@@ -31,14 +31,14 @@
 
 package net.imagej.ui.swing.viewer.plot.jfreechart;
 
-import net.imagej.ui.swing.viewer.plot.jfreechart.JfcPlot;
+import net.imagej.plot.XYPlot;
 import org.scijava.display.Display;
 
 /**
- * Interface for {@link JfcPlot} {@link Display}s.
+ * Interface for {@link JfcPlotGenerator} {@link Display}s.
  * 
  * @author Curtis Rueden
  */
-public interface PlotDisplay extends Display<JfcPlot> {
+public interface PlotDisplay extends Display<XYPlot> {
 	// This interface intentionally left blank.
 }

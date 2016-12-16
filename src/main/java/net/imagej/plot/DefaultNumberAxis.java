@@ -1,8 +1,28 @@
-package net.imagej.ui.swing.viewer.plot.jfreechart;
+package net.imagej.plot;
 
-import net.imagej.plot.NumberAxis;
+public class DefaultNumberAxis implements NumberAxis {
 
-public class DefaultValueAxis implements NumberAxis {
+	private String label;
+
+	private double min;
+
+	private double max;
+
+	private boolean rangeIsSet;
+
+	private boolean logarithmic;
+
+	private boolean rangeContainsZero;
+
+	private boolean rangeAddSpace;
+
+	DefaultNumberAxis() {
+		min = 0;
+		max = 0;
+		rangeIsSet = false;
+		rangeContainsZero = false;
+		logarithmic = false;
+	}
 
 	@Override
 	public void setLabel(String label) {
@@ -60,19 +80,4 @@ public class DefaultValueAxis implements NumberAxis {
 		return logarithmic;
 	}
 
-	DefaultValueAxis() {
-		min = 0;
-		max = 0;
-		rangeIsSet = false;
-		rangeContainsZero = false;
-		logarithmic = false;
-	}
-
-	private String label;
-	private double min;
-	private double max;
-	private boolean rangeIsSet;
-	private boolean logarithmic;
-	private boolean rangeContainsZero;
-	private boolean rangeAddSpace;
 }

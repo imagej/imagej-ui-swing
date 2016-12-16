@@ -31,16 +31,15 @@
 
 package net.imagej.ui.swing.viewer.plot.jfreechart;
 
-import net.imagej.ui.swing.viewer.plot.jfreechart.JfcPlot;
-import net.imagej.ui.swing.viewer.plot.jfreechart.PlotDisplay;
+import net.imagej.plot.XYPlot;
 import org.scijava.ui.viewer.DisplayViewer;
 
 /**
- * A display viewer for a display of {@link JfcPlot}s.
+ * A display viewer for a display of {@link JfcPlotGenerator}s.
  * 
  * @author Curtis Rueden
  */
-public interface PlotDisplayViewer extends DisplayViewer<JfcPlot> {
+public interface PlotDisplayViewer extends DisplayViewer<XYPlot> {
 
 	@Override
 	PlotDisplay getDisplay();

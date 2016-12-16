@@ -31,21 +31,22 @@
 
 package net.imagej.ui.swing.viewer.plot.jfreechart;
 
+import net.imagej.plot.XYPlot;
 import org.scijava.display.AbstractDisplay;
 import org.scijava.display.Display;
 import org.scijava.plugin.Plugin;
 
 /**
- * Default display for {@link JfcPlot}s.
+ * Default display for {@link JfcPlotGenerator}s.
  *
  * @author Curtis Rueden
  */
 @Plugin(type = Display.class)
-public class DefaultPlotDisplay extends AbstractDisplay<JfcPlot> implements
+public class DefaultPlotDisplay extends AbstractDisplay<XYPlot> implements
 		PlotDisplay
 {
 
 	public DefaultPlotDisplay() {
-		super(JfcPlot.class);
+		super(XYPlot.class);
 	}
 }

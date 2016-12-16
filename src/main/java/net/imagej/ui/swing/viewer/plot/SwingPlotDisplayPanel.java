@@ -34,16 +34,16 @@ package net.imagej.ui.swing.viewer.plot;
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
 
-import net.imagej.ui.swing.viewer.plot.jfreechart.JfcPlot;
+import net.imagej.ui.swing.viewer.plot.jfreechart.JfcPlotGenerator;
+import net.imagej.ui.swing.viewer.plot.jfreechart.JfcXYPlotGenerator;
 import net.imagej.ui.swing.viewer.plot.jfreechart.PlotDisplay;
 import net.imagej.ui.swing.viewer.plot.jfreechart.PlotDisplayPanel;
 
 import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
 import org.scijava.ui.viewer.DisplayWindow;
 
 /**
- * A JFreeChart-driven display panel for {@link JfcPlot}s.
+ * A JFreeChart-driven display panel for {@link JfcPlotGenerator}s.
  * 
  * @author Curtis Rueden
  */
@@ -62,7 +62,7 @@ public class SwingPlotDisplayPanel extends JPanel implements PlotDisplayPanel {
 		this.display = display;
 		this.window = window;
 		setLayout(new BorderLayout());
-		final JfcPlot plot = display.get(0);
+		final JfcXYPlotGenerator plot = new JfcXYPlotGenerator(display.get(0));
 		ChartPanel panel = new ChartPanel(plot.getJFreeChart());
 		add(panel);
 		window.setContent(this);

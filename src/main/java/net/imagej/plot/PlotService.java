@@ -5,10 +5,10 @@ import net.imagej.ImageJService;
 /**
  * @author Matthias Arzt
  */
-// TODO: consider extending WrapperService, and making JfcPlot into a WrapperPlugin
+// TODO: consider extending WrapperService, and making JfcPlotGenerator into a WrapperPlugin
 public interface PlotService extends ImageJService {
 
-	ScatterPlot createScatterPlot();
+	XYPlot createXYPlot();
 
 	// TODO: BoxPlot createBoxPlot();
 
