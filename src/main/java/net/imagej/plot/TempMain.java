@@ -41,6 +41,10 @@ import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.ui.UIService;
 
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Random;
 
 /**
@@ -61,20 +65,69 @@ public class TempMain {
 	public TempMain()
 	{
 		final Context ctx = new Context();
-		// we need an instance of ImageJ to show the table finally.
 		ui = ctx.service(UIService.class);
 		log = ctx.service(LogService.class);
 		plotService = ctx.service(PlotService.class);
 
-		// first, we create a table
-		GenericTable table = createTable();
+		plotSomething();
+		plotLineStyles();
+		plotMarkerStyles();
+		plotLogarithmic();
+	}
 
-		analyseTable(table);
-		
-		// create a plot of this data, and show it
+	private void plotSomething() {
 		ScatterPlot plot = plotService.createScatterPlot();
 		plot.setTitle("Population of largest cities!");
-		plot.setData(createSampleTable3());
+		GenericTable table2 = createSampleTable3();
+		SeriesStyle style = plot.createSeriesStyle();
+		style.setColor(Color.BLACK);
+		plot.addSeries("blub", (DoubleColumn) table2.get(0), (DoubleColumn) table2.get(1), style);
+		GenericTable table3 = createSampleTable3();
+		style.setColor(Color.BLUE);
+		style.setLineStyle(LineStyle.NONE);
+		plot.addSeries("blub", (DoubleColumn) table3.get(0), (DoubleColumn) table3.get(1), style);
+		ui.show(plot);
+	}
+
+	private void plotLineStyles() {
+		ScatterPlot plot = plotService.createScatterPlot();
+		Collection<Double> xs = collection(0.0,1.0);
+		LineStyle[] lineStyles = LineStyle.values();
+		SeriesStyle style = plot.createSeriesStyle();
+		style.setColor(Color.BLACK);
+		for(int i = 0; i < lineStyles.length; i++) {
+			style.setLineStyle(lineStyles[i]);
+			double y = i * 1.0;
+			plot.addSeries(lineStyles[i].toString(), xs, collection(y,y), style);
+		}
+		ui.show(plot);
+	}
+
+	private void plotMarkerStyles() {
+		ScatterPlot plot = plotService.createScatterPlot();
+		SeriesStyle style = plot.createSeriesStyle();
+		Collection<Double> xs = collection(0.0,1.0);
+		MarkerStyle[] markerStyles = MarkerStyle.values();
+		for(int i = 0; i < markerStyles.length; i++) {
+			style.setMarkerStyle(markerStyles[i]);
+			double y = i * 1.0;
+			plot.addSeries(markerStyles[i].toString(), xs, collection(y,y), style);
+		}
+		ui.show(plot);
+	}
+
+	private void plotLogarithmic() {
+		ScatterPlot plot = plotService.createScatterPlot();
+		SeriesStyle style = plot.createSeriesStyle();
+		Collection<Double> xs = new ArrayList<>();
+		Collection<Double> ys = new ArrayList<>();
+		for(double x = 1; x < 10; x += 0.1) {
+			xs.add(x);
+			ys.add(Math.sin(x) + 10.0);
+		}
+		plot.addSeries("sin(x)", xs, ys, style);
+		plot.getXAxis().setAutoRange();
+		plot.getYAxis().setAutoRangeIncludeZero();
 		ui.show(plot);
 	}
 
@@ -148,27 +201,9 @@ public class TempMain {
 		table.add(sizeColumn);
 		return table;
 	}
-	/**
-	 * This function shows how to read out information from tables,
-	 * such as
-	 * - the header of a column
-	 * - an entry from the table
-	 *
-	 * @param table A table with two columns, Town and Population
-	 */
-	private void analyseTable(GenericTable table)
-	{
-		// read out the header of the second column
-		String header = table.get(1).getHeader();
 
-		log.info("The header of the second column is: " + header);
-
-		// get a certain column
-		DoubleColumn populationColumn = (DoubleColumn)table.get("Population");
-
-		// get a value from the first line in the column
-		double populationOfLargestTown = populationColumn.get(0);
-
-		log.info("The population of the largest town is: " + populationOfLargestTown);
+	private static Collection<Double> collection(Double ... values) {
+		return Arrays.asList(values);
 	}
+
 }
