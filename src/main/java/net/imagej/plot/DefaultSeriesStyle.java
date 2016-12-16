@@ -5,7 +5,7 @@ import java.awt.*;
 /**
  * @author Matthias Arzt
  */
-public class DefaultSeriesStyle implements SeriesStyle {
+class DefaultSeriesStyle implements SeriesStyle {
 
 	private Color color;
 

@@ -1,6 +1,6 @@
 package net.imagej.plot;
 
-public class DefaultNumberAxis implements NumberAxis {
+class DefaultNumberAxis implements NumberAxis {
 
 	private String label;
 

@@ -7,7 +7,7 @@ import java.util.LinkedList;
 /**
  * @author Matthias Arzt
  */
-public class DefaultXYPlot implements XYPlot {
+class DefaultXYPlot implements XYPlot {
 
 	private DefaultNumberAxis xAxis;
 

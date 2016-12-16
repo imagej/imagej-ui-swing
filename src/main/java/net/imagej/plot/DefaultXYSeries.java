@@ -3,9 +3,9 @@ package net.imagej.plot;
 import java.util.Collection;
 
 /**
- * Created by arzt on 16/12/2016.
+ * @author Matthias Arzt
  */
-public class DefaultXYSeries implements XYSeries {
+class DefaultXYSeries implements XYSeries {
 
 	DefaultXYSeries(String label, Collection<Double> xs, Collection<Double> ys, SeriesStyle style) {
 		this.label = label;
