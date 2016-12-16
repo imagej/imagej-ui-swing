@@ -29,19 +29,16 @@
  * #L%
  */
 
-package net.imagej.plot;
+package net.imagej.ui.swing.viewer.plot.jfreechart;
 
-import org.scijava.ui.viewer.DisplayPanel;
+import net.imagej.ui.swing.viewer.plot.jfreechart.JfcPlot;
+import org.scijava.display.Display;
 
 /**
- * This is a panel that can go inside a display window. It displays
- * {@link Plot}s.
+ * Interface for {@link JfcPlot} {@link Display}s.
  * 
  * @author Curtis Rueden
  */
-public interface PlotDisplayPanel extends DisplayPanel {
-
-	@Override
-	PlotDisplay getDisplay();
-
+public interface PlotDisplay extends Display<JfcPlot> {
+	// This interface intentionally left blank.
 }

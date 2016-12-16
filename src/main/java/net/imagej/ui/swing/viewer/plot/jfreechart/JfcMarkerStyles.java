@@ -1,5 +1,6 @@
-package net.imagej.plot;
+package net.imagej.ui.swing.viewer.plot.jfreechart;
 
+import net.imagej.plot.MarkerStyle;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 
 import java.awt.*;
@@ -10,7 +11,7 @@ import java.awt.geom.Rectangle2D;
 /**
  * Created by arzt on 15/12/2016.
  */
-public class JFreeChartMarkerStyles {
+public class JfcMarkerStyles {
 
 	static void modifyRenderer(XYLineAndShapeRenderer renderer, int series, MarkerStyle style) {
 		if(style == null)

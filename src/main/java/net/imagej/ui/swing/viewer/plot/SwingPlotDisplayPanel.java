@@ -32,33 +32,18 @@
 package net.imagej.ui.swing.viewer.plot;
 
 import java.awt.BorderLayout;
-import java.awt.Font;
-import java.util.*;
-import java.util.List;
 import javax.swing.JPanel;
 
-import org.jfree.chart.axis.CategoryAxis;
-import org.jfree.chart.axis.NumberAxis;
-import net.imagej.plot.Plot;
-import net.imagej.plot.PlotDisplay;
-import net.imagej.plot.PlotDisplayPanel;
-import net.imagej.table.Column;
-import net.imagej.table.DoubleColumn;
-import net.imagej.table.Table;
+import net.imagej.ui.swing.viewer.plot.jfreechart.JfcPlot;
+import net.imagej.ui.swing.viewer.plot.jfreechart.PlotDisplay;
+import net.imagej.ui.swing.viewer.plot.jfreechart.PlotDisplayPanel;
 
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
-import org.jfree.data.general.DefaultPieDataset;
-import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
 import org.scijava.ui.viewer.DisplayWindow;
 
 /**
- * A JFreeChart-driven display panel for {@link Plot}s.
+ * A JFreeChart-driven display panel for {@link JfcPlot}s.
  * 
  * @author Curtis Rueden
  */
@@ -109,7 +94,7 @@ public class SwingPlotDisplayPanel extends JPanel implements PlotDisplayPanel {
 	// -- Helper methods --
 
 	private JFreeChart makeChart() {
-		final Plot plot = display.get(0);
+		final JfcPlot plot = display.get(0);
 		return plot.getJFreeChart();
 	}
 

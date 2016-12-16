@@ -1,4 +1,6 @@
-package net.imagej.plot;
+package net.imagej.ui.swing.viewer.plot.jfreechart;
+
+import net.imagej.plot.ValueAxis;
 
 public class DefaultValueAxis implements ValueAxis {
 

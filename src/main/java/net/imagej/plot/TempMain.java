@@ -81,10 +81,13 @@ public class TempMain {
 		GenericTable table2 = createSampleTable3();
 		SeriesStyle style = plot.createSeriesStyle();
 		style.setColor(Color.BLACK);
+		style.setLineStyle(LineStyle.NONE);
+		style.setMarkerStyle(MarkerStyle.STAR);
 		plot.addSeries("blub", (DoubleColumn) table2.get(0), (DoubleColumn) table2.get(1), style);
 		GenericTable table3 = createSampleTable3();
 		style.setColor(Color.BLUE);
 		style.setLineStyle(LineStyle.NONE);
+		style.setMarkerStyle(MarkerStyle.SQUARE);
 		plot.addSeries("blub", (DoubleColumn) table3.get(0), (DoubleColumn) table3.get(1), style);
 		ui.show(plot);
 	}

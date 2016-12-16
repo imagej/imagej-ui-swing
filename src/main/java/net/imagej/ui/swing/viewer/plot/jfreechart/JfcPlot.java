@@ -29,15 +29,15 @@
  * #L%
  */
 
-package net.imagej.plot;
+package net.imagej.ui.swing.viewer.plot.jfreechart;
 
-import org.scijava.display.Display;
+import org.jfree.chart.JFreeChart;
 
-/**
- * Interface for {@link Plot} {@link Display}s.
- * 
- * @author Curtis Rueden
- */
-public interface PlotDisplay extends Display<Plot> {
-	// This interface intentionally left blank.
+public interface JfcPlot {
+	// FIXME add functions beeing very likely to be general for Diagrams
+	void setTitle(String title);
+	//void setLegendVisible(Boolean visible);
+
+	// FIXME move this function in more appropriate interface
+	JFreeChart getJFreeChart();
 }

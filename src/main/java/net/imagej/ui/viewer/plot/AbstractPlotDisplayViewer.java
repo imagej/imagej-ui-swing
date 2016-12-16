@@ -31,20 +31,20 @@
 
 package net.imagej.ui.viewer.plot;
 
-import net.imagej.plot.Plot;
-import net.imagej.plot.PlotDisplay;
-import net.imagej.plot.PlotDisplayViewer;
+import net.imagej.ui.swing.viewer.plot.jfreechart.JfcPlot;
+import net.imagej.ui.swing.viewer.plot.jfreechart.PlotDisplay;
+import net.imagej.ui.swing.viewer.plot.jfreechart.PlotDisplayViewer;
 
 import org.scijava.display.Display;
 import org.scijava.ui.viewer.AbstractDisplayViewer;
 
 /**
- * Implements the UI-independent elements of a {@link Plot} viewer.
+ * Implements the UI-independent elements of a {@link JfcPlot} viewer.
  * 
  * @author Curtis Rueden
  */
 public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<Plot> implements PlotDisplayViewer
+	AbstractDisplayViewer<JfcPlot> implements PlotDisplayViewer
 {
 
 	@Override

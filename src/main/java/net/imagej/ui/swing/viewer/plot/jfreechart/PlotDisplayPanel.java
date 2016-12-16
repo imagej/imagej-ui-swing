@@ -29,15 +29,21 @@
  * #L%
  */
 
-package net.imagej.plot;
+package net.imagej.ui.swing.viewer.plot.jfreechart;
 
-import org.jfree.chart.JFreeChart;
+import net.imagej.ui.swing.viewer.plot.jfreechart.JfcPlot;
+import net.imagej.ui.swing.viewer.plot.jfreechart.PlotDisplay;
+import org.scijava.ui.viewer.DisplayPanel;
 
-public interface Plot {
-	// FIXME add functions beeing very likely to be general for Diagrams
-	void setTitle(String title);
-	//void setLegendVisible(Boolean visible);
+/**
+ * This is a panel that can go inside a display window. It displays
+ * {@link JfcPlot}s.
+ * 
+ * @author Curtis Rueden
+ */
+public interface PlotDisplayPanel extends DisplayPanel {
 
-	// FIXME move this function in more appropriate interface
-	JFreeChart getJFreeChart();
+	@Override
+	PlotDisplay getDisplay();
+
 }

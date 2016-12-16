@@ -1,10 +1,11 @@
-package net.imagej.plot;
+package net.imagej.ui.swing.viewer.plot.jfreechart;
 
+import net.imagej.plot.LineStyle;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 
 import java.awt.*;
 
-public class JFreeChartLineStyles {
+public class JfcLineStyles {
 
 	static void modifyRenderer(XYLineAndShapeRenderer renderer, int series, LineStyle style) {
 		if(style == null)
