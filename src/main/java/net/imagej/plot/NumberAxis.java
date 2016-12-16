@@ -1,7 +1,7 @@
 package net.imagej.plot;
 
 /**
- * Created by arzt on 15/12/2016.
+ * @author Matthias Arzt
  */
 public interface NumberAxis {
 

@@ -6,15 +6,18 @@ import net.imagej.plot.SeriesStyle;
 
 import java.awt.*;
 
+/**
+ * @author Matthias Arzt
+ */
 public class JfcSeriesStyle implements SeriesStyle {
 	private Color color;
-	private MarkerStyle marker_style;
-	private LineStyle line_style;
+	private MarkerStyle markerStyle;
+	private LineStyle lineStyle;
 
 	JfcSeriesStyle() {
 		color = null;
-		line_style = null;
-		marker_style = null;
+		lineStyle = null;
+		markerStyle = null;
 	}
 
 	public void setColor(Color color) {
@@ -22,11 +25,11 @@ public class JfcSeriesStyle implements SeriesStyle {
 	}
 
 	public void setLineStyle(LineStyle style) {
-		this.line_style = style;
+		this.lineStyle = style;
 	}
 
 	public void setMarkerStyle(MarkerStyle style) {
-		this.marker_style = style;
+		this.markerStyle = style;
 	}
 
 	public Color getColor() {
@@ -34,10 +37,10 @@ public class JfcSeriesStyle implements SeriesStyle {
 	}
 
 	public LineStyle getLineStyle() {
-		return line_style;
+		return lineStyle;
 	}
 
 	public MarkerStyle getMarkerStyle() {
-		return marker_style;
+		return markerStyle;
 	}
 }

@@ -33,6 +33,9 @@ package net.imagej.ui.swing.viewer.plot.jfreechart;
 
 import org.jfree.chart.JFreeChart;
 
+/**
+ * @author Matthias Arzt
+ */
 public interface JfcPlot {
 
 	void setTitle(String title);

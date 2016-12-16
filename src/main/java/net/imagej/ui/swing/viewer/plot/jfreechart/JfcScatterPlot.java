@@ -12,10 +12,13 @@ import java.awt.*;
 import java.util.Collection;
 import java.util.Iterator;
 
+/**
+ * @author Matthias Arzt
+ */
 // FIXME make JfcScatterPlot an interface and implement the JFreeChart in JFreeChartScatterPlot
 public class JfcScatterPlot implements ScatterPlot, JfcPlot {
 
-	private String chart_title;
+	private String chartTitle;
 	private XYSeriesCollection seriesCollection;
 	private JFreeChart chart;
 	private NumberAxis xAxis;
@@ -23,10 +26,10 @@ public class JfcScatterPlot implements ScatterPlot, JfcPlot {
 
 	JfcScatterPlot() {
 		seriesCollection = new XYSeriesCollection();
-		chart_title = null;
+		chartTitle = null;
 		xAxis = new DefaultValueAxis();
 		yAxis = new DefaultValueAxis();
-		chart = ChartFactory.createXYLineChart(chart_title, "", "", seriesCollection);
+		chart = ChartFactory.createXYLineChart(chartTitle, "", "", seriesCollection);
 	}
 
 	public SeriesStyle createSeriesStyle() {
@@ -34,13 +37,13 @@ public class JfcScatterPlot implements ScatterPlot, JfcPlot {
 	}
 
 	public void addSeries(String label, Collection<Double> xs, Collection<Double> ys, SeriesStyle style) {
-		SortedLabel unique_label = new SortedLabel(label);
-		addSeriesData(unique_label, xs, ys);
-		setSeriesStyle(unique_label, style);
+		SortedLabel uniqueLabel = new SortedLabel(label);
+		addSeriesData(uniqueLabel, xs, ys);
+		setSeriesStyle(uniqueLabel, style);
 	}
 
-	private void addSeriesData(SortedLabel unique_label, Collection<Double> xs, Collection<Double> ys) {
-		XYSeries series = new XYSeries(unique_label);
+	private void addSeriesData(SortedLabel uniqueLabel, Collection<Double> xs, Collection<Double> ys) {
+		XYSeries series = new XYSeries(uniqueLabel);
 		Iterator<Double> xi = xs.iterator();
 		Iterator<Double> yi = ys.iterator();
 		while (xi.hasNext() && yi.hasNext())
@@ -66,12 +69,12 @@ public class JfcScatterPlot implements ScatterPlot, JfcPlot {
 
 	@Override
 	public void setTitle(String title) {
-		this.chart_title = title;
+		this.chartTitle = title;
 	}
 
 	@Override
 	public String getTitle() {
-		return chart_title;
+		return chartTitle;
 	}
 
 	@Override
@@ -102,10 +105,10 @@ public class JfcScatterPlot implements ScatterPlot, JfcPlot {
 		}
 	}
 
-	private int number_of_labels = 0;
+	private int numberOfLabels = 0;
 
 	private class SortedLabel implements Comparable<SortedLabel> {
-		SortedLabel(String label) { this.label = label; id = number_of_labels++; }
+		SortedLabel(String label) { this.label = label; id = numberOfLabels++; }
 		@Override public String toString() { return label; }
 		@Override public int compareTo(SortedLabel o) { return Integer.compare(id, o.id); }
 		private String label;

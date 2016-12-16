@@ -5,6 +5,10 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 
 import java.awt.*;
 
+/**
+ * @author Matthias Arzt
+ */
+
 public class JfcLineStyles {
 
 	static void modifyRenderer(XYLineAndShapeRenderer renderer, int series, LineStyle style) {

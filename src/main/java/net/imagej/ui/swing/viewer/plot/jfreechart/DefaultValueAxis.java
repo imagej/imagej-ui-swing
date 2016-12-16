@@ -23,10 +23,10 @@ public class DefaultValueAxis implements NumberAxis {
 	}
 
 	@Override
-	public void setAutoRange(boolean includeZero, boolean add_space) {
+	public void setAutoRange(boolean includeZero, boolean addSpace) {
 		rangeIsSet = false;
 		rangeContainsZero = includeZero;
-		rangeAddSpace = add_space;
+		rangeAddSpace = addSpace;
 	}
 
 	@Override

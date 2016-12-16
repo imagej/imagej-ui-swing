@@ -2,6 +2,9 @@ package net.imagej.plot;
 
 import java.awt.Color;
 
+/**
+ * @author Matthias Arzt
+ */
 public interface SeriesStyle {
 
 	void setColor(Color color);

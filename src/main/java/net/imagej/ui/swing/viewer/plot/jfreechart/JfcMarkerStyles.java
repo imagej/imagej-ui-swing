@@ -9,8 +9,9 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 
 /**
- * Created by arzt on 15/12/2016.
+ * @author Matthias Arzt
  */
+
 public class JfcMarkerStyles {
 
 	static void modifyRenderer(XYLineAndShapeRenderer renderer, int series, MarkerStyle style) {
