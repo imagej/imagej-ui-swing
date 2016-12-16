@@ -31,6 +31,7 @@
 
 package net.imagej.ui.viewer.plot;
 
+import net.imagej.plot.AbstractPlot;
 import net.imagej.plot.XYPlot;
 import net.imagej.ui.swing.viewer.plot.jfreechart.JfcPlotGenerator;
 import net.imagej.ui.swing.viewer.plot.jfreechart.PlotDisplay;
@@ -45,7 +46,7 @@ import org.scijava.ui.viewer.AbstractDisplayViewer;
  * @author Curtis Rueden
  */
 public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<XYPlot> implements PlotDisplayViewer
+	AbstractDisplayViewer<AbstractPlot> implements PlotDisplayViewer
 {
 
 	@Override

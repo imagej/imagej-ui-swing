@@ -31,6 +31,7 @@
 
 package net.imagej.ui.swing.viewer.plot.jfreechart;
 
+import net.imagej.plot.AbstractPlot;
 import net.imagej.plot.XYPlot;
 import org.scijava.display.AbstractDisplay;
 import org.scijava.display.Display;
@@ -42,11 +43,10 @@ import org.scijava.plugin.Plugin;
  * @author Curtis Rueden
  */
 @Plugin(type = Display.class)
-public class DefaultPlotDisplay extends AbstractDisplay<XYPlot> implements
+public class DefaultPlotDisplay extends AbstractDisplay<AbstractPlot> implements
 		PlotDisplay
 {
-
 	public DefaultPlotDisplay() {
-		super(XYPlot.class);
+		super(AbstractPlot.class);
 	}
 }

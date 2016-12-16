@@ -6,7 +6,7 @@ import java.util.Collection;
 /**
  * @author Matthias Arzt
  */
-public interface XYPlot {
+public interface XYPlot extends AbstractPlot {
 
 	SeriesStyle createSeriesStyle(Color color, LineStyle lineStyle, MarkerStyle markerStyle);
 
@@ -21,4 +21,5 @@ public interface XYPlot {
 	void setTitle(String title);
 
 	String getTitle();
+
 }

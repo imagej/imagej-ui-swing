@@ -31,6 +31,7 @@
 
 package net.imagej.ui.swing.viewer.plot.jfreechart;
 
+import net.imagej.plot.AbstractPlot;
 import net.imagej.plot.XYPlot;
 import org.scijava.ui.viewer.DisplayViewer;
 
@@ -39,7 +40,7 @@ import org.scijava.ui.viewer.DisplayViewer;
  * 
  * @author Curtis Rueden
  */
-public interface PlotDisplayViewer extends DisplayViewer<XYPlot> {
+public interface PlotDisplayViewer extends DisplayViewer<AbstractPlot> {
 
 	@Override
 	PlotDisplay getDisplay();
