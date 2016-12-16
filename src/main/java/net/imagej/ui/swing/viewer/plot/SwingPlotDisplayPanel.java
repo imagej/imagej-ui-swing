@@ -31,20 +31,30 @@
 
 package net.imagej.ui.swing.viewer.plot;
 
+import java.awt.BorderLayout;
 import java.awt.Font;
-
+import java.util.*;
+import java.util.List;
 import javax.swing.JPanel;
 
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.NumberAxis;
 import net.imagej.plot.Plot;
 import net.imagej.plot.PlotDisplay;
 import net.imagej.plot.PlotDisplayPanel;
+import net.imagej.table.Column;
+import net.imagej.table.DoubleColumn;
 import net.imagej.table.Table;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PiePlot;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.data.general.DefaultPieDataset;
+import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 import org.scijava.ui.viewer.DisplayWindow;
 
 /**
@@ -58,7 +68,6 @@ public class SwingPlotDisplayPanel extends JPanel implements PlotDisplayPanel {
 
 	private final DisplayWindow window;
 	private final PlotDisplay display;
-	private final JFreeChart chart;
 
 	// -- constructor --
 
@@ -67,7 +76,8 @@ public class SwingPlotDisplayPanel extends JPanel implements PlotDisplayPanel {
 	{
 		this.display = display;
 		this.window = window;
-		chart = makeChart();
+		setLayout(new BorderLayout());
+		JFreeChart chart = makeChart();
 		ChartPanel panel = new ChartPanel(chart);
 		add(panel);
 		window.setContent(this);
@@ -88,55 +98,103 @@ public class SwingPlotDisplayPanel extends JPanel implements PlotDisplayPanel {
 	}
 
 	@Override
-	public void redoLayout() {
-		// FIXME
-	}
+	public void redoLayout() { }
 
 	@Override
-	public void setLabel(final String s) {
-		// FIXME
-	}
+	public void setLabel(final String s) { }
 
 	@Override
-	public void redraw() {
-		// FIXME
-	}
+	public void redraw() { }
 
 	// -- Helper methods --
 
 	private JFreeChart makeChart() {
-		final Table<?, ?> data = display.get(0).getData();
-
-		// FIXME: make the dataset based on the above Table object instead.
-		// if data cell is of type Number, then cast; else convert.
-		// convertService.convert(dataCell, Number.class)
-		// convertService.convert(dataCell, Double.class)
-		// Or, just Double.parseDouble(dataCell.toString()); // basic conversion
-		// Or: throw an exception
-		// We could type Plot on numerical columns only
-		// Or: throw IllegalStateException or something if Table columns are non-numeric.
-		// Or: skip table columns that are non-numeric.
-		DefaultPieDataset dataset = new DefaultPieDataset();
-		dataset.setValue("One", new Double(43.2));
-		dataset.setValue("Two", new Double(10.0));
-		dataset.setValue("Three", new Double(27.5));
-		dataset.setValue("Four", new Double(17.5));
-		dataset.setValue("Five", new Double(11.0));
-		dataset.setValue("Six", new Double(19.4));
-
-		JFreeChart chart = ChartFactory.createPieChart(
-			"Pie Chart Demo 1",  // chart title
-			dataset,             // data
-			true,               // include legend
-			true,
-			false
-				);
-
-		PiePlot plot = (PiePlot) chart.getPlot();
-		plot.setLabelFont(new Font("SansSerif", Font.PLAIN, 12));
-		plot.setNoDataMessage("No data available");
-		plot.setCircular(false);
-		plot.setLabelGap(0.02);
-		return chart;
+		final Plot plot = display.get(0);
+		return plot.getJFreeChart();
 	}
+
+	// 	static private JFreeChart makePieChart(final String chart_title, final Table<?,?> table) {
+	// 		final DefaultPieDataset dataset = generatePieDataset(table);
+	//		return ChartFactory.createPieChart( chart_title, dataset, true, true, false );
+	//	}
+	//
+	// static private DefaultPieDataset generatePieDataset(Table<?, ?> table) {
+	// 	// FIXME frow an exception it table has not the correct format.
+	// 	final Column<?> key_column = table.get(0);
+	// 	final DoubleColumn value_column = (DoubleColumn) table.get(1);
+	// 	final DefaultPieDataset dataset = new DefaultPieDataset();
+	// 	Iterator<?> key_iterator = key_column.iterator();
+	// 	Iterator<Double> value_iterator = value_column.iterator();
+	// 	while(key_iterator.hasNext() && value_iterator.hasNext())
+	// 		dataset.setValue(key_iterator.next().toString(), value_iterator.next());
+	// 	return dataset;
+	// }
+
+	// static private JFreeChart makeScatterChart(final String chart_title, final Table<?,?> table) {
+	// 	final XYSeries series = new XYSeries("series");
+	// 	DoubleColumn xcol = (DoubleColumn) table.get(0);
+	// 	DoubleColumn ycol = (DoubleColumn) table.get(1);
+	// 	Iterator<Double> xiter = xcol.iterator();
+	// 	Iterator<Double> yiter = ycol.iterator();
+	// 	while(xiter.hasNext() && yiter.hasNext()) {
+	// 		double x = xiter.next();
+	// 		double y = yiter.next();
+	// 		series.add(x, y);
+	// 	}
+	// 	final XYSeriesCollection chartDataset = new XYSeriesCollection( );
+	// 	chartDataset.addSeries( series );
+	// 	final String xlabel = xcol.getHeader();
+	// 	final String ylabel = ycol.getHeader();
+	// 	return ChartFactory.createScatterPlot(chart_title, xlabel, ylabel, chartDataset);
+	// }
+
+	// static private JFreeChart makeBoxChart(final String chart_title, final Table<?,?> table) {
+	// 	final DefaultBoxAndWhiskerCategoryDataset chartDataset = generateBoxplotDataset(table);
+	// 	final CategoryAxis xAxis = new CategoryAxis("Type");
+	// 	final NumberAxis yAxis = new NumberAxis("Value");
+	// 	final BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
+	// 	renderer.setFillBox(false);
+	// 	final CategoryPlot plot = new CategoryPlot(chartDataset, xAxis, yAxis, renderer);
+	// 	final Font font = new Font("SansSerif", Font.BOLD, 14);
+	// 	return new JFreeChart(chart_title ,font , plot, true );
+	// }
+
+	// static private DefaultBoxAndWhiskerCategoryDataset generateBoxplotDataset(Table<?,?> table) {
+	// 	DefaultBoxAndWhiskerCategoryDataset chartDataset = new DefaultBoxAndWhiskerCategoryDataset();
+	// 	Column<?> key_column = table.get(0);
+	// 	for(int i = 1; i < table.size(); i++) {
+	// 		DoubleColumn value_column = (DoubleColumn) table.get(i);
+	// 		String column_title = value_column.getHeader();
+	// 		MyMultiMap<?, Double> map = new MyMultiMap<>(key_column, value_column);
+	// 		for (Map.Entry<?, List<Double>> entry : map.entrySet())
+	// 			chartDataset.add(entry.getValue(), entry.getKey().toString(), column_title);
+	// 	}
+	// 	return chartDataset;
+	// }
+
+	// static private class MyMultiMap<K,V> {
+
+	// 	private Map<K, List<V>> map;
+
+	// 	MyMultiMap(Collection<K> keys, Collection<V> values) {
+	// 		map = new HashMap<>();
+	// 		Iterator<K> kIterator = keys.iterator();
+	// 		Iterator<V> vIterator = values.iterator();
+	// 		while(kIterator.hasNext() && vIterator.hasNext())
+	// 			add(kIterator.next(), vIterator.next());
+	// 	}
+
+	// 	void add(K k, V v) { get(k).add(v); }
+
+	// 	List<V> get(K k) {
+	// 		List<V> list = map.get(k);
+	//			if(list == null) {
+	//				list = new ArrayList<>();
+	//				map.put(k, list);
+	//			}
+	//			return list;
+	//		}
+	//
+	//		Set<Map.Entry<K, List<V>>> entrySet() { return map.entrySet(); }
+	//}
 }

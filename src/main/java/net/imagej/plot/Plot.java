@@ -31,19 +31,13 @@
 
 package net.imagej.plot;
 
-import net.imagej.table.Table;
+import org.jfree.chart.JFreeChart;
 
-/**
- * A plot of data from a {@link Table}.
- * 
- * @author Curtis Rueden
- */
 public interface Plot {
+	// FIXME add functions beeing very likely to be general for Diagrams
+	void setTitle(String title);
+	//void setLegendVisible(Boolean visible);
 
-	Table<?, ?> getData();
-
-	PlotStyle getStyle();
-
-	// TODO: decide if it makes sense to specify a column index/indices here.
-	// Alternately, could have a Table wrapper that selects only some columns.
+	// FIXME move this function in more appropriate interface
+	JFreeChart getJFreeChart();
 }

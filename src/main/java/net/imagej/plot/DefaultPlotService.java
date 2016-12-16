@@ -12,7 +12,13 @@ import org.scijava.service.Service;
 public class DefaultPlotService extends AbstractService implements PlotService {
 
 	@Override
-	public Plot create(final Table<?, ?> data, final PlotStyle style) {
-		return new DefaultPlot(data, style);
+	public BoxPlot createBoxPlot() {
+		return new BoxPlot();
 	}
+
+	@Override
+	public ScatterPlot createScatterPlot() {
+		return new ScatterPlot();
+	}
+
 }

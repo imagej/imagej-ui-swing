@@ -41,6 +41,8 @@ import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.ui.UIService;
 
+import java.util.Random;
+
 /**
  * A plot of data from a {@link Table}.
  * 
@@ -70,7 +72,9 @@ public class TempMain {
 		analyseTable(table);
 		
 		// create a plot of this data, and show it
-		final Plot plot = plotService.create(table, PlotStyle.PIE);
+		ScatterPlot plot = plotService.createScatterPlot();
+		plot.setTitle("Population of largest cities!");
+		plot.setData(createSampleTable3());
 		ui.show(plot);
 	}
 
@@ -112,6 +116,38 @@ public class TempMain {
 		return table;
 	}
 
+	private static GenericTable createSampleTable2() {
+		Random random = new Random();
+		GenericTable table = new DefaultGenericTable();
+		GenericColumn nameColumn = new GenericColumn("Town");
+		DoubleColumn populationColumn = new DoubleColumn("Population");
+		DoubleColumn sizeColumn = new DoubleColumn("Size");
+		for(String town : new String[]{"sadf","sdf","C","D"}) {
+			for(int i = 0; i < 20; i++) {
+				nameColumn.add(town);
+				populationColumn.add(random.nextGaussian() * 2 + 3);
+				sizeColumn.add(random.nextGaussian() + 1);
+			}
+		}
+		table.add(nameColumn);
+		table.add(populationColumn);
+		table.add(sizeColumn);
+		return table;
+	}
+
+	private static GenericTable createSampleTable3() {
+		Random random = new Random();
+		GenericTable table = new DefaultGenericTable();
+		DoubleColumn populationColumn = new DoubleColumn("Population");
+		DoubleColumn sizeColumn = new DoubleColumn("Size");
+		for(int i = 0; i < 20; i++) {
+			populationColumn.add(random.nextGaussian() * 2 + 3);
+			sizeColumn.add(random.nextGaussian() + 1);
+		}
+		table.add(populationColumn);
+		table.add(sizeColumn);
+		return table;
+	}
 	/**
 	 * This function shows how to read out information from tables,
 	 * such as
