@@ -8,4 +8,8 @@ public interface PlotService extends ImageJService {
 
 	ScatterPlot createScatterPlot();
 
+	// TODO: BoxPlot createBoxPlot();
+
+	// TODO: CategoryChart createCategoryChart();
+
 }

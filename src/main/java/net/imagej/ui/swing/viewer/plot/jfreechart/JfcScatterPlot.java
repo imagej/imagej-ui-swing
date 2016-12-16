@@ -4,7 +4,6 @@ import net.imagej.plot.*;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.LogAxis;
-import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -13,17 +12,14 @@ import java.awt.*;
 import java.util.Collection;
 import java.util.Iterator;
 
-/**
- * Created by arzt on 13/12/2016.
- */
 // FIXME make JfcScatterPlot an interface and implement the JFreeChart in JFreeChartScatterPlot
 public class JfcScatterPlot implements ScatterPlot, JfcPlot {
 
 	private String chart_title;
 	private XYSeriesCollection seriesCollection;
 	private JFreeChart chart;
-	private ValueAxis xAxis;
-	private ValueAxis yAxis;
+	private NumberAxis xAxis;
+	private NumberAxis yAxis;
 
 	JfcScatterPlot() {
 		seriesCollection = new XYSeriesCollection();
@@ -64,9 +60,9 @@ public class JfcScatterPlot implements ScatterPlot, JfcPlot {
 		JfcMarkerStyles.modifyRenderer(renderer, index, style.getMarkerStyle());
 	}
 
-	public ValueAxis getXAxis() { return xAxis; };
+	public NumberAxis getXAxis() { return xAxis; };
 
-	public ValueAxis getYAxis() { return yAxis; };
+	public NumberAxis getYAxis() { return yAxis; };
 
 	@Override
 	public void setTitle(String title) {
@@ -82,17 +78,20 @@ public class JfcScatterPlot implements ScatterPlot, JfcPlot {
 	public JFreeChart getJFreeChart() {
 		chart.getXYPlot().setDomainAxis(getJFreeChartAxis(xAxis));
 		chart.getXYPlot().setRangeAxis(getJFreeChartAxis(yAxis));
+		chart.setTitle(getTitle());
 		return chart;
 	}
 
-	private org.jfree.chart.axis.ValueAxis getJFreeChartAxis(ValueAxis v) {
+	private org.jfree.chart.axis.ValueAxis getJFreeChartAxis(NumberAxis v) {
 		if(v.isLogarithmic()) {
 			LogAxis axis = new LogAxis(v.getLabel());
 			if(v.hasManualRange())
 				axis.setRange(v.getMin(), v.getMax());
+			else
+				axis.setAutoRange(true);
 			return axis;
 		} else {
-			NumberAxis axis = new NumberAxis(v.getLabel());
+			org.jfree.chart.axis.NumberAxis axis = new org.jfree.chart.axis.NumberAxis(v.getLabel());
 			if(v.hasManualRange())
 				axis.setRange(v.getMin(), v.getMax());
 			else {

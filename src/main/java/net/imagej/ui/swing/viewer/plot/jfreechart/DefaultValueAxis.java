@@ -1,8 +1,8 @@
 package net.imagej.ui.swing.viewer.plot.jfreechart;
 
-import net.imagej.plot.ValueAxis;
+import net.imagej.plot.NumberAxis;
 
-public class DefaultValueAxis implements ValueAxis {
+public class DefaultValueAxis implements NumberAxis {
 
 	@Override
 	public void setLabel(String label) {
@@ -23,10 +23,11 @@ public class DefaultValueAxis implements ValueAxis {
 	}
 
 	@Override
-	public void setAutoRange() { rangeIsSet = false; rangeContainsZero = false; }
-
-	@Override
-	public void setAutoRangeIncludeZero() { rangeIsSet = false; rangeContainsZero = true; }
+	public void setAutoRange(boolean includeZero, boolean add_space) {
+		rangeIsSet = false;
+		rangeContainsZero = includeZero;
+		rangeAddSpace = add_space;
+	}
 
 	@Override
 	public boolean hasManualRange() {
@@ -35,6 +36,9 @@ public class DefaultValueAxis implements ValueAxis {
 
 	@Override
 	public boolean doesAutoRangeIncludesZero() { return rangeContainsZero; }
+
+	@Override
+	public boolean doesAutoRangeAddSpace() { return rangeAddSpace; }
 
 	@Override
 	public Double getMin() {
@@ -70,5 +74,5 @@ public class DefaultValueAxis implements ValueAxis {
 	private boolean rangeIsSet;
 	private boolean logarithmic;
 	private boolean rangeContainsZero;
-
+	private boolean rangeAddSpace;
 }

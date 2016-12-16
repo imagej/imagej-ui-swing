@@ -8,9 +8,9 @@ public interface ScatterPlot {
 
 	void addSeries(String label, Collection<Double> xs, Collection<Double> ys, SeriesStyle style);
 
-	ValueAxis getXAxis();
+	NumberAxis getXAxis();
 
-	ValueAxis getYAxis();
+	NumberAxis getYAxis();
 
 	void setTitle(String title);
 

@@ -31,10 +31,6 @@
 
 package net.imagej.plot;
 
-import net.imagej.table.DefaultGenericTable;
-import net.imagej.table.DoubleColumn;
-import net.imagej.table.GenericColumn;
-import net.imagej.table.GenericTable;
 import net.imagej.table.Table;
 
 import org.scijava.Context;
@@ -45,13 +41,13 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Random;
 
 /**
  * A plot of data from a {@link Table}.
  * 
  * @author Curtis Rueden
  */
+
 public class TempMain {
 
 	public static void main(final String... args) {
@@ -69,31 +65,14 @@ public class TempMain {
 		log = ctx.service(LogService.class);
 		plotService = ctx.service(PlotService.class);
 
-		plotSomething();
 		plotLineStyles();
 		plotMarkerStyles();
 		plotLogarithmic();
 	}
 
-	private void plotSomething() {
-		ScatterPlot plot = plotService.createScatterPlot();
-		plot.setTitle("Population of largest cities!");
-		GenericTable table2 = createSampleTable3();
-		SeriesStyle style = plot.createSeriesStyle();
-		style.setColor(Color.BLACK);
-		style.setLineStyle(LineStyle.NONE);
-		style.setMarkerStyle(MarkerStyle.STAR);
-		plot.addSeries("blub", (DoubleColumn) table2.get(0), (DoubleColumn) table2.get(1), style);
-		GenericTable table3 = createSampleTable3();
-		style.setColor(Color.BLUE);
-		style.setLineStyle(LineStyle.NONE);
-		style.setMarkerStyle(MarkerStyle.SQUARE);
-		plot.addSeries("blub", (DoubleColumn) table3.get(0), (DoubleColumn) table3.get(1), style);
-		ui.show(plot);
-	}
-
 	private void plotLineStyles() {
 		ScatterPlot plot = plotService.createScatterPlot();
+		plot.setTitle("Line Styles");
 		Collection<Double> xs = collection(0.0,1.0);
 		LineStyle[] lineStyles = LineStyle.values();
 		SeriesStyle style = plot.createSeriesStyle();
@@ -103,11 +82,14 @@ public class TempMain {
 			double y = i * 1.0;
 			plot.addSeries(lineStyles[i].toString(), xs, collection(y,y), style);
 		}
+		plot.getXAxis().setManualRange(-1.0, 2.0);
+		plot.getYAxis().setManualRange(-1.0, (double) lineStyles.length);
 		ui.show(plot);
 	}
 
 	private void plotMarkerStyles() {
 		ScatterPlot plot = plotService.createScatterPlot();
+		plot.setTitle("Marker Styles");
 		SeriesStyle style = plot.createSeriesStyle();
 		Collection<Double> xs = collection(0.0,1.0);
 		MarkerStyle[] markerStyles = MarkerStyle.values();
@@ -116,93 +98,26 @@ public class TempMain {
 			double y = i * 1.0;
 			plot.addSeries(markerStyles[i].toString(), xs, collection(y,y), style);
 		}
+		plot.getXAxis().setManualRange(-1.0, 2.0);
+		plot.getYAxis().setManualRange(-1.0, (double) markerStyles.length);
 		ui.show(plot);
 	}
 
 	private void plotLogarithmic() {
 		ScatterPlot plot = plotService.createScatterPlot();
+		plot.setTitle("Logarithmic");
 		SeriesStyle style = plot.createSeriesStyle();
 		Collection<Double> xs = new ArrayList<>();
 		Collection<Double> ys = new ArrayList<>();
-		for(double x = 1; x < 10; x += 0.1) {
+		for(double x = 0; x < 10; x += 0.1) {
 			xs.add(x);
-			ys.add(Math.sin(x) + 10.0);
+			ys.add(Math.exp(Math.sin(x)));
 		}
-		plot.addSeries("sin(x)", xs, ys, style);
-		plot.getXAxis().setAutoRange();
-		plot.getYAxis().setAutoRangeIncludeZero();
+		plot.addSeries("exp(sin(x))", xs, ys, style);
+		plot.getXAxis().setAutoRange(true, false);
+		plot.getYAxis().setAutoRange(true, true);
+		plot.getYAxis().setLogarithmic(true);
 		ui.show(plot);
-	}
-
-
-	/**
-	 * This function shows how to create a table with information
-	 * about the largest towns in the world.
-	 *
-	 * @return a table with strings and numbers
-	 */
-	private GenericTable createTable()
-	{
-		// we create two columns
-		GenericColumn nameColumn = new GenericColumn("Town");
-		DoubleColumn populationColumn = new DoubleColumn("Population");
-
-		// we fill the columns with information about the largest towns in the world.
-		nameColumn.add("Karachi");
-		populationColumn.add(23500000.0);
-
-		nameColumn.add("Bejing");
-		populationColumn.add(21516000.0);
-
-		nameColumn.add("Sao Paolo");
-		populationColumn.add(21292893.0);
-
-		// but actually, the largest town is Shanghai,
-		// so let's add it at the beginning of the table.
-		nameColumn.add(0, "Shanghai");
-		populationColumn.add(0, 24256800.0);
-
-		// After filling the columns, you can create a table
-		GenericTable table = new DefaultGenericTable();
-
-		// and add the columns to that table
-		table.add(nameColumn);
-		table.add(populationColumn);
-
-		return table;
-	}
-
-	private static GenericTable createSampleTable2() {
-		Random random = new Random();
-		GenericTable table = new DefaultGenericTable();
-		GenericColumn nameColumn = new GenericColumn("Town");
-		DoubleColumn populationColumn = new DoubleColumn("Population");
-		DoubleColumn sizeColumn = new DoubleColumn("Size");
-		for(String town : new String[]{"sadf","sdf","C","D"}) {
-			for(int i = 0; i < 20; i++) {
-				nameColumn.add(town);
-				populationColumn.add(random.nextGaussian() * 2 + 3);
-				sizeColumn.add(random.nextGaussian() + 1);
-			}
-		}
-		table.add(nameColumn);
-		table.add(populationColumn);
-		table.add(sizeColumn);
-		return table;
-	}
-
-	private static GenericTable createSampleTable3() {
-		Random random = new Random();
-		GenericTable table = new DefaultGenericTable();
-		DoubleColumn populationColumn = new DoubleColumn("Population");
-		DoubleColumn sizeColumn = new DoubleColumn("Size");
-		for(int i = 0; i < 20; i++) {
-			populationColumn.add(random.nextGaussian() * 2 + 3);
-			sizeColumn.add(random.nextGaussian() + 1);
-		}
-		table.add(populationColumn);
-		table.add(sizeColumn);
-		return table;
 	}
 
 	private static Collection<Double> collection(Double ... values) {

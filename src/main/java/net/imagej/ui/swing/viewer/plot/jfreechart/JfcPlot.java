@@ -34,10 +34,11 @@ package net.imagej.ui.swing.viewer.plot.jfreechart;
 import org.jfree.chart.JFreeChart;
 
 public interface JfcPlot {
-	// FIXME add functions beeing very likely to be general for Diagrams
-	void setTitle(String title);
-	//void setLegendVisible(Boolean visible);
 
-	// FIXME move this function in more appropriate interface
+	void setTitle(String title);
+
+	String getTitle();
+
+	// FIXME add functions beeing very likely to be general for Diagrams
 	JFreeChart getJFreeChart();
 }

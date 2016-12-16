@@ -62,8 +62,8 @@ public class SwingPlotDisplayPanel extends JPanel implements PlotDisplayPanel {
 		this.display = display;
 		this.window = window;
 		setLayout(new BorderLayout());
-		JFreeChart chart = makeChart();
-		ChartPanel panel = new ChartPanel(chart);
+		final JfcPlot plot = display.get(0);
+		ChartPanel panel = new ChartPanel(plot.getJFreeChart());
 		add(panel);
 		window.setContent(this);
 	}
@@ -91,95 +91,4 @@ public class SwingPlotDisplayPanel extends JPanel implements PlotDisplayPanel {
 	@Override
 	public void redraw() { }
 
-	// -- Helper methods --
-
-	private JFreeChart makeChart() {
-		final JfcPlot plot = display.get(0);
-		return plot.getJFreeChart();
-	}
-
-	// 	static private JFreeChart makePieChart(final String chart_title, final Table<?,?> table) {
-	// 		final DefaultPieDataset dataset = generatePieDataset(table);
-	//		return ChartFactory.createPieChart( chart_title, dataset, true, true, false );
-	//	}
-	//
-	// static private DefaultPieDataset generatePieDataset(Table<?, ?> table) {
-	// 	// FIXME frow an exception it table has not the correct format.
-	// 	final Column<?> key_column = table.get(0);
-	// 	final DoubleColumn value_column = (DoubleColumn) table.get(1);
-	// 	final DefaultPieDataset dataset = new DefaultPieDataset();
-	// 	Iterator<?> key_iterator = key_column.iterator();
-	// 	Iterator<Double> value_iterator = value_column.iterator();
-	// 	while(key_iterator.hasNext() && value_iterator.hasNext())
-	// 		dataset.setValue(key_iterator.next().toString(), value_iterator.next());
-	// 	return dataset;
-	// }
-
-	// static private JFreeChart makeScatterChart(final String chart_title, final Table<?,?> table) {
-	// 	final XYSeries series = new XYSeries("series");
-	// 	DoubleColumn xcol = (DoubleColumn) table.get(0);
-	// 	DoubleColumn ycol = (DoubleColumn) table.get(1);
-	// 	Iterator<Double> xiter = xcol.iterator();
-	// 	Iterator<Double> yiter = ycol.iterator();
-	// 	while(xiter.hasNext() && yiter.hasNext()) {
-	// 		double x = xiter.next();
-	// 		double y = yiter.next();
-	// 		series.add(x, y);
-	// 	}
-	// 	final XYSeriesCollection chartDataset = new XYSeriesCollection( );
-	// 	chartDataset.addSeries( series );
-	// 	final String xlabel = xcol.getHeader();
-	// 	final String ylabel = ycol.getHeader();
-	// 	return ChartFactory.createScatterPlot(chart_title, xlabel, ylabel, chartDataset);
-	// }
-
-	// static private JFreeChart makeBoxChart(final String chart_title, final Table<?,?> table) {
-	// 	final DefaultBoxAndWhiskerCategoryDataset chartDataset = generateBoxplotDataset(table);
-	// 	final CategoryAxis xAxis = new CategoryAxis("Type");
-	// 	final NumberAxis yAxis = new NumberAxis("Value");
-	// 	final BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
-	// 	renderer.setFillBox(false);
-	// 	final CategoryPlot plot = new CategoryPlot(chartDataset, xAxis, yAxis, renderer);
-	// 	final Font font = new Font("SansSerif", Font.BOLD, 14);
-	// 	return new JFreeChart(chart_title ,font , plot, true );
-	// }
-
-	// static private DefaultBoxAndWhiskerCategoryDataset generateBoxplotDataset(Table<?,?> table) {
-	// 	DefaultBoxAndWhiskerCategoryDataset chartDataset = new DefaultBoxAndWhiskerCategoryDataset();
-	// 	Column<?> key_column = table.get(0);
-	// 	for(int i = 1; i < table.size(); i++) {
-	// 		DoubleColumn value_column = (DoubleColumn) table.get(i);
-	// 		String column_title = value_column.getHeader();
-	// 		MyMultiMap<?, Double> map = new MyMultiMap<>(key_column, value_column);
-	// 		for (Map.Entry<?, List<Double>> entry : map.entrySet())
-	// 			chartDataset.add(entry.getValue(), entry.getKey().toString(), column_title);
-	// 	}
-	// 	return chartDataset;
-	// }
-
-	// static private class MyMultiMap<K,V> {
-
-	// 	private Map<K, List<V>> map;
-
-	// 	MyMultiMap(Collection<K> keys, Collection<V> values) {
-	// 		map = new HashMap<>();
-	// 		Iterator<K> kIterator = keys.iterator();
-	// 		Iterator<V> vIterator = values.iterator();
-	// 		while(kIterator.hasNext() && vIterator.hasNext())
-	// 			add(kIterator.next(), vIterator.next());
-	// 	}
-
-	// 	void add(K k, V v) { get(k).add(v); }
-
-	// 	List<V> get(K k) {
-	// 		List<V> list = map.get(k);
-	//			if(list == null) {
-	//				list = new ArrayList<>();
-	//				map.put(k, list);
-	//			}
-	//			return list;
-	//		}
-	//
-	//		Set<Map.Entry<K, List<V>>> entrySet() { return map.entrySet(); }
-	//}
 }
