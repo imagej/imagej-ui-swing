@@ -11,17 +11,13 @@ public interface NumberAxis {
 
 	void setManualRange(double min, double max);
 
-	void setAutoRange(boolean includeZero, boolean addSpace);
+	void setAutoRange(RangeStrategy rangeStrategy);
 
-	boolean hasManualRange();
+	RangeStrategy getRangeStrategy();
 
-	boolean doesAutoRangeIncludesZero();
+	double getMin();
 
-	boolean doesAutoRangeAddSpace();
-
-	Double getMin();
-
-	Double getMax();
+	double getMax();
 
 	void setLogarithmic(boolean logarithmic);
 

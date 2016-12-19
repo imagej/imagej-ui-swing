@@ -15,7 +15,7 @@ class DefaultXYPlot implements XYPlot {
 
 	private String title;
 
-	private Collection<XYSeries> seriesCollection;
+	private Collection<XYItem> seriesCollection;
 
 	DefaultXYPlot() {
 		xAxis = new DefaultNumberAxis();
@@ -29,8 +29,8 @@ class DefaultXYPlot implements XYPlot {
 	}
 
 	@Override
-	public XYSeries createXYSeries(String label, Collection<Double> xs, Collection<Double> ys, SeriesStyle style) {
-		return new DefaultXYSeries(label, xs, ys, style);
+	public XYSeries createXYSeries(String label, Collection<Double> xs, Collection<Double> ys) {
+		return new DefaultXYSeries(label, xs, ys, null);
 	}
 
 	@Override
@@ -44,7 +44,7 @@ class DefaultXYPlot implements XYPlot {
 	}
 
 	@Override
-	public Collection<XYSeries> getSeriesCollection() {
+	public Collection<XYItem> getSeriesCollection() {
 		return seriesCollection;
 	}
 

@@ -10,13 +10,13 @@ public interface XYPlot extends AbstractPlot {
 
 	SeriesStyle createSeriesStyle(Color color, LineStyle lineStyle, MarkerStyle markerStyle);
 
-	XYSeries createXYSeries(String label, Collection<Double> xs, Collection<Double> ys, SeriesStyle style);
+	XYSeries createXYSeries(String label, Collection<Double> xs, Collection<Double> ys);
 
 	NumberAxis getXAxis();
 
 	NumberAxis getYAxis();
 
-	Collection<XYSeries> getSeriesCollection();
+	Collection<XYItem> getSeriesCollection();
 
 	void setTitle(String title);
 

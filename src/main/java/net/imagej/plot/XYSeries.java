@@ -5,10 +5,7 @@ import java.util.Collection;
 /**
  * @author
  */
-public interface XYSeries {
-	String getLabel();
-
-	void setLabel(String label);
+public interface XYSeries extends XYItem {
 
 	Collection<Double> getXValues();
 

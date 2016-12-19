@@ -5,6 +5,7 @@ import net.imagej.plot.XYSeries;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.LogAxis;
+import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.*;
 
@@ -37,8 +38,9 @@ public class JfcXYPlotGenerator implements JfcPlotGenerator {
 
 	private void addAllSeries() {
 		int id = 0;
-		for(XYSeries series : xyPlot.getSeriesCollection())
-			addSeries(id, series);
+		for(XYItem series : xyPlot.getSeriesCollection())
+			if(series instanceof XYSeries)
+				addSeries(id, (XYSeries) series);
 	}
 
 	private void addSeries(int id, XYSeries series) {
@@ -69,23 +71,43 @@ public class JfcXYPlotGenerator implements JfcPlotGenerator {
 	}
 
 	private org.jfree.chart.axis.ValueAxis getJFreeChartAxis(NumberAxis v) {
-		if(v.isLogarithmic()) {
-			LogAxis axis = new LogAxis(v.getLabel());
-			if(v.hasManualRange())
+		if(v.isLogarithmic())
+			return getJFreeChartLogarithmicAxis(v);
+		else
+			return getJFreeCharLinearAxis(v);
+	}
+
+	private ValueAxis getJFreeChartLogarithmicAxis(NumberAxis v) {
+		LogAxis axis = new LogAxis(v.getLabel());
+		switch (v.getRangeStrategy()) {
+			case MANUAL:
 				axis.setRange(v.getMin(), v.getMax());
-			else
+			default:
 				axis.setAutoRange(true);
-			return axis;
-		} else {
-			org.jfree.chart.axis.NumberAxis axis = new org.jfree.chart.axis.NumberAxis(v.getLabel());
-			if(v.hasManualRange())
-				axis.setRange(v.getMin(), v.getMax());
-			else {
-				axis.setAutoRange(true);
-				axis.setAutoRangeIncludesZero(v.doesAutoRangeIncludesZero());
-			}
-			return axis;
 		}
+		return axis;
+	}
+
+	private ValueAxis getJFreeCharLinearAxis(NumberAxis v) {
+		org.jfree.chart.axis.NumberAxis axis = new org.jfree.chart.axis.NumberAxis(v.getLabel());
+		switch(v.getRangeStrategy()) {
+			case MANUAL:
+				axis.setRange(v.getMin(), v.getMax());
+				break;
+			case TIGHT:
+			case WIDE:
+				axis.setAutoRange(true);
+				axis.setAutoRangeIncludesZero(false);
+				break;
+			case TIGHT_INCLUDE_ZERO:
+			case WIDE_INCLUDE_ZERO:
+				axis.setAutoRange(true);
+				axis.setAutoRangeIncludesZero(true);
+				break;
+			default:
+				axis.setAutoRange(true);
+		}
+		return axis;
 	}
 
 	private class SortedLabel implements Comparable<SortedLabel> {

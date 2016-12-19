@@ -7,6 +7,16 @@ import java.util.Collection;
  */
 class DefaultXYSeries implements XYSeries {
 
+	private String label;
+
+	private boolean legendVisible;
+
+	private Collection<Double> xValues;
+
+	private Collection<Double> yValues;
+
+	private SeriesStyle style;
+
 	DefaultXYSeries(String label, Collection<Double> xs, Collection<Double> ys, SeriesStyle style) {
 		this.label = label;
 		this.xValues = xs;
@@ -20,6 +30,16 @@ class DefaultXYSeries implements XYSeries {
 
 	public void setLabel(String label) {
 		this.label = label;
+	}
+
+	@Override
+	public boolean getLegendVisible() {
+		return legendVisible;
+	}
+
+	@Override
+	public void setLegendVisible(boolean legendVisible) {
+		this.legendVisible = legendVisible;
 	}
 
 	public Collection<Double> getXValues() {
@@ -45,10 +65,5 @@ class DefaultXYSeries implements XYSeries {
 	public void setStyle(SeriesStyle style) {
 		this.style = style;
 	}
-
-	private String label;
-	private Collection<Double> xValues;
-	private Collection<Double> yValues;
-	private SeriesStyle style;
 
 }

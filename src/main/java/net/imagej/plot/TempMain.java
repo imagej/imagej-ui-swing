@@ -79,9 +79,10 @@ public class TempMain {
 		Collection<Double> xs = collection(0.0,1.0);
 		LineStyle[] lineStyles = LineStyle.values();
 		for(int i = 0; i < lineStyles.length; i++) {
-			SeriesStyle style = plot.createSeriesStyle(Color.BLACK, lineStyles[i], MarkerStyle.CIRCLE);
 			double y = i * 1.0;
-			XYSeries series = plot.createXYSeries(lineStyles[i].toString(), xs, collection(y,y), style);
+			XYSeries series = plot.createXYSeries(lineStyles[i].toString(), xs, collection(y,y));
+			SeriesStyle style = plot.createSeriesStyle(Color.BLACK, lineStyles[i], MarkerStyle.CIRCLE);
+			series.setStyle(style);
 			plot.getSeriesCollection().add(series);
 		}
 		plot.getXAxis().setManualRange(-1.0, 2.0);
@@ -95,9 +96,10 @@ public class TempMain {
 		Collection<Double> xs = collection(0.0,1.0);
 		MarkerStyle[] markerStyles = MarkerStyle.values();
 		for(int i = 0; i < markerStyles.length; i++) {
-			SeriesStyle style = plot.createSeriesStyle(null, null, markerStyles[i]);
 			double y = i * 1.0;
-			XYSeries series = plot.createXYSeries(markerStyles[i].toString(), xs, collection(y,y), style);
+			XYSeries series = plot.createXYSeries(markerStyles[i].toString(), xs, collection(y,y));
+			SeriesStyle style = plot.createSeriesStyle(null, null, markerStyles[i]);
+			series.setStyle(style);
 			plot.getSeriesCollection().add(series);
 		}
 		plot.getXAxis().setManualRange(-1.0, 2.0);
@@ -114,10 +116,10 @@ public class TempMain {
 			xs.add(x);
 			ys.add(Math.exp(Math.sin(x)));
 		}
-		XYSeries series = plot.createXYSeries("exp(sin(x))", xs, ys, null);
+		XYSeries series = plot.createXYSeries("exp(sin(x))", xs, ys);
 		plot.getSeriesCollection().add(series);
-		plot.getXAxis().setAutoRange(true, false);
-		plot.getYAxis().setAutoRange(true, true);
+		plot.getXAxis().setAutoRange(RangeStrategy.WIDE);
+		plot.getYAxis().setAutoRange(RangeStrategy.TIGHT);
 		plot.getYAxis().setLogarithmic(true);
 		ui.show(plot);
 	}

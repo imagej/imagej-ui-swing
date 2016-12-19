@@ -8,20 +8,15 @@ class DefaultNumberAxis implements NumberAxis {
 
 	private double max;
 
-	private boolean rangeIsSet;
-
 	private boolean logarithmic;
 
-	private boolean rangeContainsZero;
-
-	private boolean rangeAddSpace;
+	private RangeStrategy rangeStrategy;
 
 	DefaultNumberAxis() {
 		min = 0;
 		max = 0;
-		rangeIsSet = false;
-		rangeContainsZero = false;
 		logarithmic = false;
+		rangeStrategy = RangeStrategy.TIGHT;
 	}
 
 	@Override
@@ -36,38 +31,29 @@ class DefaultNumberAxis implements NumberAxis {
 
 	@Override
 	public void setManualRange(double min, double max) {
-		rangeIsSet = true;
-		rangeContainsZero = false;
+		rangeStrategy = RangeStrategy.MANUAL;
 		this.min = min;
 		this.max = max;
 	}
 
 	@Override
-	public void setAutoRange(boolean includeZero, boolean addSpace) {
-		rangeIsSet = false;
-		rangeContainsZero = includeZero;
-		rangeAddSpace = addSpace;
+	public void setAutoRange(RangeStrategy rangeStrategy) {
+		this.rangeStrategy = rangeStrategy;
 	}
 
 	@Override
-	public boolean hasManualRange() {
-		return rangeIsSet;
+	public RangeStrategy getRangeStrategy() {
+		return rangeStrategy;
 	}
 
 	@Override
-	public boolean doesAutoRangeIncludesZero() { return rangeContainsZero; }
-
-	@Override
-	public boolean doesAutoRangeAddSpace() { return rangeAddSpace; }
-
-	@Override
-	public Double getMin() {
-		return rangeIsSet ? min : null;
+	public double getMin() {
+		return min;
 	}
 
 	@Override
-	public Double getMax() {
-		return rangeIsSet ? max : null;
+	public double getMax() {
+		return max;
 	}
 
 	@Override
