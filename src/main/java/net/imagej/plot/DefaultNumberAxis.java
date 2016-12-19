@@ -16,7 +16,7 @@ class DefaultNumberAxis implements NumberAxis {
 		min = 0;
 		max = 0;
 		logarithmic = false;
-		rangeStrategy = RangeStrategy.TIGHT;
+		rangeStrategy = RangeStrategy.AUTO;
 	}
 
 	@Override

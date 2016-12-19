@@ -22,6 +22,7 @@ class DefaultXYSeries implements XYSeries {
 		this.xValues = xs;
 		this.yValues = ys;
 		this.style = style;
+		this.legendVisible = true;
 	}
 
 	public String getLabel() {

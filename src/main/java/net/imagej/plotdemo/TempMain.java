@@ -29,15 +29,15 @@
  * #L%
  */
 
-package net.imagej.plot;
+package net.imagej.plotdemo;
 
+import net.imagej.plot.*;
 import net.imagej.table.Table;
 
 import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.ui.UIService;
 
-import javax.sound.sampled.Line;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -118,8 +118,8 @@ public class TempMain {
 		}
 		XYSeries series = plot.createXYSeries("exp(sin(x))", xs, ys);
 		plot.getSeriesCollection().add(series);
-		plot.getXAxis().setAutoRange(RangeStrategy.WIDE);
-		plot.getYAxis().setAutoRange(RangeStrategy.TIGHT);
+		plot.getXAxis().setAutoRange(RangeStrategy.AUTO);
+		plot.getYAxis().setAutoRange(RangeStrategy.AUTO);
 		plot.getYAxis().setLogarithmic(true);
 		ui.show(plot);
 	}

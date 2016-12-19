@@ -46,7 +46,7 @@ public class JfcXYPlotGenerator implements JfcPlotGenerator {
 	private void addSeries(int id, XYSeries series) {
 		SortedLabel uniqueLabel = new SortedLabel(id, series.getLabel());
 		addSeriesData(uniqueLabel, series.getXValues(), series.getYValues());
-		setSeriesStyle(uniqueLabel, series.getStyle());
+		setSeriesStyle(uniqueLabel, series.getStyle(), series.getLegendVisible());
 	}
 
 	private void addSeriesData(SortedLabel uniqueLabel, Collection<Double> xs, Collection<Double> ys) {
@@ -58,7 +58,7 @@ public class JfcXYPlotGenerator implements JfcPlotGenerator {
 		seriesCollection.addSeries(series);
 	}
 
-	private void setSeriesStyle(SortedLabel label, SeriesStyle style) {
+	private void setSeriesStyle(SortedLabel label, SeriesStyle style, boolean legendVisible) {
 		if (style == null)
 			return;
 		Color color = style.getColor();
@@ -68,6 +68,7 @@ public class JfcXYPlotGenerator implements JfcPlotGenerator {
 		if (color != null) renderer.setSeriesPaint(index, color);
 		JfcLineStyles.modifyRenderer(renderer, index, style.getLineStyle());
 		JfcMarkerStyles.modifyRenderer(renderer, index, style.getMarkerStyle());
+		renderer.setSeriesVisibleInLegend(index,legendVisible);
 	}
 
 	private org.jfree.chart.axis.ValueAxis getJFreeChartAxis(NumberAxis v) {
@@ -82,6 +83,7 @@ public class JfcXYPlotGenerator implements JfcPlotGenerator {
 		switch (v.getRangeStrategy()) {
 			case MANUAL:
 				axis.setRange(v.getMin(), v.getMax());
+				break;
 			default:
 				axis.setAutoRange(true);
 		}
@@ -94,13 +96,11 @@ public class JfcXYPlotGenerator implements JfcPlotGenerator {
 			case MANUAL:
 				axis.setRange(v.getMin(), v.getMax());
 				break;
-			case TIGHT:
-			case WIDE:
+			case AUTO:
 				axis.setAutoRange(true);
 				axis.setAutoRangeIncludesZero(false);
 				break;
-			case TIGHT_INCLUDE_ZERO:
-			case WIDE_INCLUDE_ZERO:
+			case AUTO_INCLUDE_ZERO:
 				axis.setAutoRange(true);
 				axis.setAutoRangeIncludesZero(true);
 				break;
