@@ -17,8 +17,9 @@ import java.util.Iterator;
  * @author Matthias Arzt
  */
 // FIXME make JfcXYPlotGenerator an interface and implement the JFreeChart in JFreeChartXYPlot
-public class JfcXYPlotGenerator implements JfcPlotGenerator {
+public class JfcXYPlotGenerator extends AbstractJfcChartGenerator {
 
+	private SortedLabelFactory sortedLabelFactory;
 	private XYPlot xyPlot;
 	private JFreeChart jFreeChart;
 	private XYSeriesCollection seriesCollection;
@@ -32,19 +33,19 @@ public class JfcXYPlotGenerator implements JfcPlotGenerator {
 		jFreeChart.getXYPlot().setDomainAxis(getJFreeChartAxis(xyPlot.getXAxis()));
 		jFreeChart.getXYPlot().setRangeAxis(getJFreeChartAxis(xyPlot.getYAxis()));
 		jFreeChart.setTitle(xyPlot.getTitle());
+		sortedLabelFactory = new SortedLabelFactory();
 		addAllSeries();
 		return jFreeChart;
 	}
 
 	private void addAllSeries() {
-		int id = 0;
 		for(XYItem series : xyPlot.getSeriesCollection())
 			if(series instanceof XYSeries)
-				addSeries(id, (XYSeries) series);
+				addSeries((XYSeries) series);
 	}
 
-	private void addSeries(int id, XYSeries series) {
-		SortedLabel uniqueLabel = new SortedLabel(id, series.getLabel());
+	private void addSeries(XYSeries series) {
+		SortedLabel uniqueLabel = sortedLabelFactory.newLabel(series.getLabel());
 		addSeriesData(uniqueLabel, series.getXValues(), series.getYValues());
 		setSeriesStyle(uniqueLabel, series.getStyle(), series.getLegendVisible());
 	}
@@ -61,11 +62,12 @@ public class JfcXYPlotGenerator implements JfcPlotGenerator {
 	private void setSeriesStyle(SortedLabel label, SeriesStyle style, boolean legendVisible) {
 		if (style == null)
 			return;
-		Color color = style.getColor();
 		XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer)
 				jFreeChart.getXYPlot().getRendererForDataset(seriesCollection);
 		int index = seriesCollection.getSeriesIndex(label);
-		if (color != null) renderer.setSeriesPaint(index, color);
+		Color color = style.getColor();
+		if (color != null)
+			renderer.setSeriesPaint(index, color);
 		JfcLineStyles.modifyRenderer(renderer, index, style.getLineStyle());
 		JfcMarkerStyles.modifyRenderer(renderer, index, style.getMarkerStyle());
 		renderer.setSeriesVisibleInLegend(index,legendVisible);
@@ -110,11 +112,4 @@ public class JfcXYPlotGenerator implements JfcPlotGenerator {
 		return axis;
 	}
 
-	private class SortedLabel implements Comparable<SortedLabel> {
-		SortedLabel(final int id, final String label) { this.label = label; this.id = id; }
-		@Override public String toString() { return label; }
-		@Override public int compareTo(SortedLabel o) { return Integer.compare(id, o.id); }
-		private String label;
-		private int id;
-	}
 }

@@ -17,4 +17,9 @@ public class DefaultPlotService extends AbstractService implements PlotService {
 		return new DefaultXYPlot();
 	}
 
+	@Override
+	public CategoryChart createCategoryChart() {
+		return new DefaultCategoryChart();
+	}
+
 }

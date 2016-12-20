@@ -1,6 +1,8 @@
 package net.imagej.ui.swing.viewer.plot.jfreechart;
 
 import net.imagej.plot.LineStyle;
+import org.jfree.chart.renderer.AbstractRenderer;
+import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 
 import java.awt.*;
@@ -11,11 +13,18 @@ import java.awt.*;
 
 public class JfcLineStyles {
 
-	static void modifyRenderer(XYLineAndShapeRenderer renderer, int series, LineStyle style) {
+	static void modifyRenderer(XYLineAndShapeRenderer renderer, int seriesIndex, LineStyle style) {
 		if(style == null)
 			return;
-		renderer.setSeriesLinesVisible(series, style != LineStyle.NONE);
-		renderer.setSeriesStroke(series, getAwtBasicStroke(style));
+		renderer.setSeriesLinesVisible(seriesIndex, style != LineStyle.NONE);
+		renderer.setSeriesStroke(seriesIndex, getAwtBasicStroke(style));
+	}
+
+	static void modifyRenderer(LineAndShapeRenderer renderer, int seriesIndex, LineStyle style) {
+		if(style == null)
+			return;
+		renderer.setSeriesLinesVisible(seriesIndex, style != LineStyle.NONE);
+		renderer.setSeriesStroke(seriesIndex, getAwtBasicStroke(style));
 	}
 
 	// --- Helper Constants ---

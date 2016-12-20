@@ -35,11 +35,9 @@ import java.awt.BorderLayout;
 import javax.swing.JPanel;
 
 import net.imagej.plot.AbstractPlot;
+import net.imagej.plot.CategoryChart;
 import net.imagej.plot.XYPlot;
-import net.imagej.ui.swing.viewer.plot.jfreechart.JfcPlotGenerator;
-import net.imagej.ui.swing.viewer.plot.jfreechart.JfcXYPlotGenerator;
-import net.imagej.ui.swing.viewer.plot.jfreechart.PlotDisplay;
-import net.imagej.ui.swing.viewer.plot.jfreechart.PlotDisplayPanel;
+import net.imagej.ui.swing.viewer.plot.jfreechart.*;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -74,6 +72,8 @@ public class SwingPlotDisplayPanel extends JPanel implements PlotDisplayPanel {
 	JFreeChart makeJFreeChart(AbstractPlot plot) {
 		if(plot instanceof XYPlot)
 			return new JfcXYPlotGenerator((XYPlot) plot).getJFreeChart();
+		if(plot instanceof CategoryChart)
+			return new JfcCategoryChartGenerator((CategoryChart) plot).getJFreeChart();
 		return null;
 	}
 

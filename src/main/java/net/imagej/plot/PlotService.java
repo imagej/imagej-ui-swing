@@ -12,6 +12,6 @@ public interface PlotService extends ImageJService {
 
 	// TODO: BoxPlot createBoxPlot();
 
-	// TODO: CategoryChart createCategoryChart();
+	CategoryChart createCategoryChart();
 
 }

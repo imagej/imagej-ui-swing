@@ -1,6 +1,7 @@
 package net.imagej.ui.swing.viewer.plot.jfreechart;
 
 import net.imagej.plot.MarkerStyle;
+import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 
 import java.awt.*;
@@ -14,12 +15,20 @@ import java.awt.geom.Rectangle2D;
 
 public class JfcMarkerStyles {
 
-	static void modifyRenderer(XYLineAndShapeRenderer renderer, int series, MarkerStyle style) {
+	static void modifyRenderer(XYLineAndShapeRenderer renderer, int seriesIndex, MarkerStyle style) {
 		if(style == null)
 			return;
-		renderer.setSeriesShapesVisible(series, getVisiable(style));
-		renderer.setSeriesShapesFilled(series, getFilled(style));
-		renderer.setSeriesShape(series, getAwtShape(style));
+		renderer.setSeriesShapesVisible(seriesIndex, getVisiable(style));
+		renderer.setSeriesShapesFilled(seriesIndex, getFilled(style));
+		renderer.setSeriesShape(seriesIndex, getAwtShape(style));
+	}
+
+	static void modifyRenderer(LineAndShapeRenderer renderer, int seriesIndex, MarkerStyle style) {
+		if(style == null)
+			return;
+		renderer.setSeriesShapesVisible(seriesIndex, getVisiable(style));
+		renderer.setSeriesShapesFilled(seriesIndex, getFilled(style));
+		renderer.setSeriesShape(seriesIndex, getAwtShape(style));
 	}
 
 	// --- Helper Constants ---

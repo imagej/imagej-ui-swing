@@ -3,11 +3,7 @@ package net.imagej.plot;
 /**
  * @author Matthias Arzt
  */
-public interface NumberAxis {
-
-	void setLabel(String label);
-
-	String getLabel();
+public interface NumberAxis extends LabeledObject {
 
 	void setManualRange(double min, double max);
 

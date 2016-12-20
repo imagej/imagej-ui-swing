@@ -71,6 +71,8 @@ public class TempMain {
 		plotLineStyles();
 		plotMarkerStyles();
 		plotLogarithmic();
+
+		showCategoryChart();
 	}
 
 	private void plotLineStyles() {
@@ -124,8 +126,21 @@ public class TempMain {
 		ui.show(plot);
 	}
 
+	private void showCategoryChart() {
+		CategoryChart chart = plotService.createCategoryChart();
+		chart.getCategoryAxis().setCategories(collection("one wheel", "bicycle", "car"));
+		LineSeries wheels = chart.createLineSeries("speed", collection(1.0, 2.0, 4.0));
+		LineSeries speed = chart.createLineSeries("speed", collection(6.0, 55.0, 200.0));
+		chart.getSeriesCollection().add(wheels);
+		chart.getSeriesCollection().add(speed);
+		ui.show(chart);
+	}
+
 	private static Collection<Double> collection(Double ... values) {
 		return Arrays.asList(values);
 	}
 
+	private static Collection<String> collection(String ... values) {
+		return Arrays.asList(values);
+	}
 }
