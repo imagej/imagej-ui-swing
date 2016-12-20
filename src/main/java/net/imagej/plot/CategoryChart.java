@@ -12,7 +12,7 @@ public interface CategoryChart extends AbstractPlot {
 
 	LineSeries createLineSeries(String label, Collection<Double> values);
 
-	// FIXME: add BarSeries createBarSeries(String label, Collection<Double> values);
+	BarSeries createBarSeries(String label, Collection<Double> values);
 
 	// FIXME: BoxPlot createBoxPlotSeries(String label, Collection<Double> values);
 
@@ -20,7 +20,7 @@ public interface CategoryChart extends AbstractPlot {
 
 	CategoryAxis getCategoryAxis();
 
-	Collection<LineSeries> getSeriesCollection();
+	Collection<CategorySeries> getSeriesCollection();
 
 	void setTitle(String title);
 

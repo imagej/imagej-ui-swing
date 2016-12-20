@@ -3,5 +3,5 @@ package net.imagej.plot;
 /**
  * @author Matthias Arzt
  */
-public interface LineSeries extends CategorySeries {
+public interface BarSeries extends CategorySeries {
 }

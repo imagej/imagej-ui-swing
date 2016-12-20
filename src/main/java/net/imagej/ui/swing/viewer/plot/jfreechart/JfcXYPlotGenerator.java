@@ -73,43 +73,4 @@ public class JfcXYPlotGenerator extends AbstractJfcChartGenerator {
 		renderer.setSeriesVisibleInLegend(index,legendVisible);
 	}
 
-	private org.jfree.chart.axis.ValueAxis getJFreeChartAxis(NumberAxis v) {
-		if(v.isLogarithmic())
-			return getJFreeChartLogarithmicAxis(v);
-		else
-			return getJFreeCharLinearAxis(v);
-	}
-
-	private ValueAxis getJFreeChartLogarithmicAxis(NumberAxis v) {
-		LogAxis axis = new LogAxis(v.getLabel());
-		switch (v.getRangeStrategy()) {
-			case MANUAL:
-				axis.setRange(v.getMin(), v.getMax());
-				break;
-			default:
-				axis.setAutoRange(true);
-		}
-		return axis;
-	}
-
-	private ValueAxis getJFreeCharLinearAxis(NumberAxis v) {
-		org.jfree.chart.axis.NumberAxis axis = new org.jfree.chart.axis.NumberAxis(v.getLabel());
-		switch(v.getRangeStrategy()) {
-			case MANUAL:
-				axis.setRange(v.getMin(), v.getMax());
-				break;
-			case AUTO:
-				axis.setAutoRange(true);
-				axis.setAutoRangeIncludesZero(false);
-				break;
-			case AUTO_INCLUDE_ZERO:
-				axis.setAutoRange(true);
-				axis.setAutoRangeIncludesZero(true);
-				break;
-			default:
-				axis.setAutoRange(true);
-		}
-		return axis;
-	}
-
 }

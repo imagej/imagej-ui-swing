@@ -17,7 +17,7 @@ public class DefaultCategoryChart implements CategoryChart {
 
 	private CategoryAxis categoryAxis;
 
-	private Collection<LineSeries> seriesCollection;
+	private Collection<CategorySeries> seriesCollection;
 
 	DefaultCategoryChart() {
 		valueAxis = new DefaultNumberAxis();
@@ -36,6 +36,11 @@ public class DefaultCategoryChart implements CategoryChart {
 	}
 
 	@Override
+	public BarSeries createBarSeries(String label, Collection<Double> values) {
+		return new DefaultBarSeries(label, values);
+	}
+
+	@Override
 	public NumberAxis getNumberAxis() {
 		return valueAxis;
 	}
@@ -46,7 +51,7 @@ public class DefaultCategoryChart implements CategoryChart {
 	}
 
 	@Override
-	public Collection<LineSeries> getSeriesCollection() {
+	public Collection<CategorySeries> getSeriesCollection() {
 		return seriesCollection;
 	}
 

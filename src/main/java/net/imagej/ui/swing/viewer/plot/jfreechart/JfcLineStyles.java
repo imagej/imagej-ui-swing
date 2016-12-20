@@ -13,17 +13,13 @@ import java.awt.*;
 
 public class JfcLineStyles {
 
-	static void modifyRenderer(XYLineAndShapeRenderer renderer, int seriesIndex, LineStyle style) {
+	static void modifyRenderer(AbstractRenderer renderer, int seriesIndex, LineStyle style) {
 		if(style == null)
 			return;
-		renderer.setSeriesLinesVisible(seriesIndex, style != LineStyle.NONE);
-		renderer.setSeriesStroke(seriesIndex, getAwtBasicStroke(style));
-	}
-
-	static void modifyRenderer(LineAndShapeRenderer renderer, int seriesIndex, LineStyle style) {
-		if(style == null)
-			return;
-		renderer.setSeriesLinesVisible(seriesIndex, style != LineStyle.NONE);
+		if(renderer instanceof XYLineAndShapeRenderer)
+			((XYLineAndShapeRenderer) renderer).setSeriesLinesVisible(seriesIndex, style != LineStyle.NONE);
+		if(renderer instanceof LineAndShapeRenderer)
+			((LineAndShapeRenderer) renderer).setSeriesLinesVisible(seriesIndex, style != LineStyle.NONE);
 		renderer.setSeriesStroke(seriesIndex, getAwtBasicStroke(style));
 	}
 

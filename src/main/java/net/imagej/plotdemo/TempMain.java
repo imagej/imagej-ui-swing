@@ -130,7 +130,7 @@ public class TempMain {
 		CategoryChart chart = plotService.createCategoryChart();
 		chart.getCategoryAxis().setCategories(collection("one wheel", "bicycle", "car"));
 		LineSeries wheels = chart.createLineSeries("speed", collection(1.0, 2.0, 4.0));
-		LineSeries speed = chart.createLineSeries("speed", collection(6.0, 55.0, 200.0));
+		BarSeries speed = chart.createBarSeries("speed", collection(6.0, 55.0, 200.0));
 		chart.getSeriesCollection().add(wheels);
 		chart.getSeriesCollection().add(speed);
 		ui.show(chart);

@@ -1,6 +1,7 @@
 package net.imagej.ui.swing.viewer.plot.jfreechart;
 
 import net.imagej.plot.MarkerStyle;
+import org.jfree.chart.renderer.AbstractRenderer;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 
@@ -15,19 +16,17 @@ import java.awt.geom.Rectangle2D;
 
 public class JfcMarkerStyles {
 
-	static void modifyRenderer(XYLineAndShapeRenderer renderer, int seriesIndex, MarkerStyle style) {
+	static void modifyRenderer(AbstractRenderer renderer, int seriesIndex, MarkerStyle style) {
 		if(style == null)
 			return;
-		renderer.setSeriesShapesVisible(seriesIndex, getVisiable(style));
-		renderer.setSeriesShapesFilled(seriesIndex, getFilled(style));
-		renderer.setSeriesShape(seriesIndex, getAwtShape(style));
-	}
-
-	static void modifyRenderer(LineAndShapeRenderer renderer, int seriesIndex, MarkerStyle style) {
-		if(style == null)
-			return;
-		renderer.setSeriesShapesVisible(seriesIndex, getVisiable(style));
-		renderer.setSeriesShapesFilled(seriesIndex, getFilled(style));
+		if(renderer instanceof XYLineAndShapeRenderer) {
+			((XYLineAndShapeRenderer) renderer).setSeriesShapesVisible(seriesIndex, getVisiable(style));
+			((XYLineAndShapeRenderer) renderer).setSeriesShapesFilled(seriesIndex, getFilled(style));
+		}
+		if(renderer instanceof LineAndShapeRenderer) {
+			((LineAndShapeRenderer) renderer).setSeriesShapesVisible(seriesIndex, getVisiable(style));
+			((LineAndShapeRenderer) renderer).setSeriesShapesFilled(seriesIndex, getFilled(style));
+		}
 		renderer.setSeriesShape(seriesIndex, getAwtShape(style));
 	}
 
