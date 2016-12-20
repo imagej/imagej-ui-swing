@@ -1,4 +1,7 @@
-package net.imagej.plot;
+package net.imagej.defaultplot;
+
+import net.imagej.plot.SeriesStyle;
+import net.imagej.plot.XYSeries;
 
 import java.util.Collection;
 

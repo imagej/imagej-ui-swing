@@ -1,11 +1,13 @@
-package net.imagej.plot;
+package net.imagej.defaultplot;
+
+import net.imagej.plot.CategoryAxis;
 
 import java.util.Collection;
 
 /**
  * @author Matthias Arzt
  */
-public class DefaultCategoryAxis implements CategoryAxis{
+public class DefaultCategoryAxis implements CategoryAxis {
 
 	private String label;
 

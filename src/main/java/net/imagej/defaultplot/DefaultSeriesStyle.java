@@ -1,4 +1,8 @@
-package net.imagej.plot;
+package net.imagej.defaultplot;
+
+import net.imagej.plot.LineStyle;
+import net.imagej.plot.MarkerStyle;
+import net.imagej.plot.SeriesStyle;
 
 import java.awt.*;
 

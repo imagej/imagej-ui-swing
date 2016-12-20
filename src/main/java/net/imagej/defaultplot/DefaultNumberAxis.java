@@ -1,4 +1,7 @@
-package net.imagej.plot;
+package net.imagej.defaultplot;
+
+import net.imagej.plot.NumberAxis;
+import net.imagej.plot.RangeStrategy;
 
 class DefaultNumberAxis implements NumberAxis {
 

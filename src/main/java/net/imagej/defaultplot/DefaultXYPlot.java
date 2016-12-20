@@ -1,4 +1,6 @@
-package net.imagej.plot;
+package net.imagej.defaultplot;
+
+import net.imagej.plot.*;
 
 import java.awt.*;
 import java.util.Collection;

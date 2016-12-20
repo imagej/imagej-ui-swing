@@ -1,6 +1,9 @@
 
-package net.imagej.plot;
+package net.imagej.defaultplot;
 
+import net.imagej.plot.CategoryChart;
+import net.imagej.plot.PlotService;
+import net.imagej.plot.XYPlot;
 import org.scijava.plugin.Plugin;
 import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
