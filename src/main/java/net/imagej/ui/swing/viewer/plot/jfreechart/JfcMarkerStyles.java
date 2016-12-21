@@ -14,7 +14,7 @@ import java.awt.geom.Rectangle2D;
  * @author Matthias Arzt
  */
 
-public class JfcMarkerStyles {
+class JfcMarkerStyles {
 
 	static void modifyRenderer(AbstractRenderer renderer, int seriesIndex, MarkerStyle style) {
 		if(style == null)

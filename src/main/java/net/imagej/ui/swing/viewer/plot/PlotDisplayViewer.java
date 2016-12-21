@@ -29,10 +29,9 @@
  * #L%
  */
 
-package net.imagej.ui.swing.viewer.plot.jfreechart;
+package net.imagej.ui.swing.viewer.plot;
 
 import net.imagej.plot.AbstractPlot;
-import net.imagej.plot.XYPlot;
 import org.scijava.ui.viewer.DisplayViewer;
 
 /**

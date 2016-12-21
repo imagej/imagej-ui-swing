@@ -11,7 +11,7 @@ import org.scijava.plugin.Plugin;
  * @author Matthias Arzt
  */
 @Plugin(type = Converter.class, priority = Priority.NORMAL_PRIORITY)
-public class CategoryChartToJfcCpnverter extends AbstractConverter<CategoryChart, JFreeChart> {
+public class CategoryChartToJfcConverter extends AbstractConverter<CategoryChart, JFreeChart> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T convert(Object o, Class<T> aClass) {

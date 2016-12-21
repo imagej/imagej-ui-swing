@@ -29,7 +29,7 @@
  * #L%
  */
 
-package net.imagej.ui.swing.viewer.plot.jfreechart;
+package net.imagej.ui.swing.viewer.plot;
 
 import org.scijava.ui.viewer.DisplayPanel;
 

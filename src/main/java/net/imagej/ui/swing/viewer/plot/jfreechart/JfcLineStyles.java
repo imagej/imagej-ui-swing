@@ -11,7 +11,7 @@ import java.awt.*;
  * @author Matthias Arzt
  */
 
-public class JfcLineStyles {
+class JfcLineStyles {
 
 	static void modifyRenderer(AbstractRenderer renderer, int seriesIndex, LineStyle style) {
 		if(style == null)

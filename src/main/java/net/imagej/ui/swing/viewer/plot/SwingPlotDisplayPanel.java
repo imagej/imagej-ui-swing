@@ -35,9 +35,6 @@ import java.awt.BorderLayout;
 import javax.swing.JPanel;
 
 import net.imagej.plot.AbstractPlot;
-import net.imagej.plot.CategoryChart;
-import net.imagej.plot.XYPlot;
-import net.imagej.ui.swing.viewer.plot.jfreechart.*;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;

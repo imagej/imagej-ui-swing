@@ -18,7 +18,7 @@ import java.util.Iterator;
 /**
  * @author Matthias Arzt
  */
-public class JfcCategoryChartGenerator extends AbstractJfcChartGenerator {
+class JfcCategoryChartGenerator extends AbstractJfcChartGenerator {
 
 	final private CategoryChart chart;
 
@@ -34,7 +34,7 @@ public class JfcCategoryChartGenerator extends AbstractJfcChartGenerator {
 
 	private BoxDataset boxData;
 
-	public JfcCategoryChartGenerator(CategoryChart chart) {
+	JfcCategoryChartGenerator(CategoryChart chart) {
 		this.chart = chart;
 	}
 

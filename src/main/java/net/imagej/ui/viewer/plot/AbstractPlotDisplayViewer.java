@@ -32,8 +32,8 @@
 package net.imagej.ui.viewer.plot;
 
 import net.imagej.plot.AbstractPlot;
-import net.imagej.ui.swing.viewer.plot.jfreechart.PlotDisplay;
-import net.imagej.ui.swing.viewer.plot.jfreechart.PlotDisplayViewer;
+import net.imagej.ui.swing.viewer.plot.PlotDisplay;
+import net.imagej.ui.swing.viewer.plot.PlotDisplayViewer;
 
 import org.scijava.display.Display;
 import org.scijava.ui.viewer.AbstractDisplayViewer;
