@@ -1,13 +1,13 @@
 package net.imagej.plot;
 
-import java.awt.Color;
+import org.scijava.util.ColorRGB;
 
 /**
  * @author Matthias Arzt
  */
 public interface SeriesStyle {
 
-	Color getColor();
+	ColorRGB getColor();
 
 	LineStyle getLineStyle();
 

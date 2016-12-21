@@ -37,8 +37,8 @@ import net.imagej.table.Table;
 import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.ui.UIService;
+import org.scijava.util.Colors;
 
-import java.awt.*;
 import java.util.*;
 
 /**
@@ -80,7 +80,7 @@ public class TempMain {
 		for(int i = 0; i < lineStyles.length; i++) {
 			double y = i * 1.0;
 			XYSeries series = plot.createXYSeries(lineStyles[i].toString(), xs, collection(y,y));
-			SeriesStyle style = plot.createSeriesStyle(Color.BLACK, lineStyles[i], MarkerStyle.CIRCLE);
+			SeriesStyle style = plot.createSeriesStyle(Colors.BLACK, lineStyles[i], MarkerStyle.CIRCLE);
 			series.setStyle(style);
 			plot.getItems().add(series);
 		}
@@ -132,12 +132,12 @@ public class TempMain {
 				randomCollection(10),
 				randomCollection(20),
 				randomCollection(30)));
-		boxes.setColor(Color.BLACK);
+		boxes.setColor(Colors.BLACK);
 		BoxSeries boxes2 = chart.createBoxSeries("boxes", collection(
 				randomCollection(10),
 				randomCollection(20),
 				randomCollection(30)));
-		boxes2.setColor(Color.CYAN);
+		boxes2.setColor(Colors.CYAN);
 		chart.getItems().add(wheels);
 		chart.getItems().add(speed);
 		chart.getItems().add(boxes);

@@ -9,6 +9,8 @@ import org.jfree.chart.renderer.AbstractRenderer;
 import org.jfree.chart.renderer.category.*;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
+import org.scijava.ui.awt.AWTColors;
+import org.scijava.util.ColorRGB;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -98,7 +100,7 @@ class JfcCategoryChartGenerator extends AbstractJfcChartGenerator {
 			while(vi.hasNext() && ci.hasNext())
 				jfcDataset.add(new ArrayList<>(vi.next()), uniqueLabel, ci.next());
 			int seriesIndex = jfcDataset.getRowIndex(uniqueLabel);
-			Paint color = series.getColor();
+			Paint color = color(series.getColor());
 			if(color != null)
 				jfcRenderer.setSeriesPaint(seriesIndex, color);
 		}
@@ -139,7 +141,7 @@ class JfcCategoryChartGenerator extends AbstractJfcChartGenerator {
 				return;
 			int seriesIndex = jfcDataset.getRowIndex(uniqueLabel);
 			if(style.getColor() != null)
-				jfcRenderer.setSeriesPaint(seriesIndex, style.getColor());
+				jfcRenderer.setSeriesPaint(seriesIndex, color(style.getColor()));
 			JfcLineStyles.modifyRenderer((AbstractRenderer) jfcRenderer, seriesIndex, style.getLineStyle());
 			JfcMarkerStyles.modifyRenderer((AbstractRenderer) jfcRenderer, seriesIndex, style.getMarkerStyle());
 		}

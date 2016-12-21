@@ -1,6 +1,7 @@
 package net.imagej.plot;
 
-import java.awt.*;
+import org.scijava.util.ColorRGB;
+
 import java.util.Collection;
 
 /**
@@ -12,7 +13,7 @@ public interface BoxSeries extends CategoryChartItem, LabeledObject {
 
 	void setValues(Collection<Collection<Double>> values);
 
-	Color getColor();
+	ColorRGB getColor();
 
-	void setColor(Color color);
+	void setColor(ColorRGB color);
 }

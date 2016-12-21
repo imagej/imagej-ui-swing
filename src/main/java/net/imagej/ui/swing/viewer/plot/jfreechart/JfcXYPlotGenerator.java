@@ -71,7 +71,7 @@ class JfcXYPlotGenerator extends AbstractJfcChartGenerator {
 		if (style == null)
 			return;
 		int index = jfcDataSet.getSeriesIndex(label);
-		Color color = style.getColor();
+		Color color = color(style.getColor());
 		if (color != null)
 			jfcRenderer.setSeriesPaint(index, color);
 		JfcLineStyles.modifyRenderer(jfcRenderer, index, style.getLineStyle());

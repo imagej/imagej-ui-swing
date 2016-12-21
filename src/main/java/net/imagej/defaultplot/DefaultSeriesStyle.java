@@ -3,27 +3,26 @@ package net.imagej.defaultplot;
 import net.imagej.plot.LineStyle;
 import net.imagej.plot.MarkerStyle;
 import net.imagej.plot.SeriesStyle;
-
-import java.awt.*;
+import org.scijava.util.ColorRGB;
 
 /**
  * @author Matthias Arzt
  */
 class DefaultSeriesStyle implements SeriesStyle {
 
-	private Color color;
+	private ColorRGB color;
 
 	private MarkerStyle markerStyle;
 
 	private LineStyle lineStyle;
 
-	DefaultSeriesStyle(Color color, LineStyle lineStyle, MarkerStyle markerStyle) {
+	DefaultSeriesStyle(ColorRGB color, LineStyle lineStyle, MarkerStyle markerStyle) {
 		this.color = color;
 		this.lineStyle = lineStyle;
 		this.markerStyle = markerStyle;
 	}
 
-	public Color getColor() {
+	public ColorRGB getColor() {
 		return color;
 	}
 

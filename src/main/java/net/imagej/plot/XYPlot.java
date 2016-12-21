@@ -1,6 +1,7 @@
 package net.imagej.plot;
 
-import java.awt.*;
+import org.scijava.util.ColorRGB;
+
 import java.util.Collection;
 
 /**
@@ -8,7 +9,7 @@ import java.util.Collection;
  */
 public interface XYPlot extends AbstractPlot {
 
-	SeriesStyle createSeriesStyle(Color color, LineStyle lineStyle, MarkerStyle markerStyle);
+	SeriesStyle createSeriesStyle(ColorRGB color, LineStyle lineStyle, MarkerStyle markerStyle);
 
 	XYSeries createXYSeries(String label, Collection<Double> xs, Collection<Double> ys);
 

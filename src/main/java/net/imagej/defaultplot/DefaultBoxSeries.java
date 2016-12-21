@@ -1,8 +1,8 @@
 package net.imagej.defaultplot;
 
 import net.imagej.plot.BoxSeries;
+import org.scijava.util.ColorRGB;
 
-import java.awt.*;
 import java.util.Collection;
 
 /**
@@ -12,7 +12,7 @@ public class DefaultBoxSeries implements BoxSeries {
 
 	private String label;
 
-	private Color color;
+	private ColorRGB color;
 
 	private Collection<Collection<Double>> values;
 
@@ -32,12 +32,12 @@ public class DefaultBoxSeries implements BoxSeries {
 	}
 
 	@Override
-	public Color getColor() {
+	public ColorRGB getColor() {
 		return color;
 	}
 
 	@Override
-	public void setColor(Color color) {
+	public void setColor(ColorRGB color) {
 		this.color = color;
 	}
 

@@ -7,6 +7,8 @@ import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.block.BlockFrame;
 import org.jfree.chart.plot.Plot;
+import org.scijava.ui.awt.AWTColors;
+import org.scijava.util.ColorRGB;
 
 import java.awt.*;
 
@@ -78,6 +80,10 @@ abstract class AbstractJfcChartGenerator {
 		@Override public int compareTo(SortedLabel o) { return Integer.compare(id, o.id); }
 		private String label;
 		private int id;
+	}
+
+	static Color color(ColorRGB color) {
+		return AWTColors.getColor(color);
 	}
 
 }

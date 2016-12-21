@@ -1,8 +1,8 @@
 package net.imagej.defaultplot;
 
 import net.imagej.plot.*;
+import org.scijava.util.ColorRGB;
 
-import java.awt.*;
 import java.util.Collection;
 import java.util.LinkedList;
 
@@ -26,7 +26,7 @@ public class DefaultCategoryChart implements CategoryChart {
 	}
 
 	@Override
-	public SeriesStyle createSeriesStyle(Color color, LineStyle lineStyle, MarkerStyle markerStyle) {
+	public SeriesStyle createSeriesStyle(ColorRGB color, LineStyle lineStyle, MarkerStyle markerStyle) {
 		return new DefaultSeriesStyle(color, lineStyle, markerStyle);
 	}
 
