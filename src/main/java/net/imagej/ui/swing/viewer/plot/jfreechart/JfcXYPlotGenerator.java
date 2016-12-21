@@ -1,9 +1,11 @@
 package net.imagej.ui.swing.viewer.plot.jfreechart;
 
 import net.imagej.plot.*;
+import net.imagej.plot.XYPlot;
 import net.imagej.plot.XYSeries;
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.Plot;
+import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.*;
 
@@ -15,25 +17,33 @@ import java.util.Iterator;
  * @author Matthias Arzt
  */
 // FIXME make JfcXYPlotGenerator an interface and implement the JFreeChart in JFreeChartXYPlot
-public class JfcXYPlotGenerator extends AbstractJfcChartGenerator {
+class JfcXYPlotGenerator extends AbstractJfcChartGenerator {
 
 	private SortedLabelFactory sortedLabelFactory;
 	private XYPlot xyPlot;
-	private JFreeChart jFreeChart;
-	private XYSeriesCollection seriesCollection;
+	private org.jfree.chart.plot.XYPlot jfcPlot;
+	private XYSeriesCollection jfcDataSet;
+	private XYLineAndShapeRenderer jfcRenderer;
 
-	public JfcXYPlotGenerator(XYPlot xyPlot) { this.xyPlot = xyPlot; }
+	JfcXYPlotGenerator(XYPlot xyPlot) { this.xyPlot = xyPlot; }
 
 	@Override
-	public JFreeChart getJFreeChart() {
-		seriesCollection = new XYSeriesCollection();
-		jFreeChart = ChartFactory.createXYLineChart("", "", "", seriesCollection);
-		jFreeChart.getXYPlot().setDomainAxis(getJFreeChartAxis(xyPlot.getXAxis()));
-		jFreeChart.getXYPlot().setRangeAxis(getJFreeChartAxis(xyPlot.getYAxis()));
-		jFreeChart.setTitle(xyPlot.getTitle());
+	Plot getJfcPlot() {
+		jfcDataSet = new XYSeriesCollection();
+		jfcRenderer = new XYLineAndShapeRenderer();
+		jfcPlot = new org.jfree.chart.plot.XYPlot();
+		jfcPlot.setDataset(jfcDataSet);
+		jfcPlot.setDomainAxis(getJFreeChartAxis(xyPlot.getXAxis()));
+		jfcPlot.setRangeAxis(getJFreeChartAxis(xyPlot.getYAxis()));
+		jfcPlot.setRenderer(jfcRenderer);
 		sortedLabelFactory = new SortedLabelFactory();
 		addAllSeries();
-		return jFreeChart;
+		return jfcPlot;
+	}
+
+	@Override
+	String getTitle() {
+		return xyPlot.getTitle();
 	}
 
 	private void addAllSeries() {
@@ -54,21 +64,19 @@ public class JfcXYPlotGenerator extends AbstractJfcChartGenerator {
 		Iterator<Double> yi = ys.iterator();
 		while (xi.hasNext() && yi.hasNext())
 			series.add(xi.next(), yi.next());
-		seriesCollection.addSeries(series);
+		jfcDataSet.addSeries(series);
 	}
 
 	private void setSeriesStyle(SortedLabel label, SeriesStyle style, boolean legendVisible) {
 		if (style == null)
 			return;
-		XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer)
-				jFreeChart.getXYPlot().getRendererForDataset(seriesCollection);
-		int index = seriesCollection.getSeriesIndex(label);
+		int index = jfcDataSet.getSeriesIndex(label);
 		Color color = style.getColor();
 		if (color != null)
-			renderer.setSeriesPaint(index, color);
-		JfcLineStyles.modifyRenderer(renderer, index, style.getLineStyle());
-		JfcMarkerStyles.modifyRenderer(renderer, index, style.getMarkerStyle());
-		renderer.setSeriesVisibleInLegend(index,legendVisible);
+			jfcRenderer.setSeriesPaint(index, color);
+		JfcLineStyles.modifyRenderer(jfcRenderer, index, style.getLineStyle());
+		JfcMarkerStyles.modifyRenderer(jfcRenderer, index, style.getMarkerStyle());
+		jfcRenderer.setSeriesVisibleInLegend(index,legendVisible);
 	}
 
 }

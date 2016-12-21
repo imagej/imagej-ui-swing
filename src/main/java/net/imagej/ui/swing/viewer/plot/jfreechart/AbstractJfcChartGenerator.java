@@ -1,13 +1,31 @@
 package net.imagej.ui.swing.viewer.plot.jfreechart;
 
 import net.imagej.plot.NumberAxis;
+import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.LogAxis;
 import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.block.BlockBorder;
+import org.jfree.chart.block.BlockFrame;
+import org.jfree.chart.plot.Plot;
+
+import java.awt.*;
 
 /**
  * @author Matthias Arzt
  */
-abstract class AbstractJfcChartGenerator implements JfcPlotGenerator {
+abstract class AbstractJfcChartGenerator {
+
+	abstract Plot getJfcPlot();
+
+	abstract String getTitle();
+
+	public JFreeChart getJFreeChart() {
+		JFreeChart chart = new JFreeChart(getJfcPlot());
+		chart.setTitle(getTitle());
+		chart.setBackgroundPaint(Color.WHITE);
+		chart.getLegend().setFrame(BlockBorder.NONE);
+		return chart;
+	}
 
 	static org.jfree.chart.axis.ValueAxis getJFreeChartAxis(NumberAxis v) {
 		if(v.isLogarithmic())

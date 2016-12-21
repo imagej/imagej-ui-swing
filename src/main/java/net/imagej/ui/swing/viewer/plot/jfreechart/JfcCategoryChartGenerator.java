@@ -1,10 +1,10 @@
 package net.imagej.ui.swing.viewer.plot.jfreechart;
 
 import net.imagej.plot.*;
-import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.Plot;
 import org.jfree.chart.renderer.AbstractRenderer;
 import org.jfree.chart.renderer.category.*;
 import org.jfree.data.category.DefaultCategoryDataset;
@@ -39,21 +39,26 @@ public class JfcCategoryChartGenerator extends AbstractJfcChartGenerator {
 	}
 
 	@Override
-	public JFreeChart getJFreeChart() {
+	Plot getJfcPlot() {
 		labelFactory = new SortedLabelFactory();
 		categories = chart.getCategoryAxis().getCategories();
 		lineData = new LineAndBarDataset(new LineAndShapeRenderer());
 		barData = new LineAndBarDataset(createFlatBarRenderer());
 		boxData = new BoxDataset();
-		addAllSeries();
 		jfcPlot = new CategoryPlot();
 		jfcPlot.setDomainAxis(new CategoryAxis(chart.getCategoryAxis().getLabel()));
 		jfcPlot.getDomainAxis().setCategoryLabelPositions(CategoryLabelPositions.UP_45);
 		jfcPlot.setRangeAxis(getJFreeChartAxis(chart.getNumberAxis()));
+		addAllSeries();
 		lineData.addDatasetToPlot(0);
 		boxData.addDatasetToPlot(1);
 		barData.addDatasetToPlot(2);
-		return new JFreeChart(jfcPlot);
+		return jfcPlot;
+	}
+
+	@Override
+	String getTitle() {
+		return chart.getTitle();
 	}
 
 	static private BarRenderer createFlatBarRenderer() {
