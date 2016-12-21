@@ -41,6 +41,7 @@ import net.imagej.ui.swing.viewer.plot.jfreechart.*;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.scijava.convert.ConvertService;
 import org.scijava.ui.viewer.DisplayWindow;
 
 /**
@@ -54,14 +55,16 @@ public class SwingPlotDisplayPanel extends JPanel implements PlotDisplayPanel {
 
 	private final DisplayWindow window;
 	private final PlotDisplay display;
+	private final ConvertService convertService;
 
 	// -- constructor --
 
 	public SwingPlotDisplayPanel(final PlotDisplay display,
-		final DisplayWindow window)
+		final DisplayWindow window, final ConvertService convertService)
 	{
 		this.display = display;
 		this.window = window;
+		this.convertService = convertService;
 		setLayout(new BorderLayout());
 		final JFreeChart chart = makeJFreeChart(display.get(0));
 		ChartPanel panel = new ChartPanel(chart);
@@ -70,11 +73,7 @@ public class SwingPlotDisplayPanel extends JPanel implements PlotDisplayPanel {
 	}
 
 	JFreeChart makeJFreeChart(AbstractPlot plot) {
-		if(plot instanceof XYPlot)
-			return new JfcXYPlotGenerator((XYPlot) plot).getJFreeChart();
-		if(plot instanceof CategoryChart)
-			return new JfcCategoryChartGenerator((CategoryChart) plot).getJFreeChart();
-		return null;
+		return convertService.convert(plot, JFreeChart.class);
 	}
 
 	// -- PlotDisplayPanel methods --

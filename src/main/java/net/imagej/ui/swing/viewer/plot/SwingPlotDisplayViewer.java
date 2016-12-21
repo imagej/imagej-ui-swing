@@ -31,10 +31,11 @@
 
 package net.imagej.ui.swing.viewer.plot;
 
-import net.imagej.ui.swing.viewer.plot.jfreechart.JfcPlotGenerator;
 import net.imagej.ui.viewer.plot.AbstractPlotDisplayViewer;
 
+import org.scijava.convert.ConvertService;
 import org.scijava.display.Display;
+import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.ui.UserInterface;
 import org.scijava.ui.swing.SwingUI;
@@ -49,6 +50,9 @@ import org.scijava.ui.viewer.DisplayWindow;
 @Plugin(type = DisplayViewer.class)
 public class SwingPlotDisplayViewer extends AbstractPlotDisplayViewer {
 
+	@Parameter
+	ConvertService convertService;
+
 	@Override
 	public boolean isCompatible(final UserInterface ui) {
 		return ui instanceof SwingUI;
@@ -57,7 +61,7 @@ public class SwingPlotDisplayViewer extends AbstractPlotDisplayViewer {
 	@Override
 	public void view(final DisplayWindow w, final Display<?> d) {
 		super.view(w, d);
-		setPanel(new SwingPlotDisplayPanel(getDisplay(), w));
+		setPanel(new SwingPlotDisplayPanel(getDisplay(), w, convertService));
 	}
 
 }

@@ -32,8 +32,6 @@
 package net.imagej.ui.viewer.plot;
 
 import net.imagej.plot.AbstractPlot;
-import net.imagej.plot.XYPlot;
-import net.imagej.ui.swing.viewer.plot.jfreechart.JfcPlotGenerator;
 import net.imagej.ui.swing.viewer.plot.jfreechart.PlotDisplay;
 import net.imagej.ui.swing.viewer.plot.jfreechart.PlotDisplayViewer;
 
