@@ -17,12 +17,12 @@ public class DefaultCategoryChart implements CategoryChart {
 
 	private CategoryAxis categoryAxis;
 
-	private Collection<CategorySeries> seriesCollection;
+	private Collection<CategorySeries> items;
 
 	DefaultCategoryChart() {
 		valueAxis = new DefaultNumberAxis();
 		categoryAxis = new DefaultCategoryAxis();
-		seriesCollection = new LinkedList<>();
+		items = new LinkedList<>();
 	}
 
 	@Override
@@ -50,9 +50,8 @@ public class DefaultCategoryChart implements CategoryChart {
 		return categoryAxis;
 	}
 
-	@Override
-	public Collection<CategorySeries> getSeriesCollection() {
-		return seriesCollection;
+	public Collection<CategorySeries> getItems() {
+		return items;
 	}
 
 	@Override

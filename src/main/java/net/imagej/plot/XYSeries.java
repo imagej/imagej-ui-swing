@@ -5,7 +5,7 @@ import java.util.Collection;
 /**
  * @author
  */
-public interface XYSeries extends XYItem {
+public interface XYSeries extends XYPlotItem {
 
 	Collection<Double> getXValues();
 

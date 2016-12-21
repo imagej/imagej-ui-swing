@@ -20,7 +20,7 @@ public interface CategoryChart extends AbstractPlot {
 
 	CategoryAxis getCategoryAxis();
 
-	Collection<CategorySeries> getSeriesCollection();
+	Collection<CategorySeries> getItems();
 
 	void setTitle(String title);
 

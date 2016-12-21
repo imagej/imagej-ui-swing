@@ -17,12 +17,12 @@ class DefaultXYPlot implements XYPlot {
 
 	private String title;
 
-	private Collection<XYItem> seriesCollection;
+	private Collection<XYPlotItem> items;
 
 	DefaultXYPlot() {
 		xAxis = new DefaultNumberAxis();
 		yAxis = new DefaultNumberAxis();
-		seriesCollection = new LinkedList<>();
+		items = new LinkedList<>();
 	}
 
 	@Override
@@ -45,9 +45,8 @@ class DefaultXYPlot implements XYPlot {
 		return yAxis;
 	}
 
-	@Override
-	public Collection<XYItem> getSeriesCollection() {
-		return seriesCollection;
+	public Collection<XYPlotItem> getItems() {
+		return items;
 	}
 
 	@Override

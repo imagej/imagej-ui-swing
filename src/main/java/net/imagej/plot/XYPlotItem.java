@@ -3,7 +3,7 @@ package net.imagej.plot;
 /**
  * @author Matthias Arzt
  */
-public interface XYItem extends LabeledObject {
+public interface XYPlotItem extends LabeledObject {
 
 	boolean getLegendVisible();
 

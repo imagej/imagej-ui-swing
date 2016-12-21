@@ -16,7 +16,7 @@ public interface XYPlot extends AbstractPlot {
 
 	NumberAxis getYAxis();
 
-	Collection<XYItem> getSeriesCollection();
+	Collection<XYPlotItem> getItems();
 
 	void setTitle(String title);
 

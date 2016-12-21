@@ -52,7 +52,7 @@ public class JfcCategoryChartGenerator extends AbstractJfcChartGenerator {
 	}
 
 	private void addAllSeries() {
-		for(CategorySeries series : chart.getSeriesCollection()) {
+		for(CategorySeries series : chart.getItems()) {
 			if(series instanceof BarSeries)
 				barDataset.addSeries(series);
 			if(series instanceof LineSeries)

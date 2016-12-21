@@ -85,7 +85,7 @@ public class TempMain {
 			XYSeries series = plot.createXYSeries(lineStyles[i].toString(), xs, collection(y,y));
 			SeriesStyle style = plot.createSeriesStyle(Color.BLACK, lineStyles[i], MarkerStyle.CIRCLE);
 			series.setStyle(style);
-			plot.getSeriesCollection().add(series);
+			plot.getItems().add(series);
 		}
 		plot.getXAxis().setManualRange(-1.0, 2.0);
 		plot.getYAxis().setManualRange(-1.0, (double) lineStyles.length);
@@ -102,7 +102,7 @@ public class TempMain {
 			XYSeries series = plot.createXYSeries(markerStyles[i].toString(), xs, collection(y,y));
 			SeriesStyle style = plot.createSeriesStyle(null, null, markerStyles[i]);
 			series.setStyle(style);
-			plot.getSeriesCollection().add(series);
+			plot.getItems().add(series);
 		}
 		plot.getXAxis().setManualRange(-1.0, 2.0);
 		plot.getYAxis().setManualRange(-1.0, (double) markerStyles.length);
@@ -119,7 +119,7 @@ public class TempMain {
 			ys.add(Math.exp(Math.sin(x)));
 		}
 		XYSeries series = plot.createXYSeries("exp(sin(x))", xs, ys);
-		plot.getSeriesCollection().add(series);
+		plot.getItems().add(series);
 		plot.getXAxis().setAutoRange(RangeStrategy.AUTO);
 		plot.getYAxis().setAutoRange(RangeStrategy.AUTO);
 		plot.getYAxis().setLogarithmic(true);
@@ -131,8 +131,8 @@ public class TempMain {
 		chart.getCategoryAxis().setCategories(collection("one wheel", "bicycle", "car"));
 		LineSeries wheels = chart.createLineSeries("speed", collection(1.0, 2.0, 4.0));
 		BarSeries speed = chart.createBarSeries("speed", collection(6.0, 55.0, 200.0));
-		chart.getSeriesCollection().add(wheels);
-		chart.getSeriesCollection().add(speed);
+		chart.getItems().add(wheels);
+		chart.getItems().add(speed);
 		ui.show(chart);
 	}
 

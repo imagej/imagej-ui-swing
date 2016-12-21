@@ -4,8 +4,6 @@ import net.imagej.plot.*;
 import net.imagej.plot.XYSeries;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.LogAxis;
-import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.*;
 
@@ -39,7 +37,7 @@ public class JfcXYPlotGenerator extends AbstractJfcChartGenerator {
 	}
 
 	private void addAllSeries() {
-		for(XYItem series : xyPlot.getSeriesCollection())
+		for(XYPlotItem series : xyPlot.getItems())
 			if(series instanceof XYSeries)
 				addSeries((XYSeries) series);
 	}
