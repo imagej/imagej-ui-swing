@@ -14,13 +14,13 @@ public interface CategoryChart extends AbstractPlot {
 
 	BarSeries createBarSeries(String label, Collection<Double> values);
 
-	// FIXME: BoxPlot createBoxPlotSeries(String label, Collection<Double> values);
+	BoxSeries createBoxSeries(String label, Collection<Collection<Double>> values);
 
 	NumberAxis getNumberAxis();
 
 	CategoryAxis getCategoryAxis();
 
-	Collection<CategorySeries> getItems();
+	Collection<CategoryChartItem> getItems();
 
 	void setTitle(String title);
 

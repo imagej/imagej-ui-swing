@@ -39,9 +39,7 @@ import org.scijava.log.LogService;
 import org.scijava.ui.UIService;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.*;
 
 /**
  * A plot of data from a {@link Table}.
@@ -61,8 +59,7 @@ public class TempMain {
 		new TempMain();
 	}
 
-	public TempMain()
-	{
+	public TempMain() {
 		final Context ctx = new Context();
 		ui = ctx.service(UIService.class);
 		log = ctx.service(LogService.class);
@@ -131,16 +128,32 @@ public class TempMain {
 		chart.getCategoryAxis().setCategories(collection("one wheel", "bicycle", "car"));
 		LineSeries wheels = chart.createLineSeries("speed", collection(1.0, 2.0, 4.0));
 		BarSeries speed = chart.createBarSeries("speed", collection(6.0, 55.0, 200.0));
+		BoxSeries boxes = chart.createBoxSeries("boxes", collection(
+				randomCollection(10),
+				randomCollection(20),
+				randomCollection(30)));
+		boxes.setColor(Color.BLACK);
+		BoxSeries boxes2 = chart.createBoxSeries("boxes", collection(
+				randomCollection(10),
+				randomCollection(20),
+				randomCollection(30)));
+		boxes2.setColor(Color.CYAN);
 		chart.getItems().add(wheels);
 		chart.getItems().add(speed);
+		chart.getItems().add(boxes);
+		chart.getItems().add(boxes2);
 		ui.show(chart);
 	}
 
-	private static Collection<Double> collection(Double ... values) {
+	private static <T> Collection<T> collection(T ... values) {
 		return Arrays.asList(values);
 	}
 
-	private static Collection<String> collection(String ... values) {
-		return Arrays.asList(values);
+	private static Collection<Double> randomCollection(int size) {
+		Random rand = new Random();
+		Vector<Double> result = new Vector<>(size);
+		for(int i = 0; i < size; i++)
+			result.add(rand.nextGaussian()*20);
+		return result;
 	}
 }
