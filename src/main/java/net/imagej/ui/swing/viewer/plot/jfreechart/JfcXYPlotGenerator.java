@@ -3,13 +3,13 @@ package net.imagej.ui.swing.viewer.plot.jfreechart;
 import net.imagej.plot.*;
 import net.imagej.plot.XYPlot;
 import net.imagej.plot.XYSeries;
-import org.jfree.chart.JFreeChart;
+import net.imagej.ui.swing.viewer.plot.utils.AwtLineStyles;
+import net.imagej.ui.swing.viewer.plot.utils.AwtMarkerStyles;
 import org.jfree.chart.plot.Plot;
-import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.*;
+import org.scijava.util.ColorRGB;
 
-import java.awt.*;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -71,12 +71,8 @@ class JfcXYPlotGenerator extends AbstractJfcChartGenerator {
 		if (style == null)
 			return;
 		int index = jfcDataSet.getSeriesIndex(label);
-		Color color = color(style.getColor());
-		if (color != null)
-			jfcRenderer.setSeriesPaint(index, color);
-		JfcLineStyles.modifyRenderer(jfcRenderer, index, style.getLineStyle());
-		JfcMarkerStyles.modifyRenderer(jfcRenderer, index, style.getMarkerStyle());
-		jfcRenderer.setSeriesVisibleInLegend(index,legendVisible);
+		RendererModifier.wrap(jfcRenderer).setSeriesStyle(index, style);
+		jfcRenderer.setSeriesVisibleInLegend(index, legendVisible);
 	}
 
 }

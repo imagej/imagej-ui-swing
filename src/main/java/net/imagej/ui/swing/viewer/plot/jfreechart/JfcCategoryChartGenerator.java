@@ -5,12 +5,9 @@ import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.Plot;
-import org.jfree.chart.renderer.AbstractRenderer;
 import org.jfree.chart.renderer.category.*;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
-import org.scijava.ui.awt.AWTColors;
-import org.scijava.util.ColorRGB;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -116,9 +113,9 @@ class JfcCategoryChartGenerator extends AbstractJfcChartGenerator {
 
 		private DefaultCategoryDataset jfcDataset;
 
-		private CategoryItemRenderer jfcRenderer;
+		private AbstractCategoryItemRenderer jfcRenderer;
 
-		LineAndBarDataset(CategoryItemRenderer renderer) {
+		LineAndBarDataset(AbstractCategoryItemRenderer renderer) {
 			jfcDataset = new DefaultCategoryDataset();
 			jfcRenderer = renderer;
 		}
@@ -139,11 +136,8 @@ class JfcCategoryChartGenerator extends AbstractJfcChartGenerator {
 		private void setSeriesStyle(SortedLabel uniqueLabel, SeriesStyle style) {
 			if(style == null)
 				return;
-			int seriesIndex = jfcDataset.getRowIndex(uniqueLabel);
-			if(style.getColor() != null)
-				jfcRenderer.setSeriesPaint(seriesIndex, color(style.getColor()));
-			JfcLineStyles.modifyRenderer((AbstractRenderer) jfcRenderer, seriesIndex, style.getLineStyle());
-			JfcMarkerStyles.modifyRenderer((AbstractRenderer) jfcRenderer, seriesIndex, style.getMarkerStyle());
+			int index = jfcDataset.getRowIndex(uniqueLabel);
+			RendererModifier.wrap(jfcRenderer).setSeriesStyle(index, style);
 		}
 
 		void addDatasetToPlot(int datasetIndex) {
