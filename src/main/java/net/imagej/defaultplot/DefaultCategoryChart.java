@@ -9,7 +9,7 @@ import java.util.LinkedList;
 /**
  * @author Matthias Arzt
  */
-public class DefaultCategoryChart implements CategoryChart {
+public class DefaultCategoryChart extends DefaultAbstractPlot implements CategoryChart {
 
 	private String title;
 
@@ -60,13 +60,4 @@ public class DefaultCategoryChart implements CategoryChart {
 		return items;
 	}
 
-	@Override
-	public void setTitle(String title) {
-		this.title = title;
-	}
-
-	@Override
-	public String getTitle() {
-		return title;
-	}
 }

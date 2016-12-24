@@ -9,13 +9,11 @@ import java.util.LinkedList;
 /**
  * @author Matthias Arzt
  */
-class DefaultXYPlot implements XYPlot {
+class DefaultXYPlot extends DefaultAbstractPlot implements XYPlot {
 
 	private DefaultNumberAxis xAxis;
 
 	private DefaultNumberAxis yAxis;
-
-	private String title;
 
 	private Collection<XYPlotItem> items;
 
@@ -47,16 +45,6 @@ class DefaultXYPlot implements XYPlot {
 
 	public Collection<XYPlotItem> getItems() {
 		return items;
-	}
-
-	@Override
-	public void setTitle(String title) {
-		this.title = title;
-	}
-
-	@Override
-	public String getTitle() {
-		return title;
 	}
 
 }

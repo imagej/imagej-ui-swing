@@ -19,8 +19,4 @@ public interface XYPlot extends AbstractPlot {
 
 	Collection<XYPlotItem> getItems();
 
-	void setTitle(String title);
-
-	String getTitle();
-
 }

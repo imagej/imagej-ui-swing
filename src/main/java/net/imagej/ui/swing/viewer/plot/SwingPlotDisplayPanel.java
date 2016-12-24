@@ -31,8 +31,8 @@
 
 package net.imagej.ui.swing.viewer.plot;
 
-import java.awt.BorderLayout;
-import javax.swing.JPanel;
+import java.awt.*;
+import javax.swing.*;
 
 import net.imagej.plot.AbstractPlot;
 
@@ -53,6 +53,7 @@ public class SwingPlotDisplayPanel extends JPanel implements PlotDisplayPanel {
 	private final DisplayWindow window;
 	private final PlotDisplay display;
 	private final ConvertService convertService;
+	private Dimension prefferedSize;
 
 	// -- constructor --
 
@@ -63,14 +64,28 @@ public class SwingPlotDisplayPanel extends JPanel implements PlotDisplayPanel {
 		this.window = window;
 		this.convertService = convertService;
 		setLayout(new BorderLayout());
-		final JFreeChart chart = makeJFreeChart(display.get(0));
-		ChartPanel panel = new ChartPanel(chart);
-		add(panel);
+		AbstractPlot plot = display.get(0);
+		prefferedSize = new Dimension(plot.getPreferredWidth(), plot.getPreferredHeight());
+		try {
+			add(makeJFreeChartPanel(plot));
+		} catch (ConverterFailedException e) {
+			add(new JLabel(e.getMessage()));
+		}
 		window.setContent(this);
 	}
 
-	JFreeChart makeJFreeChart(AbstractPlot plot) {
-		return convertService.convert(plot, JFreeChart.class);
+	JPanel makeJFreeChartPanel(AbstractPlot plot) {
+		final JFreeChart chart = convertService.convert(plot, JFreeChart.class);
+		if(chart == null)
+			throw new ConverterFailedException("No sci-java  plugin of type Converter<" +
+				plot.getClass().getName() + ", JFreeChart> found.");
+		return new ChartPanel(chart);
+	}
+
+	private class ConverterFailedException extends RuntimeException {
+		ConverterFailedException(String message) {
+			super(message);
+		}
 	}
 
 	// -- PlotDisplayPanel methods --
@@ -95,5 +110,10 @@ public class SwingPlotDisplayPanel extends JPanel implements PlotDisplayPanel {
 
 	@Override
 	public void redraw() { }
+
+	@Override
+	public Dimension getPreferredSize() {
+		return prefferedSize;
+	}
 
 }
