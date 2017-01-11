@@ -7,7 +7,7 @@ import java.util.Collection;
 /**
  * @author Matthias Arzt
  */
-public interface BoxSeries extends CategoryChartItem, LabeledObject {
+public interface BoxSeries extends CategoryChartItem, Labeled {
 
 	Collection<Collection<Double>> getValues();
 

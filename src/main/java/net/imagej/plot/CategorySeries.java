@@ -5,7 +5,7 @@ import java.util.Collection;
 /**
  * @author Matthias Arzt
  */
-public interface CategorySeries extends LabeledObject {
+public interface CategorySeries extends Labeled {
 
 	Collection<Double> getValues();
 

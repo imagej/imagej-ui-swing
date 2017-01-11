@@ -5,7 +5,7 @@ import java.util.Collection;
 /**
  * @author Matthias Arzt
  */
-public interface CategoryAxis extends LabeledObject {
+public interface CategoryAxis extends Labeled {
 
 	void setCategories(Collection<String> categories);
 

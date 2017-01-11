@@ -3,7 +3,7 @@ package net.imagej.plot;
 /**
  * @author Matthias Arzt
  */
-public interface LabeledObject {
+public interface Labeled {
 
 	void setLabel(String label);
 
