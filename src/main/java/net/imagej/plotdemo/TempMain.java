@@ -64,7 +64,7 @@ public class TempMain {
 		ui = ctx.service(UIService.class);
 		log = ctx.service(LogService.class);
 		plotService = ctx.service(PlotService.class);
-
+		ui.showUI();
 		plotLineStyles();
 		plotMarkerStyles();
 		plotLogarithmic();
@@ -73,41 +73,37 @@ public class TempMain {
 	}
 
 	private void plotLineStyles() {
-		XYPlot plot = plotService.createXYPlot();
+		XYPlot plot = plotService.newXYPlot();
 		plot.setTitle("Line Styles");
 		Collection<Double> xs = collection(0.0,1.0);
 		LineStyle[] lineStyles = LineStyle.values();
 		for(int i = 0; i < lineStyles.length; i++) {
 			double y = i * 1.0;
-			XYSeries series = plot.createXYSeries(lineStyles[i].toString(), xs, collection(y,y));
-			SeriesStyle style = plot.createSeriesStyle(Colors.BLACK, lineStyles[i], MarkerStyle.CIRCLE);
-			series.setStyle(style);
-			plot.getItems().add(series);
+			XYSeries series = plot.addXYSeries(lineStyles[i].toString(), xs, collection(y,y));
+			series.setStyle(plot.newSeriesStyle(Colors.BLACK, lineStyles[i], MarkerStyle.CIRCLE));
 		}
-		plot.getXAxis().setManualRange(-1.0, 2.0);
-		plot.getYAxis().setManualRange(-1.0, (double) lineStyles.length);
+		plot.xAxis().setManualRange(-1.0, 2.0);
+		plot.yAxis().setManualRange(-1.0, (double) lineStyles.length);
 		ui.show(plot);
 	}
 
 	private void plotMarkerStyles() {
-		XYPlot plot = plotService.createXYPlot();
+		XYPlot plot = plotService.newXYPlot();
 		plot.setTitle("Marker Styles");
 		Collection<Double> xs = collection(0.0,1.0);
 		MarkerStyle[] markerStyles = MarkerStyle.values();
 		for(int i = 0; i < markerStyles.length; i++) {
 			double y = i * 1.0;
-			XYSeries series = plot.createXYSeries(markerStyles[i].toString(), xs, collection(y,y));
-			SeriesStyle style = plot.createSeriesStyle(null, null, markerStyles[i]);
-			series.setStyle(style);
-			plot.getItems().add(series);
+			XYSeries series = plot.addXYSeries(markerStyles[i].toString(), xs, collection(y,y));
+			series.setStyle(plot.newSeriesStyle(null, null, markerStyles[i]));
 		}
-		plot.getXAxis().setManualRange(-1.0, 2.0);
-		plot.getYAxis().setManualRange(-1.0, (double) markerStyles.length);
+		plot.xAxis().setManualRange(-1.0, 2.0);
+		plot.yAxis().setManualRange(-1.0, (double) markerStyles.length);
 		ui.show(plot);
 	}
 
 	private void plotLogarithmic() {
-		XYPlot plot = plotService.createXYPlot();
+		XYPlot plot = plotService.newXYPlot();
 		plot.setTitle("Logarithmic");
 		Collection<Double> xs = new ArrayList<>();
 		Collection<Double> ys = new ArrayList<>();
@@ -115,33 +111,28 @@ public class TempMain {
 			xs.add(x);
 			ys.add(Math.exp(Math.sin(x)));
 		}
-		XYSeries series = plot.createXYSeries("exp(sin(x))", xs, ys);
-		plot.getItems().add(series);
-		plot.getXAxis().setAutoRange(RangeStrategy.AUTO);
-		plot.getYAxis().setAutoRange(RangeStrategy.AUTO);
-		plot.getYAxis().setLogarithmic(true);
+		plot.addXYSeries("exp(sin(x))", xs, ys);
+		plot.xAxis().setAutoRange(RangeStrategy.AUTO);
+		plot.yAxis().setAutoRange(RangeStrategy.AUTO);
+		plot.yAxis().setLogarithmic(true);
 		ui.show(plot);
 	}
 
 	private void showCategoryChart() {
-		CategoryChart chart = plotService.createCategoryChart();
+		CategoryChart chart = plotService.newCategoryChart();
 		chart.getCategoryAxis().setCategories(collection("one wheel", "bicycle", "car"));
-		LineSeries wheels = chart.createLineSeries("speed", collection(1.0, 2.0, 4.0));
-		BarSeries speed = chart.createBarSeries("speed", collection(6.0, 55.0, 200.0));
-		BoxSeries boxes = chart.createBoxSeries("boxes", collection(
+		chart.addLineSeries("speed", collection(1.0, 2.0, 4.0));
+		chart.addBarSeries("speed", collection(6.0, 55.0, 200.0));
+		chart.addBoxSeries("boxes", collection(
 				randomCollection(10),
 				randomCollection(20),
-				randomCollection(30)));
-		boxes.setColor(Colors.BLACK);
-		BoxSeries boxes2 = chart.createBoxSeries("boxes", collection(
+				randomCollection(30))
+		).setColor(Colors.BLACK);
+		chart.addBoxSeries("boxes", collection(
 				randomCollection(10),
 				randomCollection(20),
-				randomCollection(30)));
-		boxes2.setColor(Colors.CYAN);
-		chart.getItems().add(wheels);
-		chart.getItems().add(speed);
-		chart.getItems().add(boxes);
-		chart.getItems().add(boxes2);
+				randomCollection(30))
+		).setColor(Colors.CYAN);
 		ui.show(chart);
 	}
 

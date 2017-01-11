@@ -3,12 +3,9 @@ package net.imagej.ui.swing.viewer.plot.jfreechart;
 import net.imagej.plot.*;
 import net.imagej.plot.XYPlot;
 import net.imagej.plot.XYSeries;
-import net.imagej.ui.swing.viewer.plot.utils.AwtLineStyles;
-import net.imagej.ui.swing.viewer.plot.utils.AwtMarkerStyles;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.*;
-import org.scijava.util.ColorRGB;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -33,8 +30,8 @@ class JfcXYPlotGenerator extends AbstractJfcChartGenerator {
 		jfcRenderer = new XYLineAndShapeRenderer();
 		jfcPlot = new org.jfree.chart.plot.XYPlot();
 		jfcPlot.setDataset(jfcDataSet);
-		jfcPlot.setDomainAxis(getJFreeChartAxis(xyPlot.getXAxis()));
-		jfcPlot.setRangeAxis(getJFreeChartAxis(xyPlot.getYAxis()));
+		jfcPlot.setDomainAxis(getJFreeChartAxis(xyPlot.xAxis()));
+		jfcPlot.setRangeAxis(getJFreeChartAxis(xyPlot.yAxis()));
 		jfcPlot.setRenderer(jfcRenderer);
 		sortedLabelFactory = new SortedLabelFactory();
 		addAllSeries();

@@ -3,25 +3,26 @@ package net.imagej.plot;
 import org.scijava.util.ColorRGB;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Matthias Arzt
  */
 public interface CategoryChart extends AbstractPlot {
 
-	SeriesStyle createSeriesStyle(ColorRGB color, LineStyle lineStyle, MarkerStyle markerStyle);
+	SeriesStyle newSeriesStyle(ColorRGB color, LineStyle lineStyle, MarkerStyle markerStyle);
 
-	LineSeries createLineSeries(String label, Collection<Double> values);
+	LineSeries addLineSeries(String label, Collection<Double> values);
 
-	BarSeries createBarSeries(String label, Collection<Double> values);
+	BarSeries addBarSeries(String label, Collection<Double> values);
 
-	BoxSeries createBoxSeries(String label, Collection<Collection<Double>> values);
+	BoxSeries addBoxSeries(String label, Collection<Collection<Double>> values);
 
 	NumberAxis getNumberAxis();
 
 	CategoryAxis getCategoryAxis();
 
-	Collection<CategoryChartItem> getItems();
+	List<CategoryChartItem> getItems();
 
 	void setTitle(String title);
 

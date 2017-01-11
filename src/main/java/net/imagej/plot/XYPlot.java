@@ -3,20 +3,21 @@ package net.imagej.plot;
 import org.scijava.util.ColorRGB;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Matthias Arzt
  */
 public interface XYPlot extends AbstractPlot {
 
-	SeriesStyle createSeriesStyle(ColorRGB color, LineStyle lineStyle, MarkerStyle markerStyle);
+	SeriesStyle newSeriesStyle(ColorRGB color, LineStyle lineStyle, MarkerStyle markerStyle);
 
-	XYSeries createXYSeries(String label, Collection<Double> xs, Collection<Double> ys);
+	XYSeries addXYSeries(String label, Collection<Double> xs, Collection<Double> ys);
 
-	NumberAxis getXAxis();
+	NumberAxis xAxis();
 
-	NumberAxis getYAxis();
+	NumberAxis yAxis();
 
-	Collection<XYPlotItem> getItems();
+	List<XYPlotItem> getItems();
 
 }

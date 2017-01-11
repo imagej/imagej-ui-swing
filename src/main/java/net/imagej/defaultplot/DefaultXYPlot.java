@@ -4,7 +4,9 @@ import net.imagej.plot.*;
 import org.scijava.util.ColorRGB;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author Matthias Arzt
@@ -15,7 +17,7 @@ class DefaultXYPlot extends DefaultAbstractPlot implements XYPlot {
 
 	private DefaultNumberAxis yAxis;
 
-	private Collection<XYPlotItem> items;
+	private List<XYPlotItem> items;
 
 	DefaultXYPlot() {
 		xAxis = new DefaultNumberAxis();
@@ -24,27 +26,29 @@ class DefaultXYPlot extends DefaultAbstractPlot implements XYPlot {
 	}
 
 	@Override
-	public SeriesStyle createSeriesStyle(ColorRGB color, LineStyle lineStyle, MarkerStyle markerStyle) {
+	public SeriesStyle newSeriesStyle(ColorRGB color, LineStyle lineStyle, MarkerStyle markerStyle) {
 		return new DefaultSeriesStyle(color, lineStyle, markerStyle);
 	}
 
 	@Override
-	public XYSeries createXYSeries(String label, Collection<Double> xs, Collection<Double> ys) {
-		return new DefaultXYSeries(label, xs, ys, null);
+	public XYSeries addXYSeries(String label, Collection<Double> xs, Collection<Double> ys) {
+		XYSeries result = new DefaultXYSeries(label, xs, ys, null);
+		items.add(result);
+		return result;
 	}
 
 	@Override
-	public NumberAxis getXAxis() {
+	public NumberAxis xAxis() {
 		return xAxis;
 	}
 
 	@Override
-	public NumberAxis getYAxis() {
+	public NumberAxis yAxis() {
 		return yAxis;
 	}
 
-	public Collection<XYPlotItem> getItems() {
-		return items;
+	public List<XYPlotItem> getItems() {
+		return Collections.unmodifiableList(items);
 	}
 
 }

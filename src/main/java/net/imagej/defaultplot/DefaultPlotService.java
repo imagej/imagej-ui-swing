@@ -16,12 +16,12 @@ import org.scijava.service.Service;
 public class DefaultPlotService extends AbstractService implements PlotService {
 
 	@Override
-	public XYPlot createXYPlot() {
+	public XYPlot newXYPlot() {
 		return new DefaultXYPlot();
 	}
 
 	@Override
-	public CategoryChart createCategoryChart() {
+	public CategoryChart newCategoryChart() {
 		return new DefaultCategoryChart();
 	}
 

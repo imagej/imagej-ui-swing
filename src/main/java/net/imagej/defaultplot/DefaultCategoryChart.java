@@ -4,7 +4,9 @@ import net.imagej.plot.*;
 import org.scijava.util.ColorRGB;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author Matthias Arzt
@@ -17,7 +19,7 @@ public class DefaultCategoryChart extends DefaultAbstractPlot implements Categor
 
 	private CategoryAxis categoryAxis;
 
-	private Collection<CategoryChartItem> items;
+	private List<CategoryChartItem> items;
 
 	DefaultCategoryChart() {
 		valueAxis = new DefaultNumberAxis();
@@ -26,23 +28,23 @@ public class DefaultCategoryChart extends DefaultAbstractPlot implements Categor
 	}
 
 	@Override
-	public SeriesStyle createSeriesStyle(ColorRGB color, LineStyle lineStyle, MarkerStyle markerStyle) {
+	public SeriesStyle newSeriesStyle(ColorRGB color, LineStyle lineStyle, MarkerStyle markerStyle) {
 		return new DefaultSeriesStyle(color, lineStyle, markerStyle);
 	}
 
 	@Override
-	public LineSeries createLineSeries(String label, Collection<Double> values) {
-		return new DefaultLineSeries(label, values);
+	public LineSeries addLineSeries(String label, Collection<Double> values) {
+		return addItem(new DefaultLineSeries(label, values));
 	}
 
 	@Override
-	public BarSeries createBarSeries(String label, Collection<Double> values) {
-		return new DefaultBarSeries(label, values);
+	public BarSeries addBarSeries(String label, Collection<Double> values) {
+		return addItem(new DefaultBarSeries(label, values));
 	}
 
 	@Override
-	public BoxSeries createBoxSeries(String label, Collection<Collection<Double>> values) {
-		return new DefaultBoxSeries(label, values);
+	public BoxSeries addBoxSeries(String label, Collection<Collection<Double>> values) {
+		return addItem(new DefaultBoxSeries(label, values));
 	}
 
 	@Override
@@ -56,8 +58,9 @@ public class DefaultCategoryChart extends DefaultAbstractPlot implements Categor
 	}
 
 	@Override
-	public Collection<CategoryChartItem> getItems() {
-		return items;
+	public List<CategoryChartItem> getItems() {
+		return Collections.unmodifiableList(items);
 	}
 
+	private <T extends CategoryChartItem> T addItem(T value) { items.add(value); return value; }
 }

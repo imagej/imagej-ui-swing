@@ -8,10 +8,10 @@ import net.imagej.ImageJService;
 // TODO: consider extending WrapperService, and making JfcPlotGenerator into a WrapperPlugin
 public interface PlotService extends ImageJService {
 
-	XYPlot createXYPlot();
+	XYPlot newXYPlot();
 
 	// TODO: BoxPlot createBoxPlot();
 
-	CategoryChart createCategoryChart();
+	CategoryChart newCategoryChart();
 
 }
