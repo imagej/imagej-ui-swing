@@ -35,19 +35,19 @@ class RendererModifier {
 		setSeriesMarkerStyle(index, style.getMarkerStyle());
 	}
 
-	private void setSeriesColor(int index, ColorRGB color) {
+	public void setSeriesColor(int index, ColorRGB color) {
 		if (color == null)
 			return;
 		renderer.setSeriesPaint(index, AWTColors.getColor(color));
 	}
 
-	private void setSeriesLineStyle(int index, LineStyle style) {
+	public void setSeriesLineStyle(int index, LineStyle style) {
 		AwtLineStyles line = AwtLineStyles.getInstance(style);
 		setSeriesLinesVisible(index, line.isVisible());
 		renderer.setSeriesStroke(index, line.getStroke());
 	}
 
-	private void setSeriesMarkerStyle(int index, MarkerStyle style) {
+	public void setSeriesMarkerStyle(int index, MarkerStyle style) {
 		AwtMarkerStyles marker = AwtMarkerStyles.getInstance(style);
 		setSeriesShapesVisible(index, marker.isVisible());
 		setSeriesShapesFilled(index, marker.isFilled());

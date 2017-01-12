@@ -8,6 +8,7 @@ import org.jfree.chart.plot.Plot;
 import org.jfree.chart.renderer.category.*;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
+import org.scijava.util.ColorRGB;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -120,7 +121,13 @@ class JfcCategoryChartGenerator extends AbstractJfcChartGenerator {
 			jfcRenderer = renderer;
 		}
 
-		private void addSeries(CategorySeries series) {
+		private void addSeries(BarSeries series) {
+			SortedLabel uniqueLabel = labelFactory.newLabel(series.getLabel());
+			addSeriesData(uniqueLabel, series.getValues());
+			setSeriesStyle(uniqueLabel, series.getColor());
+		}
+
+		private void addSeries(LineSeries series) {
 			SortedLabel uniqueLabel = labelFactory.newLabel(series.getLabel());
 			addSeriesData(uniqueLabel, series.getValues());
 			setSeriesStyle(uniqueLabel, series.getStyle());
@@ -138,6 +145,13 @@ class JfcCategoryChartGenerator extends AbstractJfcChartGenerator {
 				return;
 			int index = jfcDataset.getRowIndex(uniqueLabel);
 			RendererModifier.wrap(jfcRenderer).setSeriesStyle(index, style);
+		}
+
+		private void setSeriesStyle(SortedLabel uniqueLabel, ColorRGB style) {
+			if(style == null)
+				return;
+			int index = jfcDataset.getRowIndex(uniqueLabel);
+			RendererModifier.wrap(jfcRenderer).setSeriesColor(index, style);
 		}
 
 		void addDatasetToPlot(int datasetIndex) {
