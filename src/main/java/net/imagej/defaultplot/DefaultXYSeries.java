@@ -3,35 +3,33 @@ package net.imagej.defaultplot;
 import net.imagej.plot.SeriesStyle;
 import net.imagej.plot.XYSeries;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Matthias Arzt
  */
 class DefaultXYSeries implements XYSeries {
 
-	private String label;
+	private String label = "";
 
-	private boolean legendVisible;
+	private boolean legendVisible = true;
 
-	private Collection<Double> xValues;
+	private List<Double> xValues = null;
 
-	private Collection<Double> yValues;
+	private List<Double> yValues = null;
 
-	private SeriesStyle style;
+	private SeriesStyle style = null;
 
-	DefaultXYSeries(String label, Collection<Double> xs, Collection<Double> ys, SeriesStyle style) {
-		this.label = label;
-		this.xValues = xs;
-		this.yValues = ys;
-		this.style = style;
-		this.legendVisible = true;
-	}
+	DefaultXYSeries() { }
 
+	@Override
 	public String getLabel() {
 		return label;
 	}
 
+	@Override
 	public void setLabel(String label) {
 		this.label = label;
 	}
@@ -46,26 +44,28 @@ class DefaultXYSeries implements XYSeries {
 		this.legendVisible = legendVisible;
 	}
 
-	public Collection<Double> getXValues() {
-		return xValues;
+	@Override
+	public void setValues(List<Double> xValues, List<Double> yValues) {
+		this.xValues = Collections.unmodifiableList(new ArrayList<>(xValues));
+		this.yValues = Collections.unmodifiableList(new ArrayList<>(yValues));
 	}
 
-	public void setXValues(Collection<Double> xValues) {
-		this.xValues = xValues;
+	@Override
+	public List<Double> getXValues() {
+		return xValues == null ? Collections.emptyList() : xValues;
 	}
 
-	public Collection<Double> getYValues() {
-		return yValues;
+	@Override
+	public List<Double> getYValues() {
+		return yValues == null ? Collections.emptyList() : yValues;
 	}
 
-	public void setYValues(Collection<Double> yValues) {
-		this.yValues = yValues;
-	}
-
+	@Override
 	public SeriesStyle getStyle() {
 		return style;
 	}
 
+	@Override
 	public void setStyle(SeriesStyle style) {
 		this.style = style;
 	}

@@ -1,19 +1,16 @@
 package net.imagej.plot;
 
-import java.util.Collection;
+import java.util.List;
 
 /**
  * @author
  */
 public interface XYSeries extends XYPlotItem {
 
-	Collection<Double> getXValues();
+	void setValues(List<Double> xValues, List<Double> yValues);
 
-	void setXValues(Collection<Double> xValues);
-
-	Collection<Double> getYValues();
-
-	void setYValues(Collection<Double> yValues);
+	List<Double> getXValues();
+	List<Double> getYValues();
 
 	SeriesStyle getStyle();
 

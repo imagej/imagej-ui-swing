@@ -31,8 +31,8 @@ class DefaultXYPlot extends DefaultAbstractPlot implements XYPlot {
 	}
 
 	@Override
-	public XYSeries addXYSeries(String label, Collection<Double> xs, Collection<Double> ys) {
-		XYSeries result = new DefaultXYSeries(label, xs, ys, null);
+	public XYSeries addXYSeries() {
+		XYSeries result = new DefaultXYSeries();
 		items.add(result);
 		return result;
 	}

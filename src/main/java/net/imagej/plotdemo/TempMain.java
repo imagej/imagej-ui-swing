@@ -75,11 +75,13 @@ public class TempMain {
 	private void plotLineStyles() {
 		XYPlot plot = plotService.newXYPlot();
 		plot.setTitle("Line Styles");
-		Collection<Double> xs = collection(0.0,1.0);
+		List<Double> xs = list(0.0,1.0);
 		LineStyle[] lineStyles = LineStyle.values();
 		for(int i = 0; i < lineStyles.length; i++) {
 			double y = i * 1.0;
-			XYSeries series = plot.addXYSeries(lineStyles[i].toString(), xs, collection(y,y));
+			XYSeries series = plot.addXYSeries();
+			series.setLabel(lineStyles[i].toString());
+			series.setValues(xs, list(y,y));
 			series.setStyle(plot.newSeriesStyle(Colors.BLACK, lineStyles[i], MarkerStyle.CIRCLE));
 		}
 		plot.xAxis().setManualRange(-1.0, 2.0);
@@ -90,11 +92,13 @@ public class TempMain {
 	private void plotMarkerStyles() {
 		XYPlot plot = plotService.newXYPlot();
 		plot.setTitle("Marker Styles");
-		Collection<Double> xs = collection(0.0,1.0);
+		List<Double> xs = list(0.0,1.0);
 		MarkerStyle[] markerStyles = MarkerStyle.values();
 		for(int i = 0; i < markerStyles.length; i++) {
 			double y = i * 1.0;
-			XYSeries series = plot.addXYSeries(markerStyles[i].toString(), xs, collection(y,y));
+			XYSeries series = plot.addXYSeries();
+			series.setLabel(markerStyles[i].toString());
+			series.setValues(xs, list(y,y));
 			series.setStyle(plot.newSeriesStyle(null, null, markerStyles[i]));
 		}
 		plot.xAxis().setManualRange(-1.0, 2.0);
@@ -105,13 +109,15 @@ public class TempMain {
 	private void plotLogarithmic() {
 		XYPlot plot = plotService.newXYPlot();
 		plot.setTitle("Logarithmic");
-		Collection<Double> xs = new ArrayList<>();
-		Collection<Double> ys = new ArrayList<>();
+		List<Double> xs = new ArrayList<>();
+		List<Double> ys = new ArrayList<>();
 		for(double x = 0; x < 10; x += 0.1) {
 			xs.add(x);
 			ys.add(Math.exp(Math.sin(x)));
 		}
-		plot.addXYSeries("exp(sin(x))", xs, ys);
+		XYSeries series = plot.addXYSeries();
+		series.setLabel("exp(sin(x))");
+		series.setValues(xs, ys);
 		plot.xAxis().setAutoRange(RangeStrategy.AUTO);
 		plot.yAxis().setAutoRange(RangeStrategy.AUTO);
 		plot.yAxis().setLogarithmic(true);
@@ -120,15 +126,15 @@ public class TempMain {
 
 	private void showCategoryChart() {
 		CategoryChart chart = plotService.newCategoryChart();
-		chart.getCategoryAxis().setCategories(collection("one wheel", "bicycle", "car"));
-		chart.addLineSeries("speed", collection(1.0, 2.0, 4.0));
-		chart.addBarSeries("speed", collection(6.0, 55.0, 200.0));
-		chart.addBoxSeries("boxes", collection(
+		chart.getCategoryAxis().setCategories(list("one wheel", "bicycle", "car"));
+		chart.addLineSeries("speed", list(1.0, 2.0, 4.0));
+		chart.addBarSeries("speed", list(6.0, 55.0, 200.0));
+		chart.addBoxSeries("boxes", list(
 				randomCollection(10),
 				randomCollection(20),
 				randomCollection(30))
 		).setColor(Colors.BLACK);
-		chart.addBoxSeries("boxes", collection(
+		chart.addBoxSeries("boxes", list(
 				randomCollection(10),
 				randomCollection(20),
 				randomCollection(30))
@@ -136,7 +142,7 @@ public class TempMain {
 		ui.show(chart);
 	}
 
-	private static <T> Collection<T> collection(T ... values) {
+	private static <T> List<T> list(T ... values) {
 		return Arrays.asList(values);
 	}
 

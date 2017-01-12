@@ -12,7 +12,7 @@ public interface XYPlot extends AbstractPlot {
 
 	SeriesStyle newSeriesStyle(ColorRGB color, LineStyle lineStyle, MarkerStyle markerStyle);
 
-	XYSeries addXYSeries(String label, Collection<Double> xs, Collection<Double> ys);
+	XYSeries addXYSeries();
 
 	NumberAxis xAxis();
 
