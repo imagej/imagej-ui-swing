@@ -60,4 +60,9 @@ public class DefaultBoxSeries<C> implements BoxSeries<C> {
 	public void setLegendVisible(boolean visible) {
 		legendVisible = visible;
 	}
+
+	@Override
+	public Collection getCategories() {
+		return values.keySet();
+	}
 }

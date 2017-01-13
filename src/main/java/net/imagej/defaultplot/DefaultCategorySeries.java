@@ -1,5 +1,6 @@
 package net.imagej.defaultplot;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -40,4 +41,7 @@ abstract public class DefaultCategorySeries<C> {
 		return values;
 	}
 
+	public Collection<C> getCategories() {
+		return values.keySet();
+	}
 }

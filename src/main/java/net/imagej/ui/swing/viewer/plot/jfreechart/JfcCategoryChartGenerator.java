@@ -10,10 +10,8 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.scijava.util.ColorRGB;
 
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
+import java.util.List;
 
 /**
  * @author Matthias Arzt
@@ -26,11 +24,13 @@ class JfcCategoryChartGenerator<C extends Comparable<C>> extends AbstractJfcChar
 
 	private CategoryPlot jfcPlot;
 
-	private LineAndBarDataset<C> lineData;
+	private LineAndBarDataset lineData;
 
-	private LineAndBarDataset<C> barData;
+	private LineAndBarDataset barData;
 
-	private BoxDataset<C> boxData;
+	private BoxDataset boxData;
+
+	private List<C> categoryList;
 
 	JfcCategoryChartGenerator(CategoryChart<C> chart) {
 		this.chart = chart;
@@ -39,9 +39,10 @@ class JfcCategoryChartGenerator<C extends Comparable<C>> extends AbstractJfcChar
 	@Override
 	Plot getJfcPlot() {
 		labelFactory = new SortedLabelFactory();
-		lineData = new LineAndBarDataset<>(new LineAndShapeRenderer());
-		barData = new LineAndBarDataset<>(createFlatBarRenderer());
-		boxData = new BoxDataset<>();
+		categoryList = chart.categoryAxis().getCategories();
+		lineData = new LineAndBarDataset(new LineAndShapeRenderer());
+		barData = new LineAndBarDataset(createFlatBarRenderer());
+		boxData = new BoxDataset();
 		jfcPlot = new CategoryPlot();
 		jfcPlot.setDomainAxis(new CategoryAxis(chart.categoryAxis().getLabel()));
 		jfcPlot.getDomainAxis().setCategoryLabelPositions(CategoryLabelPositions.UP_45);
@@ -76,7 +77,7 @@ class JfcCategoryChartGenerator<C extends Comparable<C>> extends AbstractJfcChar
 		}
 	}
 
-	class BoxDataset<C extends Comparable<C>> {
+	private class BoxDataset {
 
 		private DefaultBoxAndWhiskerCategoryDataset jfcDataset;
 
@@ -88,24 +89,56 @@ class JfcCategoryChartGenerator<C extends Comparable<C>> extends AbstractJfcChar
 			jfcRenderer.setFillBox(false);
 		}
 
-		private void addBoxSeries(BoxSeries<C> series) {
-			SortedLabel uniqueLabel = labelFactory.newLabel(series.getLabel());
-			for(Map.Entry<C, Collection<Double>> entry : series.getValues().entrySet())
-				jfcDataset.add(new ArrayList<>(entry.getValue()), uniqueLabel, entry.getKey());
-			int seriesIndex = jfcDataset.getRowIndex(uniqueLabel);
-			Paint color = color(series.getColor());
-			if(color != null)
-				jfcRenderer.setSeriesPaint(seriesIndex, color);
+		private void setCategories() {
+			SortedLabel uniqueLabel = labelFactory.newLabel("dummy");
+			for(C category : categoryList)
+				jfcDataset.add(Collections.emptyList(), uniqueLabel, category);
+			setSeriesVisibility(uniqueLabel, false, false);
 		}
 
+		private void addBoxSeries(BoxSeries<C> series) {
+			SortedLabel uniqueLabel = labelFactory.newLabel(series.getLabel());
+			setSeriesData(uniqueLabel, series.getValues());
+			setSeriesVisibility(uniqueLabel, true, series.getLegendVisible());
+			setSeriesColor(uniqueLabel, series.getColor());
+		}
+
+		private void setSeriesData(SortedLabel uniqueLabel, Map<C, Collection<Double>> data) {
+			for(C category : categoryList) {
+				Collection<Double> value = data.get(category);
+				if(value != null)
+					jfcDataset.add(new ArrayList<>(value), uniqueLabel, category);
+			}
+		}
+
+		private void setSeriesColor(SortedLabel uniqueLabel, ColorRGB color) {
+			if(color == null)
+				return;
+			int index = jfcDataset.getRowIndex(uniqueLabel);
+			if(index < 0)
+				return;
+			jfcRenderer.setSeriesPaint(index, color(color));
+		}
+
+		private void setSeriesVisibility(SortedLabel uniqueLabel, boolean seriesVsisible, boolean legendVisible) {
+			int index = jfcDataset.getRowIndex(uniqueLabel);
+			if(index < 0)
+				return;
+			jfcRenderer.setSeriesVisible(index, seriesVsisible, false);
+			jfcRenderer.setSeriesVisibleInLegend(index, legendVisible, false);
+		}
+
+
 		void addDatasetToPlot(int datasetIndex) {
+			setCategories();
 			jfcPlot.setDataset(datasetIndex, jfcDataset);
 			jfcPlot.setRenderer(datasetIndex, jfcRenderer);
 		}
 
 	}
 
-	class LineAndBarDataset<C extends Comparable<C>> {
+
+	private class LineAndBarDataset {
 
 		private DefaultCategoryDataset jfcDataset;
 
@@ -116,38 +149,63 @@ class JfcCategoryChartGenerator<C extends Comparable<C>> extends AbstractJfcChar
 			jfcRenderer = renderer;
 		}
 
+		private void setCategories() {
+			SortedLabel uniqueLabel = labelFactory.newLabel("dummy");
+			for(C category : categoryList)
+				jfcDataset.addValue(0.0, uniqueLabel, category);
+			setSeriesVisibility(uniqueLabel, false, false);
+		}
+
 		private void addSeries(BarSeries series) {
 			SortedLabel uniqueLabel = labelFactory.newLabel(series.getLabel());
 			addSeriesData(uniqueLabel, series.getValues());
-			setSeriesStyle(uniqueLabel, series.getColor());
+			setSeriesColor(uniqueLabel, series.getColor());
+			setSeriesVisibility(uniqueLabel, true, series.getLegendVisible());
 		}
 
 		private void addSeries(LineSeries series) {
 			SortedLabel uniqueLabel = labelFactory.newLabel(series.getLabel());
 			addSeriesData(uniqueLabel, series.getValues());
 			setSeriesStyle(uniqueLabel, series.getStyle());
+			setSeriesVisibility(uniqueLabel, true, series.getLegendVisible());
+		}
+
+		private void setSeriesVisibility(SortedLabel uniqueLabel, boolean seriesVsisible, boolean legendVisible) {
+			int index = jfcDataset.getRowIndex(uniqueLabel);
+			if(index < 0)
+				return;
+			jfcRenderer.setSeriesVisible(index, seriesVsisible, false);
+			jfcRenderer.setSeriesVisibleInLegend(index, legendVisible, false);
 		}
 
 		private void addSeriesData(SortedLabel uniqueLabel, Map<C, Double> values) {
-		    for(Map.Entry<C, Double> entry : values.entrySet())
-				jfcDataset.addValue(entry.getValue(), uniqueLabel, entry.getKey());
+		    for(C category : categoryList) {
+		    	Double value = values.get(category);
+		    	if(value != null)
+					jfcDataset.addValue(value, uniqueLabel, category);
+			}
 		}
 
 		private void setSeriesStyle(SortedLabel uniqueLabel, SeriesStyle style) {
 			if(style == null)
 				return;
 			int index = jfcDataset.getRowIndex(uniqueLabel);
+			if(index < 0)
+				return;
 			RendererModifier.wrap(jfcRenderer).setSeriesStyle(index, style);
 		}
 
-		private void setSeriesStyle(SortedLabel uniqueLabel, ColorRGB style) {
+		private void setSeriesColor(SortedLabel uniqueLabel, ColorRGB style) {
 			if(style == null)
 				return;
 			int index = jfcDataset.getRowIndex(uniqueLabel);
+			if(index < 0)
+				return;
 			RendererModifier.wrap(jfcRenderer).setSeriesColor(index, style);
 		}
 
 		void addDatasetToPlot(int datasetIndex) {
+			setCategories();
 			jfcPlot.setDataset(datasetIndex, jfcDataset);
 			jfcPlot.setRenderer(datasetIndex, jfcRenderer);
 		}

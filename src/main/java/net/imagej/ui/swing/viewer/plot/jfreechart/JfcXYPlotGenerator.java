@@ -56,6 +56,7 @@ class JfcXYPlotGenerator extends AbstractJfcChartGenerator {
 	}
 
 	private void addSeriesData(SortedLabel uniqueLabel, Collection<Double> xs, Collection<Double> ys) {
+		// FIXME org.jfree.data.xy.XYSeries series = new org.jfree.data.xy.XYSeries(uniqueLabel, false, true);
 		org.jfree.data.xy.XYSeries series = new org.jfree.data.xy.XYSeries(uniqueLabel);
 		Iterator<Double> xi = xs.iterator();
 		Iterator<Double> yi = ys.iterator();

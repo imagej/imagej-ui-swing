@@ -65,11 +65,12 @@ public class TempMain {
 		log = ctx.service(LogService.class);
 		plotService = ctx.service(PlotService.class);
 		ui.showUI();
-		plotLineStyles();
-		plotMarkerStyles();
-		plotLogarithmic();
 
-		showCategoryChart();
+		//plotLineStyles();
+		//plotMarkerStyles();
+		//plotLogarithmic();
+		//showCategoryChart();
+		showSortedCategoryCharts();
 	}
 
 	private void plotLineStyles() {
@@ -127,6 +128,8 @@ public class TempMain {
 	private void showCategoryChart() {
 
 		CategoryChart<String> chart = plotService.newCategoryChart();
+		Comparator<String> reverse = (s, t1) -> t1.compareTo(s);
+		chart.categoryAxis().setOrder(reverse);
 
 		Map<String, Double> wheelsData = new TreeMap<>();
 		wheelsData.put("one wheel", 1.0);
@@ -168,6 +171,59 @@ public class TempMain {
 
 		ui.show(chart);
 
+	}
+
+	private void showSortedCategoryCharts() {
+		showSortedCategoryChart(new AxisManipulator() {
+			@Override
+			void manipulate(CategoryAxis<String> axis) {
+				axis.setManualCategories(list("a","c","b"));
+				axis.setLabel("acb");
+			}
+		});
+		showSortedCategoryChart(new AxisManipulator() {
+			@Override
+			void manipulate(CategoryAxis<String> axis) {
+				axis.setManualCategories(list("a","c","b","g"));
+				axis.setLabel("acbg");
+			}
+		});
+		showSortedCategoryChart(new AxisManipulator() {
+			@Override
+			void manipulate(CategoryAxis<String> axis) {
+				axis.setManualCategories(list("d","c","a","b"));
+				axis.setOrder(String::compareTo);
+				axis.setLabel("abcd");
+			}
+		});
+		showSortedCategoryChart(new AxisManipulator() {
+			@Override
+			void manipulate(CategoryAxis<String> axis) {
+				axis.setManualCategories(list());
+				axis.setOrder(String::compareTo);
+				axis.setLabel("empty");
+			}
+		});
+	}
+
+	static abstract class AxisManipulator {
+		abstract void manipulate(CategoryAxis<String> axis);
+	}
+
+	private void showSortedCategoryChart(AxisManipulator categoryAxisManipulator) {
+		CategoryChart<String> chart = plotService.newCategoryChart();
+		categoryAxisManipulator.manipulate(chart.categoryAxis());
+
+		Map<String, Double> data = new TreeMap<>();
+		data.put("a", 1.0);
+		data.put("b", 2.0);
+		data.put("c", 3.0);
+		data.put("d", 4.0);
+
+		BarSeries<String> bars = chart.addBarSeries();
+		bars.setValues(data);
+
+		ui.show(chart);
 	}
 
 	private static <T> List<T> list(T ... values) {

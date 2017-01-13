@@ -22,7 +22,7 @@ public class DefaultCategoryChart<C> extends DefaultAbstractPlot implements Cate
 
 	DefaultCategoryChart() {
 		valueAxis = new DefaultNumberAxis();
-		categoryAxis = new DefaultCategoryAxis<>();
+		categoryAxis = new DefaultCategoryAxis<>(this);
 		items = new LinkedList<>();
 	}
 
