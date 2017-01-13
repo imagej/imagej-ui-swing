@@ -1,15 +1,16 @@
 package net.imagej.plot;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author Matthias Arzt
  */
-public interface LineSeries extends Labeled, CategoryChartItem {
+public interface LineSeries<C> extends CategoryChartItem {
 
-    Collection<Double> getValues();
+    Map<C, Double> getValues();
 
-    void setValues(Collection<Double> Values);
+    void setValues(Map<C, Double> Values);
 
     SeriesStyle getStyle();
 

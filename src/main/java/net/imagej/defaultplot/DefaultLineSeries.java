@@ -8,12 +8,12 @@ import java.util.Collection;
 /**
  * @author Matthias Arzt
  */
-public class DefaultLineSeries extends DefaultCategorySeries implements LineSeries {
+public class DefaultLineSeries<C> extends DefaultCategorySeries<C> implements LineSeries<C> {
 
 	private SeriesStyle style = null;
 
-	DefaultLineSeries(String label, Collection<Double> values) {
-		super(label, values);
+	DefaultLineSeries() {
+		super();
 	}
 
 	public void setStyle(SeriesStyle style) {

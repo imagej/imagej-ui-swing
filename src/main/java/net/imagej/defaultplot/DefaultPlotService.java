@@ -21,8 +21,8 @@ public class DefaultPlotService extends AbstractService implements PlotService {
 	}
 
 	@Override
-	public CategoryChart newCategoryChart() {
-		return new DefaultCategoryChart();
+	public <C extends Comparable<C>> CategoryChart<C> newCategoryChart() {
+		return new DefaultCategoryChart<C>();
 	}
 
 }

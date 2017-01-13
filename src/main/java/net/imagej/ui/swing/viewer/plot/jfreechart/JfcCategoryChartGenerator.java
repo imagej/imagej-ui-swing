@@ -13,42 +13,39 @@ import org.scijava.util.ColorRGB;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.Map;
 
 /**
  * @author Matthias Arzt
  */
-class JfcCategoryChartGenerator extends AbstractJfcChartGenerator {
+class JfcCategoryChartGenerator<C extends Comparable<C>> extends AbstractJfcChartGenerator {
 
-	final private CategoryChart chart;
-
-	private Collection<String> categories;
+	final private CategoryChart<C> chart;
 
 	private SortedLabelFactory labelFactory;
 
 	private CategoryPlot jfcPlot;
 
-	private LineAndBarDataset lineData;
+	private LineAndBarDataset<C> lineData;
 
-	private LineAndBarDataset barData;
+	private LineAndBarDataset<C> barData;
 
-	private BoxDataset boxData;
+	private BoxDataset<C> boxData;
 
-	JfcCategoryChartGenerator(CategoryChart chart) {
+	JfcCategoryChartGenerator(CategoryChart<C> chart) {
 		this.chart = chart;
 	}
 
 	@Override
 	Plot getJfcPlot() {
 		labelFactory = new SortedLabelFactory();
-		categories = chart.getCategoryAxis().getCategories();
-		lineData = new LineAndBarDataset(new LineAndShapeRenderer());
-		barData = new LineAndBarDataset(createFlatBarRenderer());
-		boxData = new BoxDataset();
+		lineData = new LineAndBarDataset<>(new LineAndShapeRenderer());
+		barData = new LineAndBarDataset<>(createFlatBarRenderer());
+		boxData = new BoxDataset<>();
 		jfcPlot = new CategoryPlot();
-		jfcPlot.setDomainAxis(new CategoryAxis(chart.getCategoryAxis().getLabel()));
+		jfcPlot.setDomainAxis(new CategoryAxis(chart.categoryAxis().getLabel()));
 		jfcPlot.getDomainAxis().setCategoryLabelPositions(CategoryLabelPositions.UP_45);
-		jfcPlot.setRangeAxis(getJFreeChartAxis(chart.getNumberAxis()));
+		jfcPlot.setRangeAxis(getJFreeChartAxis(chart.numberAxis()));
 		addAllSeries();
 		lineData.addDatasetToPlot(0);
 		boxData.addDatasetToPlot(1);
@@ -79,7 +76,7 @@ class JfcCategoryChartGenerator extends AbstractJfcChartGenerator {
 		}
 	}
 
-	class BoxDataset {
+	class BoxDataset<C extends Comparable<C>> {
 
 		private DefaultBoxAndWhiskerCategoryDataset jfcDataset;
 
@@ -91,12 +88,10 @@ class JfcCategoryChartGenerator extends AbstractJfcChartGenerator {
 			jfcRenderer.setFillBox(false);
 		}
 
-		private void addBoxSeries(BoxSeries series) {
+		private void addBoxSeries(BoxSeries<C> series) {
 			SortedLabel uniqueLabel = labelFactory.newLabel(series.getLabel());
-			Iterator<Collection<Double>> vi = series.getValues().iterator();
-			Iterator<String> ci = categories.iterator();
-			while(vi.hasNext() && ci.hasNext())
-				jfcDataset.add(new ArrayList<>(vi.next()), uniqueLabel, ci.next());
+			for(Map.Entry<C, Collection<Double>> entry : series.getValues().entrySet())
+				jfcDataset.add(new ArrayList<>(entry.getValue()), uniqueLabel, entry.getKey());
 			int seriesIndex = jfcDataset.getRowIndex(uniqueLabel);
 			Paint color = color(series.getColor());
 			if(color != null)
@@ -110,7 +105,7 @@ class JfcCategoryChartGenerator extends AbstractJfcChartGenerator {
 
 	}
 
-	class LineAndBarDataset {
+	class LineAndBarDataset<C extends Comparable<C>> {
 
 		private DefaultCategoryDataset jfcDataset;
 
@@ -133,11 +128,9 @@ class JfcCategoryChartGenerator extends AbstractJfcChartGenerator {
 			setSeriesStyle(uniqueLabel, series.getStyle());
 		}
 
-		private void addSeriesData(SortedLabel uniqueLabel, Collection<Double> values) {
-			Iterator<Double> vi = values.iterator();
-			Iterator<String> ci = categories.iterator();
-			while(vi.hasNext() && ci.hasNext())
-				jfcDataset.addValue(vi.next(), uniqueLabel, ci.next());
+		private void addSeriesData(SortedLabel uniqueLabel, Map<C, Double> values) {
+		    for(Map.Entry<C, Double> entry : values.entrySet())
+				jfcDataset.addValue(entry.getValue(), uniqueLabel, entry.getKey());
 		}
 
 		private void setSeriesStyle(SortedLabel uniqueLabel, SeriesStyle style) {

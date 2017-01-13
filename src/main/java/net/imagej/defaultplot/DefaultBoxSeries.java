@@ -4,30 +4,30 @@ import net.imagej.plot.BoxSeries;
 import org.scijava.util.ColorRGB;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
- * Created by arzt on 21/12/2016.
+ * @author Matthias Arzt
  */
-public class DefaultBoxSeries implements BoxSeries {
+public class DefaultBoxSeries<C> implements BoxSeries<C> {
 
-	private String label;
+	private String label = null;
 
-	private ColorRGB color;
+	private ColorRGB color = null;
 
-	private Collection<Collection<Double>> values;
+	private Map<C, Collection<Double>> values = null;
 
-	public DefaultBoxSeries(String label, Collection<Collection<Double>> values) {
-		this.label = label;
-		this.values = values;
-	}
+	private boolean legendVisible = true;
+
+	public DefaultBoxSeries() { }
 
 	@Override
-	public Collection<Collection<Double>> getValues() {
+	public Map<C, Collection<Double>> getValues() {
 		return values;
 	}
 
 	@Override
-	public void setValues(Collection<Collection<Double>> values) {
+	public void setValues(Map<C, Collection<Double>> values) {
 		this.values = values;
 	}
 
@@ -49,5 +49,15 @@ public class DefaultBoxSeries implements BoxSeries {
 	@Override
 	public String getLabel() {
 		return label;
+	}
+
+	@Override
+	public boolean getLegendVisible() {
+		return legendVisible;
+	}
+
+	@Override
+	public void setLegendVisible(boolean visible) {
+		legendVisible = visible;
 	}
 }

@@ -1,21 +1,20 @@
 package net.imagej.defaultplot;
 
-import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author Matthias Arzt
  */
 
-abstract public class DefaultCategorySeries {
+abstract public class DefaultCategorySeries<C> {
 
-	private Collection<Double> values;
+	private Map<C, Double> values = null;
 
-	private String label;
+	private String label = null;
 
-	DefaultCategorySeries(String label, Collection<Double> values) {
-		this.label = label;
-		this.values = values;
-	}
+	private boolean legendVisible = true;
+
+	DefaultCategorySeries() { }
 
 	public String getLabel() {
 		return label;
@@ -25,11 +24,19 @@ abstract public class DefaultCategorySeries {
 		this.label = label;
 	}
 
-	public void setValues(Collection<Double> Values) {
+	public boolean getLegendVisible() {
+		return legendVisible;
+	}
+
+	public void setLegendVisible(boolean visible) {
+		legendVisible = visible;
+	}
+
+	public void setValues(Map<C, Double> values) {
 		this.values = values;
 	}
 
-	public Collection<Double> getValues() {
+	public Map<C, Double> getValues() {
 		return values;
 	}
 

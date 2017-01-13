@@ -8,13 +8,11 @@ import java.util.Collection;
 /**
  * @author Matthias Arzt
  */
-public class DefaultBarSeries extends DefaultCategorySeries implements BarSeries {
+public class DefaultBarSeries<C> extends DefaultCategorySeries<C> implements BarSeries<C> {
 
 	ColorRGB color = null;
 
-	DefaultBarSeries(String label, Collection<Double> values) {
-		super(label, values);
-	}
+	DefaultBarSeries() { super(); }
 
 	@Override
 	public ColorRGB getColor() { return color; }

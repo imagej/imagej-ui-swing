@@ -2,16 +2,16 @@ package net.imagej.plot;
 
 import org.scijava.util.ColorRGB;
 
-import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author Matthias Arzt
  */
-public interface BarSeries extends Labeled, CategoryChartItem {
+public interface BarSeries<C> extends CategoryChartItem {
 
-    Collection<Double> getValues();
+    Map<C, Double> getValues();
 
-    void setValues(Collection<Double> Values);
+    void setValues(Map<C, Double> Values);
 
     ColorRGB getColor();
 

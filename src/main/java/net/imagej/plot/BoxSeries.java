@@ -3,15 +3,16 @@ package net.imagej.plot;
 import org.scijava.util.ColorRGB;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author Matthias Arzt
  */
-public interface BoxSeries extends CategoryChartItem, Labeled {
+public interface BoxSeries<C> extends CategoryChartItem {
 
-	Collection<Collection<Double>> getValues();
+	Map<C, Collection<Double>> getValues();
 
-	void setValues(Collection<Collection<Double>> values);
+	void setValues(Map<C, Collection<Double>> values);
 
 	ColorRGB getColor();
 

@@ -125,21 +125,49 @@ public class TempMain {
 	}
 
 	private void showCategoryChart() {
-		CategoryChart chart = plotService.newCategoryChart();
-		chart.getCategoryAxis().setCategories(list("one wheel", "bicycle", "car"));
-		chart.addLineSeries("speed", list(1.0, 2.0, 4.0));
-		chart.addBarSeries("speed", list(6.0, 55.0, 200.0));
-		chart.addBoxSeries("boxes", list(
-				randomCollection(10),
-				randomCollection(20),
-				randomCollection(30))
-		).setColor(Colors.BLACK);
-		chart.addBoxSeries("boxes", list(
-				randomCollection(10),
-				randomCollection(20),
-				randomCollection(30))
-		).setColor(Colors.CYAN);
+
+		CategoryChart<String> chart = plotService.newCategoryChart();
+
+		Map<String, Double> wheelsData = new TreeMap<>();
+		wheelsData.put("one wheel", 1.0);
+		wheelsData.put("bicycle", 2.0);
+		wheelsData.put("car", 4.0);
+
+		LineSeries<String> wheels = chart.addLineSeries();
+		wheels.setLabel("wheels");
+		wheels.setValues(wheelsData);
+
+		Map<String, Double> speedData = new TreeMap<>();
+		speedData.put("one wheel", 10.0);
+		speedData.put("bicycle", 30.0);
+		speedData.put("car", 200.0);
+
+		BarSeries<String> speed = chart.addBarSeries();
+		speed.setLabel("speed");
+		speed.setValues(speedData);
+
+		Map<String, Collection<Double>> randomData1 = new TreeMap<>();
+		randomData1.put("one wheel", randomCollection(10));
+		randomData1.put("bicycle", randomCollection(20));
+		randomData1.put("car", randomCollection(30));
+
+		BoxSeries<String> random1 = chart.addBoxSeries();
+		random1.setLabel("boxes1");
+		random1.setValues(randomData1);
+		random1.setColor(Colors.CYAN);
+
+		Map<String, Collection<Double>> randomData2 = new TreeMap<>();
+		randomData2.put("one wheel", randomCollection(10));
+		randomData2.put("bicycle", randomCollection(20));
+		randomData2.put("car", randomCollection(30));
+
+		BoxSeries<String> random2 = chart.addBoxSeries();
+		random2.setLabel("boxes2");
+		random2.setValues(randomData2);
+		random2.setColor(Colors.BLACK);
+
 		ui.show(chart);
+
 	}
 
 	private static <T> List<T> list(T ... values) {

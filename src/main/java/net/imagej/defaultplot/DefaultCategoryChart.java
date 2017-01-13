@@ -3,7 +3,6 @@ package net.imagej.defaultplot;
 import net.imagej.plot.*;
 import org.scijava.util.ColorRGB;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,19 +10,19 @@ import java.util.List;
 /**
  * @author Matthias Arzt
  */
-public class DefaultCategoryChart extends DefaultAbstractPlot implements CategoryChart {
+public class DefaultCategoryChart<C> extends DefaultAbstractPlot implements CategoryChart<C> {
 
 	private String title;
 
 	private NumberAxis valueAxis;
 
-	private CategoryAxis categoryAxis;
+	private CategoryAxis<C> categoryAxis;
 
-	private List<CategoryChartItem> items;
+	private List<CategoryChartItem<C>> items;
 
 	DefaultCategoryChart() {
 		valueAxis = new DefaultNumberAxis();
-		categoryAxis = new DefaultCategoryAxis();
+		categoryAxis = new DefaultCategoryAxis<>();
 		items = new LinkedList<>();
 	}
 
@@ -33,32 +32,32 @@ public class DefaultCategoryChart extends DefaultAbstractPlot implements Categor
 	}
 
 	@Override
-	public LineSeries addLineSeries(String label, Collection<Double> values) {
-		return addItem(new DefaultLineSeries(label, values));
+	public LineSeries<C> addLineSeries() {
+		return addItem(new DefaultLineSeries<>());
 	}
 
 	@Override
-	public BarSeries addBarSeries(String label, Collection<Double> values) {
-		return addItem(new DefaultBarSeries(label, values));
+	public BarSeries<C> addBarSeries() {
+		return addItem(new DefaultBarSeries<>());
 	}
 
 	@Override
-	public BoxSeries addBoxSeries(String label, Collection<Collection<Double>> values) {
-		return addItem(new DefaultBoxSeries(label, values));
+	public BoxSeries<C> addBoxSeries() {
+		return addItem(new DefaultBoxSeries<C>());
 	}
 
 	@Override
-	public NumberAxis getNumberAxis() {
+	public NumberAxis numberAxis() {
 		return valueAxis;
 	}
 
 	@Override
-	public CategoryAxis getCategoryAxis() {
+	public CategoryAxis<C> categoryAxis() {
 		return categoryAxis;
 	}
 
 	@Override
-	public List<CategoryChartItem> getItems() {
+	public List<CategoryChartItem<C>> getItems() {
 		return Collections.unmodifiableList(items);
 	}
 

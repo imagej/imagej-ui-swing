@@ -7,16 +7,11 @@ import java.util.Collection;
 /**
  * @author Matthias Arzt
  */
-public class DefaultCategoryAxis implements CategoryAxis {
+public class DefaultCategoryAxis<C> implements CategoryAxis<C> {
 
-	private String label;
+	private String label = null;
 
-	private Collection<String> categories;
-
-	DefaultCategoryAxis() {
-		label = null;
-		categories = null;
-	}
+	DefaultCategoryAxis() { }
 
 	@Override
 	public void setLabel(String label) {
@@ -28,13 +23,4 @@ public class DefaultCategoryAxis implements CategoryAxis {
 		return label;
 	}
 
-	@Override
-	public void setCategories(Collection<String> categories) {
-		this.categories = categories;
-	}
-
-	@Override
-	public Collection<String> getCategories() {
-		return categories;
-	}
 }
