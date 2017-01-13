@@ -7,7 +7,9 @@ public interface NumberAxis extends Labeled {
 
 	void setManualRange(double min, double max);
 
-	void setAutoRange(RangeStrategy rangeStrategy);
+	void setAutoRange();
+
+	void setAutoIncludeZeroRange();
 
 	RangeStrategy getRangeStrategy();
 
@@ -19,4 +21,7 @@ public interface NumberAxis extends Labeled {
 
 	boolean isLogarithmic();
 
+	enum RangeStrategy {
+		MANUAL, AUTO, AUTO_INCLUDE_ZERO
+	}
 }

@@ -1,7 +1,6 @@
 package net.imagej.defaultplot;
 
 import net.imagej.plot.NumberAxis;
-import net.imagej.plot.RangeStrategy;
 
 class DefaultNumberAxis implements NumberAxis {
 
@@ -40,8 +39,13 @@ class DefaultNumberAxis implements NumberAxis {
 	}
 
 	@Override
-	public void setAutoRange(RangeStrategy rangeStrategy) {
-		this.rangeStrategy = rangeStrategy;
+	public void setAutoRange() {
+		this.rangeStrategy = RangeStrategy.AUTO;
+	}
+
+	@Override
+	public void setAutoIncludeZeroRange() {
+		this.rangeStrategy = RangeStrategy.AUTO_INCLUDE_ZERO;
 	}
 
 	@Override

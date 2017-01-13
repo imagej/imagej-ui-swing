@@ -118,8 +118,8 @@ public class TempMain {
 		XYSeries series = plot.addXYSeries();
 		series.setLabel("exp(sin(x))");
 		series.setValues(xs, ys);
-		plot.xAxis().setAutoRange(RangeStrategy.AUTO);
-		plot.yAxis().setAutoRange(RangeStrategy.AUTO);
+		plot.xAxis().setAutoRange();
+		plot.yAxis().setAutoRange();
 		plot.yAxis().setLogarithmic(true);
 		ui.show(plot);
 	}
