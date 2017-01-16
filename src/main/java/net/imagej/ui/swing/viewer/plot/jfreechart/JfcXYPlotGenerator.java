@@ -13,7 +13,6 @@ import java.util.Iterator;
 /**
  * @author Matthias Arzt
  */
-// FIXME make JfcXYPlotGenerator an interface and implement the JFreeChart in JFreeChartXYPlot
 class JfcXYPlotGenerator extends AbstractJfcChartGenerator {
 
 	private SortedLabelFactory sortedLabelFactory;
@@ -56,8 +55,7 @@ class JfcXYPlotGenerator extends AbstractJfcChartGenerator {
 	}
 
 	private void addSeriesData(SortedLabel uniqueLabel, Collection<Double> xs, Collection<Double> ys) {
-		// FIXME org.jfree.data.xy.XYSeries series = new org.jfree.data.xy.XYSeries(uniqueLabel, false, true);
-		org.jfree.data.xy.XYSeries series = new org.jfree.data.xy.XYSeries(uniqueLabel);
+		org.jfree.data.xy.XYSeries series = new org.jfree.data.xy.XYSeries(uniqueLabel, false, true);
 		Iterator<Double> xi = xs.iterator();
 		Iterator<Double> yi = ys.iterator();
 		while (xi.hasNext() && yi.hasNext())

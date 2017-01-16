@@ -66,10 +66,11 @@ public class TempMain {
 		plotService = ctx.service(PlotService.class);
 		ui.showUI();
 
-		//plotLineStyles();
-		//plotMarkerStyles();
-		//plotLogarithmic();
-		//showCategoryChart();
+		plotLineStyles();
+		plotMarkerStyles();
+		plotLogarithmic();
+		plotCircle();
+		showCategoryChart();
 		showSortedCategoryCharts();
 	}
 
@@ -123,6 +124,28 @@ public class TempMain {
 		plot.yAxis().setAutoRange();
 		plot.yAxis().setLogarithmic(true);
 		ui.show(plot);
+	}
+
+	private void plotCircle() {
+
+		XYPlot plot = plotService.newXYPlot();
+		plot.setTitle("Logarithmic");
+
+		List<Double> xs = new ArrayList<>();
+		List<Double> ys = new ArrayList<>();
+		for(double t = 0; t < 2 * Math.PI; t += 0.1) {
+			xs.add(Math.sin(t));
+			ys.add(Math.cos(t));
+		}
+
+		XYSeries series = plot.addXYSeries();
+		series.setLabel("exp(sin(x))");
+		series.setValues(xs, ys);
+
+		plot.xAxis().setAutoRange();
+		plot.yAxis().setAutoRange();
+		ui.show(plot);
+
 	}
 
 	private void showCategoryChart() {
