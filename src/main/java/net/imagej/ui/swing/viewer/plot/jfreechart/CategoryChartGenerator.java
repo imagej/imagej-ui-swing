@@ -8,6 +8,7 @@ import org.jfree.chart.plot.Plot;
 import org.jfree.chart.renderer.category.*;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
+import org.scijava.ui.awt.AWTColors;
 import org.scijava.util.ColorRGB;
 
 import java.util.*;
@@ -16,7 +17,7 @@ import java.util.List;
 /**
  * @author Matthias Arzt
  */
-class JfcCategoryChartGenerator<C extends Comparable<C>> extends AbstractJfcChartGenerator {
+class CategoryChartGenerator<C extends Comparable<C>> extends AbstractChartGenerator {
 
 	final private CategoryChart<C> chart;
 
@@ -32,7 +33,7 @@ class JfcCategoryChartGenerator<C extends Comparable<C>> extends AbstractJfcChar
 
 	private List<C> categoryList;
 
-	JfcCategoryChartGenerator(CategoryChart<C> chart) {
+	CategoryChartGenerator(CategoryChart<C> chart) {
 		this.chart = chart;
 	}
 
@@ -117,7 +118,7 @@ class JfcCategoryChartGenerator<C extends Comparable<C>> extends AbstractJfcChar
 			int index = jfcDataset.getRowIndex(uniqueLabel);
 			if(index < 0)
 				return;
-			jfcRenderer.setSeriesPaint(index, color(color));
+			jfcRenderer.setSeriesPaint(index, AWTColors.getColor(color));
 		}
 
 		private void setSeriesVisibility(SortedLabel uniqueLabel, boolean seriesVsisible, boolean legendVisible) {

@@ -1,4 +1,4 @@
-package net.imagej.ui.swing.viewer.plot.utils;
+package net.imagej.ui.swing.viewer.plot.jfreechart;
 
 import net.imagej.plot.LineStyle;
 
@@ -8,7 +8,7 @@ import java.awt.*;
  * @author Matthias Arzt
  */
 
-public class AwtLineStyles {
+class AwtLineStyles {
 
 	private boolean visible;
 

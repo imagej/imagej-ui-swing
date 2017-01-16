@@ -1,4 +1,4 @@
-package net.imagej.ui.swing.viewer.plot.utils;
+package net.imagej.ui.swing.viewer.plot.jfreechart;
 
 import net.imagej.plot.MarkerStyle;
 
@@ -11,7 +11,7 @@ import java.awt.geom.Rectangle2D;
  * @author Matthias Arzt
  */
 
-public class AwtMarkerStyles {
+class AwtMarkerStyles {
 
 	final private boolean visible;
 

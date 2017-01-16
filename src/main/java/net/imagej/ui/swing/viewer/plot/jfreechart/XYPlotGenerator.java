@@ -13,7 +13,7 @@ import java.util.Iterator;
 /**
  * @author Matthias Arzt
  */
-class JfcXYPlotGenerator extends AbstractJfcChartGenerator {
+class XYPlotGenerator extends AbstractChartGenerator {
 
 	private SortedLabelFactory sortedLabelFactory;
 	private XYPlot xyPlot;
@@ -21,7 +21,7 @@ class JfcXYPlotGenerator extends AbstractJfcChartGenerator {
 	private XYSeriesCollection jfcDataSet;
 	private XYLineAndShapeRenderer jfcRenderer;
 
-	JfcXYPlotGenerator(XYPlot xyPlot) { this.xyPlot = xyPlot; }
+	XYPlotGenerator(XYPlot xyPlot) { this.xyPlot = xyPlot; }
 
 	@Override
 	Plot getJfcPlot() {

@@ -11,11 +11,11 @@ import org.scijava.plugin.Plugin;
  * @author Matthias.Arzt
  */
 @Plugin(type = Converter.class, priority = Priority.NORMAL_PRIORITY)
-public class XYPlotToJfcConverter extends AbstractConverter<XYPlot, JFreeChart> {
+public class XYPlotConverter extends AbstractConverter<XYPlot, JFreeChart> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T convert(Object o, Class<T> aClass) {
-		return (T) new JfcXYPlotGenerator((XYPlot) o).getJFreeChart();
+		return (T) new XYPlotGenerator((XYPlot) o).getJFreeChart();
 	}
 
 	@Override

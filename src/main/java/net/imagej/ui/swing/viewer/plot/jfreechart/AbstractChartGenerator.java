@@ -5,17 +5,14 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.LogAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.block.BlockBorder;
-import org.jfree.chart.block.BlockFrame;
 import org.jfree.chart.plot.Plot;
-import org.scijava.ui.awt.AWTColors;
-import org.scijava.util.ColorRGB;
 
 import java.awt.*;
 
 /**
  * @author Matthias Arzt
  */
-abstract class AbstractJfcChartGenerator {
+abstract class AbstractChartGenerator {
 
 	abstract Plot getJfcPlot();
 
@@ -80,10 +77,6 @@ abstract class AbstractJfcChartGenerator {
 		@Override public int compareTo(SortedLabel o) { return Integer.compare(id, o.id); }
 		private String label;
 		private int id;
-	}
-
-	static Color color(ColorRGB color) {
-		return AWTColors.getColor(color);
 	}
 
 }
