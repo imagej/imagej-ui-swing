@@ -32,11 +32,10 @@
 package net.imagej.ui.swing.viewer.plot;
 
 import net.imagej.plot.AbstractPlot;
-import net.imagej.plot.XYPlot;
 import org.scijava.display.Display;
 
 /**
- * Interface for {@link JfcPlotGenerator} {@link Display}s.
+ * Interface for {@link AbstractPlot} {@link Display}s.
  * 
  * @author Curtis Rueden
  */

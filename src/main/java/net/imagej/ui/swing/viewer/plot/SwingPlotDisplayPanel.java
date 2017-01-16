@@ -32,6 +32,7 @@
 package net.imagej.ui.swing.viewer.plot;
 
 import java.awt.*;
+import java.util.Objects;
 import javax.swing.*;
 
 import net.imagej.plot.AbstractPlot;
@@ -42,7 +43,7 @@ import org.scijava.convert.ConvertService;
 import org.scijava.ui.viewer.DisplayWindow;
 
 /**
- * A JFreeChart-driven display panel for {@link JfcPlotGenerator}s.
+ * A JFreeChart-driven display panel for {@link AbstractPlot}s.
  * 
  * @author Curtis Rueden
  */
@@ -64,28 +65,27 @@ public class SwingPlotDisplayPanel extends JPanel implements PlotDisplayPanel {
 		this.window = window;
 		this.convertService = convertService;
 		setLayout(new BorderLayout());
-		AbstractPlot plot = display.get(0);
-		prefferedSize = new Dimension(plot.getPreferredWidth(), plot.getPreferredHeight());
-		try {
-			add(makeJFreeChartPanel(plot));
-		} catch (ConverterFailedException e) {
-			add(new JLabel(e.getMessage()));
-		}
+		initPreferredSize();
+		setupChart();
 		window.setContent(this);
 	}
 
-	JPanel makeJFreeChartPanel(AbstractPlot plot) {
-		final JFreeChart chart = convertService.convert(plot, JFreeChart.class);
-		if(chart == null)
-			throw new ConverterFailedException("No sci-java  plugin of type Converter<" +
-				plot.getClass().getName() + ", JFreeChart> found.");
-		return new ChartPanel(chart);
+	private void initPreferredSize() {
+		AbstractPlot plot = display.get(0);
+		prefferedSize = new Dimension(plot.getPreferredWidth(), plot.getPreferredHeight());
 	}
 
-	private class ConverterFailedException extends RuntimeException {
-		ConverterFailedException(String message) {
-			super(message);
-		}
+	private void setupChart() {
+		final JFreeChart chart = convertToJFreeChart(display.get(0));
+		add(new ChartPanel(chart));
+	}
+
+	private JFreeChart convertToJFreeChart(AbstractPlot plot) {
+		return Objects.requireNonNull(convertService.convert(plot, JFreeChart.class));
+	}
+
+	public static boolean supports(AbstractPlot abstractPlot, ConvertService convertService) {
+		return convertService.supports(abstractPlot, JFreeChart.class);
 	}
 
 	// -- PlotDisplayPanel methods --

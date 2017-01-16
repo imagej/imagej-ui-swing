@@ -35,7 +35,7 @@ import org.scijava.ui.viewer.DisplayPanel;
 
 /**
  * This is a panel that can go inside a display window. It displays
- * {@link JfcPlotGenerator}s.
+ * {@link AbstractPlot}s.
  * 
  * @author Curtis Rueden
  */

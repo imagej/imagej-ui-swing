@@ -31,6 +31,8 @@
 
 package net.imagej.ui.swing.viewer.plot;
 
+import net.imagej.Position;
+import net.imagej.plot.AbstractPlot;
 import net.imagej.ui.viewer.plot.AbstractPlotDisplayViewer;
 
 import org.scijava.convert.ConvertService;
@@ -43,7 +45,7 @@ import org.scijava.ui.viewer.DisplayViewer;
 import org.scijava.ui.viewer.DisplayWindow;
 
 /**
- * A Swing {@link JfcPlotGenerator} display viewer, which displays plots using JFreeChart.
+ * A Swing {@link AbstractPlot} display viewer, which displays plots using JFreeChart.
  * 
  * @author Curtis Rueden
  */
@@ -56,6 +58,14 @@ public class SwingPlotDisplayViewer extends AbstractPlotDisplayViewer {
 	@Override
 	public boolean isCompatible(final UserInterface ui) {
 		return ui instanceof SwingUI;
+	}
+
+	@Override
+	public boolean canView(final Display<?> d) {
+		if(! (d instanceof PlotDisplay))
+			return false;
+		AbstractPlot plot = ((PlotDisplay) d).get(0);
+		return SwingPlotDisplayPanel.supports(plot, convertService);
 	}
 
 	@Override

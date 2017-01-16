@@ -35,7 +35,7 @@ import net.imagej.plot.AbstractPlot;
 import org.scijava.ui.viewer.DisplayViewer;
 
 /**
- * A display viewer for a display of {@link JfcPlotGenerator}s.
+ * A display viewer for a display of {@link AbstractPlot}s.
  * 
  * @author Curtis Rueden
  */
