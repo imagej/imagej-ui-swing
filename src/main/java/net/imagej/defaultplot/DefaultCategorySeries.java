@@ -9,7 +9,7 @@ import java.util.Map;
 
 abstract public class DefaultCategorySeries<C> {
 
-	private Map<C, Double> values = null;
+	private Map<? extends C, Double> values = null;
 
 	private String label = null;
 
@@ -33,15 +33,15 @@ abstract public class DefaultCategorySeries<C> {
 		legendVisible = visible;
 	}
 
-	public void setValues(Map<C, Double> values) {
+	public void setValues(Map<? extends C, Double> values) {
 		this.values = values;
 	}
 
-	public Map<C, Double> getValues() {
+	public Map<? extends C, Double> getValues() {
 		return values;
 	}
 
-	public Collection<C> getCategories() {
+	public Collection<? extends C> getCategories() {
 		return values.keySet();
 	}
 }

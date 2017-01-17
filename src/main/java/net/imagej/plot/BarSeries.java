@@ -9,9 +9,9 @@ import java.util.Map;
  */
 public interface BarSeries<C> extends CategoryChartItem {
 
-    Map<C, Double> getValues();
+    Map<? extends C, Double> getValues();
 
-    void setValues(Map<C, Double> Values);
+    void setValues(Map<? extends C, Double> Values);
 
     ColorRGB getColor();
 

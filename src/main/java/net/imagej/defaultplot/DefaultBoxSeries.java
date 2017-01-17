@@ -4,6 +4,7 @@ import net.imagej.plot.BoxSeries;
 import org.scijava.util.ColorRGB;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -27,8 +28,8 @@ public class DefaultBoxSeries<C> implements BoxSeries<C> {
 	}
 
 	@Override
-	public void setValues(Map<C, Collection<Double>> values) {
-		this.values = values;
+	public void setValues(Map<? extends C, ? extends Collection<Double>> values) {
+		this.values = Collections.unmodifiableMap(values);
 	}
 
 	@Override

@@ -11,5 +11,5 @@ public interface CategoryChartItem<C> extends Labeled {
 
     void setLegendVisible(boolean visible);
 
-    Collection<C> getCategories();
+    Collection<? extends C> getCategories();
 }

@@ -8,7 +8,7 @@ import java.util.List;
  */
 public interface CategoryAxis<C> extends Labeled {
 
-	void setManualCategories(List<C> categories);
+	void setManualCategories(List<? extends C> categories);
 
 	void clearManualCategories();
 

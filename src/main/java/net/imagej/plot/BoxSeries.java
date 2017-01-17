@@ -10,9 +10,9 @@ import java.util.Map;
  */
 public interface BoxSeries<C> extends CategoryChartItem {
 
-	Map<C, Collection<Double>> getValues();
+	Map<? extends C, ? extends Collection<Double>> getValues();
 
-	void setValues(Map<C, Collection<Double>> values);
+	void setValues(Map<? extends C, ? extends Collection<Double>> values);
 
 	ColorRGB getColor();
 

@@ -15,7 +15,7 @@ public class DefaultCategoryAxis<C> implements CategoryAxis<C> {
 
 	private String label = null;
 
-	private List<C> categories = null;
+	private List<? extends C> categories = null;
 
 	private Comparator<C> comparator = null;
 
@@ -34,7 +34,7 @@ public class DefaultCategoryAxis<C> implements CategoryAxis<C> {
 	}
 
 	@Override
-	public void setManualCategories(List<C> categories) {
+	public void setManualCategories(List<? extends C> categories) {
 		this.categories = categories;
 	}
 

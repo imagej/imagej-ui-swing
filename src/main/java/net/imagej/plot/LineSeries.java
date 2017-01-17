@@ -8,9 +8,9 @@ import java.util.Map;
  */
 public interface LineSeries<C> extends CategoryChartItem {
 
-    Map<C, Double> getValues();
+    Map<? extends C, Double> getValues();
 
-    void setValues(Map<C, Double> Values);
+    void setValues(Map<? extends C, Double> Values);
 
     SeriesStyle getStyle();
 

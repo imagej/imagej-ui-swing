@@ -104,7 +104,7 @@ class CategoryChartGenerator<C extends Comparable<C>> extends AbstractChartGener
 			setSeriesColor(uniqueLabel, series.getColor());
 		}
 
-		private void setSeriesData(SortedLabel uniqueLabel, Map<C, Collection<Double>> data) {
+		private void setSeriesData(SortedLabel uniqueLabel, Map<? extends C, ? extends Collection<Double>> data) {
 			for(C category : categoryList) {
 				Collection<Double> value = data.get(category);
 				if(value != null)
