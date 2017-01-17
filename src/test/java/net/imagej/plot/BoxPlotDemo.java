@@ -10,7 +10,7 @@ import java.util.*;
 class BoxPlotDemo extends ChartDemo{
 
 	public void run() {
-		CategoryChart<String> chart = plotService.newCategoryChart();
+		CategoryChart<String> chart = plotService.newCategoryChart(String.class);
 
 		Map<String, Collection<Double>> randomData1 = new TreeMap<>();
 		randomData1.put("A", randomCollection(10));

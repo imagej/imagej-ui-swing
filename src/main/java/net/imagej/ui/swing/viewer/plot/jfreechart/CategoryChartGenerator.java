@@ -17,11 +17,11 @@ import java.util.List;
 /**
  * @author Matthias Arzt
  */
-class CategoryChartGenerator<C extends Comparable<C>> extends AbstractChartGenerator {
+class CategoryChartGenerator<C> extends AbstractChartGenerator {
 
 	final private CategoryChart<C> chart;
 
-	private SortedLabelFactory labelFactory;
+	private SortedLabelFactory<String> labelFactory;
 
 	private CategoryPlot jfcPlot;
 
@@ -31,7 +31,9 @@ class CategoryChartGenerator<C extends Comparable<C>> extends AbstractChartGener
 
 	private BoxDataset boxData;
 
-	private List<C> categoryList;
+	private List<SortedLabel<C>> categoryList;
+
+	private SortedLabelFactory<C> categoryFactory;
 
 	CategoryChartGenerator(CategoryChart<C> chart) {
 		this.chart = chart;
@@ -39,8 +41,11 @@ class CategoryChartGenerator<C extends Comparable<C>> extends AbstractChartGener
 
 	@Override
 	Plot getJfcPlot() {
-		labelFactory = new SortedLabelFactory();
-		categoryList = chart.categoryAxis().getCategories();
+		labelFactory = new SortedLabelFactory<>();
+		categoryFactory = new SortedLabelFactory<>();
+		categoryList = new ArrayList<>();
+		for(C category : chart.categoryAxis().getCategories())
+			categoryList.add(categoryFactory.newLabel(category));
 		lineData = new LineAndBarDataset(new LineAndShapeRenderer());
 		barData = new LineAndBarDataset(createFlatBarRenderer());
 		boxData = new BoxDataset();
@@ -92,7 +97,7 @@ class CategoryChartGenerator<C extends Comparable<C>> extends AbstractChartGener
 
 		private void setCategories() {
 			SortedLabel uniqueLabel = labelFactory.newLabel("dummy");
-			for(C category : categoryList)
+			for(SortedLabel<C> category : categoryList)
 				jfcDataset.add(Collections.emptyList(), uniqueLabel, category);
 			setSeriesVisibility(uniqueLabel, false, false);
 		}
@@ -105,8 +110,8 @@ class CategoryChartGenerator<C extends Comparable<C>> extends AbstractChartGener
 		}
 
 		private void setSeriesData(SortedLabel uniqueLabel, Map<? extends C, ? extends Collection<Double>> data) {
-			for(C category : categoryList) {
-				Collection<Double> value = data.get(category);
+			for(SortedLabel<C> category : categoryList) {
+				Collection<Double> value = data.get(category.getLabel());
 				if(value != null)
 					jfcDataset.add(new ArrayList<>(value), uniqueLabel, category);
 			}
@@ -152,19 +157,19 @@ class CategoryChartGenerator<C extends Comparable<C>> extends AbstractChartGener
 
 		private void setCategories() {
 			SortedLabel uniqueLabel = labelFactory.newLabel("dummy");
-			for(C category : categoryList)
+			for(SortedLabel<C> category : categoryList)
 				jfcDataset.addValue(0.0, uniqueLabel, category);
 			setSeriesVisibility(uniqueLabel, false, false);
 		}
 
-		private void addSeries(BarSeries series) {
+		private void addSeries(BarSeries<C> series) {
 			SortedLabel uniqueLabel = labelFactory.newLabel(series.getLabel());
 			addSeriesData(uniqueLabel, series.getValues());
 			setSeriesColor(uniqueLabel, series.getColor());
 			setSeriesVisibility(uniqueLabel, true, series.getLegendVisible());
 		}
 
-		private void addSeries(LineSeries series) {
+		private void addSeries(LineSeries<C> series) {
 			SortedLabel uniqueLabel = labelFactory.newLabel(series.getLabel());
 			addSeriesData(uniqueLabel, series.getValues());
 			setSeriesStyle(uniqueLabel, series.getStyle());
@@ -179,9 +184,9 @@ class CategoryChartGenerator<C extends Comparable<C>> extends AbstractChartGener
 			jfcRenderer.setSeriesVisibleInLegend(index, legendVisible, false);
 		}
 
-		private void addSeriesData(SortedLabel uniqueLabel, Map<C, Double> values) {
-		    for(C category : categoryList) {
-		    	Double value = values.get(category);
+		private void addSeriesData(SortedLabel uniqueLabel, Map<? extends C, Double> values) {
+		    for(SortedLabel<C> category : categoryList) {
+		    	Double value = values.get(category.getLabel());
 		    	if(value != null)
 					jfcDataset.addValue(value, uniqueLabel, category);
 			}

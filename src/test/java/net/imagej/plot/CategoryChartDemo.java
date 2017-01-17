@@ -9,7 +9,7 @@ class CategoryChartDemo extends ChartDemo{
 
 	public void run() {
 
-		CategoryChart<String> chart = plotService.newCategoryChart();
+		CategoryChart<String> chart = plotService.newCategoryChart(String.class);
 		chart.categoryAxis().setManualCategories(Arrays.asList("one wheel", "bicycle", "car"));
 
 		Map<String, Double> wheelsData = new TreeMap<>();

@@ -8,6 +8,8 @@ import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.plot.Plot;
 
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * @author Matthias Arzt
@@ -65,18 +67,19 @@ abstract class AbstractChartGenerator {
 		return axis;
 	}
 
-	static class SortedLabelFactory {
+	static class SortedLabelFactory<T> {
 		private int n;
 		SortedLabelFactory() { n = 0; }
-		SortedLabel newLabel(String label) { return new SortedLabel(n++, label); }
+		SortedLabel<T> newLabel(T label) { return new SortedLabel<>(n++, label); }
 	}
 
-	static class SortedLabel implements Comparable<SortedLabel> {
-		SortedLabel(final int id, final String label) { this.label = label; this.id = id; }
-		@Override public String toString() { return label; }
+	static class SortedLabel<T> implements Comparable<SortedLabel> {
+		SortedLabel(final int id, final T label) { this.label = Objects.requireNonNull(label); this.id = id; }
+		@Override public String toString() { return label.toString(); }
 		@Override public int compareTo(SortedLabel o) { return Integer.compare(id, o.id); }
-		private String label;
-		private int id;
+		public T getLabel() { return label; }
+		final private T label;
+		final private int id;
 	}
 
 }

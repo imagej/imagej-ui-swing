@@ -68,11 +68,18 @@ public class DefaultCategoryAxis<C> implements CategoryAxis<C> {
 
 	private List<C> getCategoriesDefaultOrder() {
 		if(categories == null) {
-			Set<C> allCategories = new TreeSet<>();
+			Set<C> allCategories = newEmptySetOfCategories();
 			for (CategoryChartItem item : chart.getItems())
 				allCategories.addAll(item.getCategories());
 			return new ArrayList<>(allCategories);
 		} else
 			return new ArrayList<>(categories); // Make copy to avoid the list passed to setManualCategories to be sorted.
+	}
+
+	private Set<C> newEmptySetOfCategories() {
+		if(Comparable.class.isAssignableFrom(chart.getCategoryType()))
+			return new TreeSet<>();
+		else
+			return new HashSet<>();
 	}
 }

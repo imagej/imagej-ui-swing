@@ -11,6 +11,8 @@ public interface CategoryChart<C> extends AbstractPlot {
 
 	SeriesStyle newSeriesStyle(ColorRGB color, LineStyle lineStyle, MarkerStyle markerStyle);
 
+	Class<C> getCategoryType();
+
 	LineSeries<C> addLineSeries();
 
 	BarSeries<C> addBarSeries();

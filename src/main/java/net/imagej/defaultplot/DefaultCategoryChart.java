@@ -14,13 +14,16 @@ public class DefaultCategoryChart<C> extends DefaultAbstractPlot implements Cate
 
 	private String title;
 
+	final private Class<C> categoryType;
+
 	private NumberAxis valueAxis;
 
 	private CategoryAxis<C> categoryAxis;
 
 	private List<CategoryChartItem<C>> items;
 
-	DefaultCategoryChart() {
+	DefaultCategoryChart(final Class<C> categoryType) {
+		this.categoryType = categoryType;
 		valueAxis = new DefaultNumberAxis();
 		categoryAxis = new DefaultCategoryAxis<>(this);
 		items = new LinkedList<>();
@@ -29,6 +32,11 @@ public class DefaultCategoryChart<C> extends DefaultAbstractPlot implements Cate
 	@Override
 	public SeriesStyle newSeriesStyle(ColorRGB color, LineStyle lineStyle, MarkerStyle markerStyle) {
 		return new DefaultSeriesStyle(color, lineStyle, markerStyle);
+	}
+
+	@Override
+	public Class<C> getCategoryType() {
+		return categoryType;
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package net.imagej.defaultplot;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Matthias Arzt
@@ -11,7 +12,7 @@ abstract public class DefaultCategorySeries<C> {
 
 	private Map<? extends C, Double> values = null;
 
-	private String label = null;
+	private String label = "unnamed";
 
 	private boolean legendVisible = true;
 
@@ -22,7 +23,7 @@ abstract public class DefaultCategorySeries<C> {
 	}
 
 	public void setLabel(String label) {
-		this.label = label;
+		this.label = Objects.requireNonNull(label);
 	}
 
 	public boolean getLegendVisible() {

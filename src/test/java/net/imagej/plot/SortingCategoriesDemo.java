@@ -77,7 +77,7 @@ class SortingCategoriesDemo extends ChartDemo{
 	}
 
 	private void showSortedCategoryChart(AxisManipulator categoryAxisManipulator) {
-		CategoryChart<String> chart = plotService.newCategoryChart();
+		CategoryChart<String> chart = plotService.newCategoryChart(String.class);
 		categoryAxisManipulator.manipulate(chart.categoryAxis());
 
 		Map<String, Double> data = new TreeMap<>();
