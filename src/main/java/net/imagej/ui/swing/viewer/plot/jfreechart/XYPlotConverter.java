@@ -15,7 +15,7 @@ public class XYPlotConverter extends AbstractConverter<XYPlot, JFreeChart> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T convert(Object o, Class<T> aClass) {
-		return (T) new XYPlotGenerator((XYPlot) o).getJFreeChart();
+		return (T) XYPlotGenerator.run((XYPlot) o);
 	}
 
 	@Override

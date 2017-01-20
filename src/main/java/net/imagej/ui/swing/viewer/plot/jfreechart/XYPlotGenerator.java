@@ -3,47 +3,44 @@ package net.imagej.ui.swing.viewer.plot.jfreechart;
 import net.imagej.plot.*;
 import net.imagej.plot.XYPlot;
 import net.imagej.plot.XYSeries;
-import org.jfree.chart.plot.Plot;
+import org.jfree.chart.JFreeChart;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.*;
 
 import java.util.Collection;
 import java.util.Iterator;
 
+import static net.imagej.ui.swing.viewer.plot.jfreechart.Utils.*;
+
 /**
  * @author Matthias Arzt
  */
-class XYPlotGenerator extends AbstractChartGenerator {
-
-	private SortedLabelFactory sortedLabelFactory;
+class XYPlotGenerator {
 
 	private final XYPlot xyPlot;
 
-	private org.jfree.chart.plot.XYPlot jfcPlot;
+	private final SortedLabelFactory sortedLabelFactory = new SortedLabelFactory();
 
-	private XYSeriesCollection jfcDataSet;
+	private final org.jfree.chart.plot.XYPlot jfcPlot = new org.jfree.chart.plot.XYPlot();
 
-	private XYLineAndShapeRenderer jfcRenderer;
+	private final XYSeriesCollection jfcDataSet = new XYSeriesCollection();
 
-	XYPlotGenerator(XYPlot xyPlot) { this.xyPlot = xyPlot; }
+	private final XYLineAndShapeRenderer jfcRenderer = new XYLineAndShapeRenderer();
 
-	@Override
-	Plot getJfcPlot() {
-		jfcDataSet = new XYSeriesCollection();
-		jfcRenderer = new XYLineAndShapeRenderer();
-		jfcPlot = new org.jfree.chart.plot.XYPlot();
+	private XYPlotGenerator(XYPlot xyPlot) {
+		this.xyPlot = xyPlot;
+	}
+
+	public static JFreeChart run(XYPlot xyPlot) { return new XYPlotGenerator(xyPlot).getJFreeChart();
+	}
+
+	private JFreeChart getJFreeChart() {
 		jfcPlot.setDataset(jfcDataSet);
 		jfcPlot.setDomainAxis(getJFreeChartAxis(xyPlot.xAxis()));
 		jfcPlot.setRangeAxis(getJFreeChartAxis(xyPlot.yAxis()));
 		jfcPlot.setRenderer(jfcRenderer);
-		sortedLabelFactory = new SortedLabelFactory();
 		addAllSeries();
-		return jfcPlot;
-	}
-
-	@Override
-	String getTitle() {
-		return xyPlot.getTitle();
+		return Utils.setupJFreeChart(xyPlot.getTitle(), jfcPlot);
 	}
 
 	private void addAllSeries() {

@@ -8,21 +8,16 @@ import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.plot.Plot;
 
 import java.awt.*;
-import java.util.HashMap;
 import java.util.Objects;
 
 /**
  * @author Matthias Arzt
  */
-abstract class AbstractChartGenerator {
+class Utils {
 
-	abstract Plot getJfcPlot();
-
-	abstract String getTitle();
-
-	public JFreeChart getJFreeChart() {
-		JFreeChart chart = new JFreeChart(getJfcPlot());
-		chart.setTitle(getTitle());
+	static JFreeChart setupJFreeChart(String title, Plot plot) {
+		JFreeChart chart = new JFreeChart(plot);
+		chart.setTitle(title);
 		chart.setBackgroundPaint(Color.WHITE);
 		chart.getLegend().setFrame(BlockBorder.NONE);
 		return chart;

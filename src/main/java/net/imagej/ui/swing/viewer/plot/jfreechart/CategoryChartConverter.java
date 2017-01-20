@@ -15,7 +15,7 @@ public class CategoryChartConverter extends AbstractConverter<CategoryChart, JFr
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T convert(Object o, Class<T> aClass) {
-		return (T) new CategoryChartGenerator((CategoryChart) o).getJFreeChart();
+		return (T) CategoryChartGenerator.run((CategoryChart) o);
 	}
 
 	@Override
