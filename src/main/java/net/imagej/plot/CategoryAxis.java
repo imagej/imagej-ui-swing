@@ -14,7 +14,7 @@ public interface CategoryAxis<C> extends Labeled {
 
 	boolean hasManualCategories();
 
-	void setOrder(Comparator<C> comparator);
+	void setOrder(Comparator<? super C> comparator);
 
 	void clearOrder();
 

@@ -10,9 +10,9 @@ import java.awt.*;
 
 class AwtLineStyles {
 
-	private boolean visible;
+	private final boolean visible;
 
-	private BasicStroke stroke;
+	private final BasicStroke stroke;
 
 	private AwtLineStyles(boolean visible, BasicStroke stroke) {
 		this.visible = visible;

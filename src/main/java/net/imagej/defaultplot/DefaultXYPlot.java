@@ -13,11 +13,11 @@ import java.util.List;
  */
 class DefaultXYPlot extends DefaultAbstractPlot implements XYPlot {
 
-	private DefaultNumberAxis xAxis;
+	private final DefaultNumberAxis xAxis;
 
-	private DefaultNumberAxis yAxis;
+	private final DefaultNumberAxis yAxis;
 
-	private List<XYPlotItem> items;
+	private final List<XYPlotItem> items;
 
 	DefaultXYPlot() {
 		xAxis = new DefaultNumberAxis();
@@ -47,6 +47,7 @@ class DefaultXYPlot extends DefaultAbstractPlot implements XYPlot {
 		return yAxis;
 	}
 
+	@Override
 	public List<XYPlotItem> getItems() {
 		return Collections.unmodifiableList(items);
 	}

@@ -9,15 +9,15 @@ import java.util.*;
 /**
  * @author Matthias Arzt
  */
-public class DefaultCategoryAxis<C> implements CategoryAxis<C> {
+class DefaultCategoryAxis<C> implements CategoryAxis<C> {
 
-	final private CategoryChart<C> chart;
+	private final CategoryChart<C> chart;
 
 	private String label = null;
 
 	private List<? extends C> categories = null;
 
-	private Comparator<C> comparator = null;
+	private Comparator<? super C> comparator = null;
 
 	DefaultCategoryAxis(CategoryChart<C> chart) {
 		this.chart = chart;
@@ -49,7 +49,7 @@ public class DefaultCategoryAxis<C> implements CategoryAxis<C> {
 	}
 
 	@Override
-	public void setOrder(Comparator<C> comparator) {
+	public void setOrder(Comparator<? super C> comparator) {
 		this.comparator = comparator;
 	}
 

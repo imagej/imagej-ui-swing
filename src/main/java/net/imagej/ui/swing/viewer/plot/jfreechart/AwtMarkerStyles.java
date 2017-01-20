@@ -13,11 +13,11 @@ import java.awt.geom.Rectangle2D;
 
 class AwtMarkerStyles {
 
-	final private boolean visible;
+	private final boolean visible;
 
-	final private boolean filled;
+	private final boolean filled;
 
-	final private Shape shape;
+	private final Shape shape;
 
 	private AwtMarkerStyles(boolean visible, boolean filled, Shape shape) {
 		this.visible = visible;

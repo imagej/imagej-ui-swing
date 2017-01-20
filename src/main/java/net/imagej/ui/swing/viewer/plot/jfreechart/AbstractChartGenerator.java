@@ -78,8 +78,8 @@ abstract class AbstractChartGenerator {
 		@Override public String toString() { return label.toString(); }
 		@Override public int compareTo(SortedLabel o) { return Integer.compare(id, o.id); }
 		public T getLabel() { return label; }
-		final private T label;
-		final private int id;
+		private final T label;
+		private final int id;
 	}
 
 }

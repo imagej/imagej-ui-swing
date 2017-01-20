@@ -8,7 +8,7 @@ import java.util.Collection;
 /**
  * @author Matthias Arzt
  */
-public class DefaultLineSeries<C> extends DefaultCategorySeries<C> implements LineSeries<C> {
+class DefaultLineSeries<C> extends DefaultCategorySeries<C> implements LineSeries<C> {
 
 	private SeriesStyle style = null;
 

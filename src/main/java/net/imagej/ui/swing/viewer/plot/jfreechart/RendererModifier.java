@@ -14,7 +14,7 @@ import org.scijava.util.ColorRGB;
  */
 class RendererModifier {
 
-	AbstractRenderer renderer;
+	final AbstractRenderer renderer;
 
 	private RendererModifier(AbstractRenderer renderer) {
 		this.renderer = renderer;
@@ -51,21 +51,21 @@ class RendererModifier {
 		renderer.setSeriesShape(index, marker.getShape());
 	}
 
-	void setSeriesLinesVisible(int index, boolean visible) {
+	private void setSeriesLinesVisible(int index, boolean visible) {
 		if(renderer instanceof LineAndShapeRenderer)
 			((LineAndShapeRenderer) renderer).setSeriesLinesVisible(index, visible);
 		if(renderer instanceof XYLineAndShapeRenderer)
 			((XYLineAndShapeRenderer) renderer).setSeriesLinesVisible(index, visible);
 	}
 
-	void setSeriesShapesVisible(int index, boolean visible) {
+	private void setSeriesShapesVisible(int index, boolean visible) {
 		if(renderer instanceof LineAndShapeRenderer)
 			((LineAndShapeRenderer) renderer).setSeriesShapesVisible(index, visible);
 		if(renderer instanceof XYLineAndShapeRenderer)
 			((XYLineAndShapeRenderer) renderer).setSeriesShapesVisible(index, visible);
 	}
 
-	void setSeriesShapesFilled(int index, boolean filled) {
+	private void setSeriesShapesFilled(int index, boolean filled) {
 		if(renderer instanceof LineAndShapeRenderer)
 			((LineAndShapeRenderer) renderer).setSeriesShapesFilled(index, filled);
 		if(renderer instanceof XYLineAndShapeRenderer)

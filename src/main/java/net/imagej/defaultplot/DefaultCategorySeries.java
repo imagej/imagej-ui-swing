@@ -8,7 +8,7 @@ import java.util.Objects;
  * @author Matthias Arzt
  */
 
-abstract public class DefaultCategorySeries<C> {
+abstract class DefaultCategorySeries<C> {
 
 	private Map<? extends C, Double> values = null;
 

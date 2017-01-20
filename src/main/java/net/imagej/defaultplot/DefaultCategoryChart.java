@@ -10,17 +10,17 @@ import java.util.List;
 /**
  * @author Matthias Arzt
  */
-public class DefaultCategoryChart<C> extends DefaultAbstractPlot implements CategoryChart<C> {
+class DefaultCategoryChart<C> extends DefaultAbstractPlot implements CategoryChart<C> {
 
 	private String title;
 
-	final private Class<C> categoryType;
+	private final Class<C> categoryType;
 
-	private NumberAxis valueAxis;
+	private final NumberAxis valueAxis;
 
-	private CategoryAxis<C> categoryAxis;
+	private final CategoryAxis<C> categoryAxis;
 
-	private List<CategoryChartItem<C>> items;
+	private final List<CategoryChartItem<C>> items;
 
 	DefaultCategoryChart(final Class<C> categoryType) {
 		this.categoryType = categoryType;

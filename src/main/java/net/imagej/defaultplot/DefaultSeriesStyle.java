@@ -10,11 +10,11 @@ import org.scijava.util.ColorRGB;
  */
 class DefaultSeriesStyle implements SeriesStyle {
 
-	private ColorRGB color;
+	private final ColorRGB color;
 
-	private MarkerStyle markerStyle;
+	private final MarkerStyle markerStyle;
 
-	private LineStyle lineStyle;
+	private final LineStyle lineStyle;
 
 	DefaultSeriesStyle(ColorRGB color, LineStyle lineStyle, MarkerStyle markerStyle) {
 		this.color = color;

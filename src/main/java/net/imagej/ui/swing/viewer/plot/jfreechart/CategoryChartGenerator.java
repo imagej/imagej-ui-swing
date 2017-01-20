@@ -19,7 +19,7 @@ import java.util.List;
  */
 class CategoryChartGenerator<C> extends AbstractChartGenerator {
 
-	final private CategoryChart<C> chart;
+	private final CategoryChart<C> chart;
 
 	private SortedLabelFactory<String> labelFactory;
 

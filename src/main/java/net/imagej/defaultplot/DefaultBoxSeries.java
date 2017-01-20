@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * @author Matthias Arzt
  */
-public class DefaultBoxSeries<C> implements BoxSeries<C> {
+class DefaultBoxSeries<C> implements BoxSeries<C> {
 
 	private String label = null;
 

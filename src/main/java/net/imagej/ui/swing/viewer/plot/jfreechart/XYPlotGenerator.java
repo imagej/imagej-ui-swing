@@ -16,9 +16,13 @@ import java.util.Iterator;
 class XYPlotGenerator extends AbstractChartGenerator {
 
 	private SortedLabelFactory sortedLabelFactory;
-	private XYPlot xyPlot;
+
+	private final XYPlot xyPlot;
+
 	private org.jfree.chart.plot.XYPlot jfcPlot;
+
 	private XYSeriesCollection jfcDataSet;
+
 	private XYLineAndShapeRenderer jfcRenderer;
 
 	XYPlotGenerator(XYPlot xyPlot) { this.xyPlot = xyPlot; }

@@ -8,9 +8,9 @@ import java.util.Collection;
 /**
  * @author Matthias Arzt
  */
-public class DefaultBarSeries<C> extends DefaultCategorySeries<C> implements BarSeries<C> {
+class DefaultBarSeries<C> extends DefaultCategorySeries<C> implements BarSeries<C> {
 
-	ColorRGB color = null;
+	private ColorRGB color = null;
 
 	DefaultBarSeries() { super(); }
 
