@@ -11,6 +11,9 @@ class XYPlotDemo extends ChartDemo{
 	public void run() {
 		XYPlot plot = plotService.newXYPlot();
 		plot.setTitle("A series forming a circle.");
+		plot.xAxis().setAutoRange();
+		plot.yAxis().setAutoRange();
+		plot.setPreferredSize(400, 400);
 
 		List<Double> xs = new ArrayList<>();
 		List<Double> ys = new ArrayList<>();
@@ -23,9 +26,6 @@ class XYPlotDemo extends ChartDemo{
 		series.setLabel("circle");
 		series.setValues(xs, ys);
 
-		plot.xAxis().setAutoRange();
-		plot.yAxis().setAutoRange();
-		plot.setPreferredSize(400, 400);
 		ui.show(plot);
 	}
 

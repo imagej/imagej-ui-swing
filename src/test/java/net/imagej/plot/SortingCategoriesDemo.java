@@ -50,8 +50,8 @@ class SortingCategoriesDemo extends ChartDemo{
 		showSortedCategoryChart(new AxisManipulator() {
 			@Override
 			void manipulate(CategoryAxis<String> axis) {
-				axis.setManualCategories(Arrays.asList("a","c","b","g"));
-				axis.setLabel("acbg");
+				axis.setManualCategories(Arrays.asList("a","g","c","b"));
+				axis.setLabel("agcb");
 			}
 		});
 		showSortedCategoryChart(new AxisManipulator() {

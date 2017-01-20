@@ -17,18 +17,18 @@ class CategoryChartDemo extends ChartDemo{
 		wheelsData.put("bicycle", 2.0);
 		wheelsData.put("car", 4.0);
 
-		LineSeries<String> wheels = chart.addLineSeries();
-		wheels.setLabel("wheels");
-		wheels.setValues(wheelsData);
+		LineSeries<String> lineSeries = chart.addLineSeries();
+		lineSeries.setLabel("wheels");
+		lineSeries.setValues(wheelsData);
 
 		Map<String, Double> speedData = new TreeMap<>();
 		speedData.put("one wheel", 10.0);
 		speedData.put("bicycle", 30.0);
 		speedData.put("car", 200.0);
 
-		BarSeries<String> speed = chart.addBarSeries();
-		speed.setLabel("speed");
-		speed.setValues(speedData);
+		BarSeries<String> barSeries = chart.addBarSeries();
+		barSeries.setLabel("speed");
+		barSeries.setValues(speedData);
 
 		ui.show(chart);
 	}
