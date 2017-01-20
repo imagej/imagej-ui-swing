@@ -2,9 +2,7 @@ package net.imagej.defaultplot;
 
 import net.imagej.plot.NumberAxis;
 
-class DefaultNumberAxis implements NumberAxis {
-
-	private String label;
+class DefaultNumberAxis extends AbstractLabeled implements NumberAxis {
 
 	private double min;
 
@@ -19,16 +17,6 @@ class DefaultNumberAxis implements NumberAxis {
 		max = 0;
 		logarithmic = false;
 		rangeStrategy = RangeStrategy.AUTO;
-	}
-
-	@Override
-	public void setLabel(String label) {
-		this.label = label;
-	}
-
-	@Override
-	public String getLabel() {
-		return label;
 	}
 
 	@Override

@@ -39,7 +39,7 @@ import org.scijava.display.Display;
 import org.scijava.ui.viewer.AbstractDisplayViewer;
 
 /**
- * Implements the UI-independent elements of a {@link JfcPlotGenerator} viewer.
+ * Implements the UI-independent elements of a {@link AbstractPlot} viewer.
  * 
  * @author Curtis Rueden
  */

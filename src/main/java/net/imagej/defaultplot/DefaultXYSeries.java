@@ -10,54 +10,30 @@ import java.util.List;
 /**
  * @author Matthias Arzt
  */
-class DefaultXYSeries implements XYSeries {
+class DefaultXYSeries extends AbstractChartItem implements XYSeries {
 
-	private String label = "";
+	private List<Double> xValues = Collections.emptyList();
 
-	private boolean legendVisible = true;
+	private List<Double> yValues = Collections.emptyList();
 
-	private List<Double> xValues = null;
-
-	private List<Double> yValues = null;
-
-	private SeriesStyle style = null;
+	private SeriesStyle style = DefaultSeriesStyle.emptySeriesStyle();
 
 	DefaultXYSeries() { }
 
 	@Override
-	public String getLabel() {
-		return label;
-	}
-
-	@Override
-	public void setLabel(String label) {
-		this.label = label;
-	}
-
-	@Override
-	public boolean getLegendVisible() {
-		return legendVisible;
-	}
-
-	@Override
-	public void setLegendVisible(boolean legendVisible) {
-		this.legendVisible = legendVisible;
-	}
-
-	@Override
 	public void setValues(List<Double> xValues, List<Double> yValues) {
-		this.xValues = Collections.unmodifiableList(new ArrayList<>(xValues));
-		this.yValues = Collections.unmodifiableList(new ArrayList<>(yValues));
+		this.xValues = Collections.unmodifiableList(xValues);
+		this.yValues = Collections.unmodifiableList(yValues);
 	}
 
 	@Override
 	public List<Double> getXValues() {
-		return xValues == null ? Collections.emptyList() : xValues;
+		return xValues;
 	}
 
 	@Override
 	public List<Double> getYValues() {
-		return yValues == null ? Collections.emptyList() : yValues;
+		return yValues;
 	}
 
 	@Override

@@ -9,11 +9,9 @@ import java.util.*;
 /**
  * @author Matthias Arzt
  */
-class DefaultCategoryAxis<C> implements CategoryAxis<C> {
+class DefaultCategoryAxis<C> extends AbstractLabeled implements CategoryAxis<C> {
 
 	private final CategoryChart<C> chart;
-
-	private String label = null;
 
 	private List<? extends C> categories = null;
 
@@ -24,18 +22,8 @@ class DefaultCategoryAxis<C> implements CategoryAxis<C> {
 	}
 
 	@Override
-	public void setLabel(String label) {
-		this.label = label;
-	}
-
-	@Override
-	public String getLabel() {
-		return label;
-	}
-
-	@Override
 	public void setManualCategories(List<? extends C> categories) {
-		this.categories = categories;
+		this.categories = Objects.requireNonNull(categories);
 	}
 
 	@Override
@@ -50,7 +38,7 @@ class DefaultCategoryAxis<C> implements CategoryAxis<C> {
 
 	@Override
 	public void setOrder(Comparator<? super C> comparator) {
-		this.comparator = comparator;
+		this.comparator = Objects.requireNonNull(comparator);
 	}
 
 	@Override

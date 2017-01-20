@@ -2,6 +2,8 @@ package net.imagej.defaultplot;
 
 import net.imagej.plot.AbstractPlot;
 
+import java.util.Objects;
+
 /**
  * @author Matthias Arzt
  */
@@ -21,7 +23,7 @@ abstract class DefaultAbstractPlot implements AbstractPlot {
 
 	@Override
 	public void setTitle(String title) {
-		this.title = title;
+		this.title = Objects.requireNonNull(title);
 	}
 
 	@Override

@@ -34,4 +34,10 @@ class DefaultSeriesStyle implements SeriesStyle {
 		return markerStyle;
 	}
 
+	private static final DefaultSeriesStyle EMPTY_SERIES_STYLE = new DefaultSeriesStyle(null, null, null);
+
+	public static DefaultSeriesStyle emptySeriesStyle() {
+		return EMPTY_SERIES_STYLE;
+	}
+
 }

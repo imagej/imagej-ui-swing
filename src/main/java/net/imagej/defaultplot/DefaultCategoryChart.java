@@ -6,13 +6,12 @@ import org.scijava.util.ColorRGB;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Matthias Arzt
  */
 class DefaultCategoryChart<C> extends DefaultAbstractPlot implements CategoryChart<C> {
-
-	private String title;
 
 	private final Class<C> categoryType;
 
@@ -23,7 +22,7 @@ class DefaultCategoryChart<C> extends DefaultAbstractPlot implements CategoryCha
 	private final List<CategoryChartItem<C>> items;
 
 	DefaultCategoryChart(final Class<C> categoryType) {
-		this.categoryType = categoryType;
+		this.categoryType = Objects.requireNonNull(categoryType);
 		valueAxis = new DefaultNumberAxis();
 		categoryAxis = new DefaultCategoryAxis<>(this);
 		items = new LinkedList<>();

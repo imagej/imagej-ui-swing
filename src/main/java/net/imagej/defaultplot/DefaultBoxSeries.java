@@ -10,15 +10,11 @@ import java.util.Map;
 /**
  * @author Matthias Arzt
  */
-class DefaultBoxSeries<C> implements BoxSeries<C> {
-
-	private String label = null;
+class DefaultBoxSeries<C> extends AbstractChartItem implements BoxSeries<C> {
 
 	private ColorRGB color = null;
 
-	private Map<C, Collection<Double>> values = null;
-
-	private boolean legendVisible = true;
+	private Map<C, Collection<Double>> values = Collections.emptyMap();
 
 	public DefaultBoxSeries() { }
 
@@ -40,26 +36,6 @@ class DefaultBoxSeries<C> implements BoxSeries<C> {
 	@Override
 	public void setColor(ColorRGB color) {
 		this.color = color;
-	}
-
-	@Override
-	public void setLabel(String label) {
-		this.label = label;
-	}
-
-	@Override
-	public String getLabel() {
-		return label;
-	}
-
-	@Override
-	public boolean getLegendVisible() {
-		return legendVisible;
-	}
-
-	@Override
-	public void setLegendVisible(boolean visible) {
-		legendVisible = visible;
 	}
 
 	@Override
