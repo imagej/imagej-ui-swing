@@ -5,6 +5,8 @@ import org.scijava.util.ColorRGB;
 import java.util.List;
 
 /**
+ * Container for data and settings discribing a chart, whose data is organised in categories.
+ *
  * @author Matthias Arzt
  */
 public interface CategoryChart<C> extends AbstractPlot {

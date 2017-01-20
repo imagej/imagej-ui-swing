@@ -6,6 +6,8 @@ import org.scijava.util.ColorRGB;
 import java.util.Collection;
 
 /**
+ * Default Implementation of {@link BarSeries}.
+ *
  * @author Matthias Arzt
  */
 class DefaultBarSeries<C> extends DefaultCategorySeries<C> implements BarSeries<C> {
@@ -13,6 +15,8 @@ class DefaultBarSeries<C> extends DefaultCategorySeries<C> implements BarSeries<
 	private ColorRGB color = null;
 
 	DefaultBarSeries() { super(); }
+
+	// -- BarSeries methods --
 
 	@Override
 	public ColorRGB getColor() { return color; }

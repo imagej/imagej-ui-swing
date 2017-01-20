@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.List;
 
 /**
+ * Container for data and settings describing an plot, with two number axis X and Y.
+ *
  * @author Matthias Arzt
  */
 public interface XYPlot extends AbstractPlot {

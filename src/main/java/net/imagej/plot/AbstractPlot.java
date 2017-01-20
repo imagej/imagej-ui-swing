@@ -1,6 +1,8 @@
 package net.imagej.plot;
 
 /**
+ * Super interface to all charts that are provided by {@link PlotService}.
+ *
  * @author Matthias Arzt
  */
 public interface AbstractPlot {

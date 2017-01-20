@@ -2,6 +2,12 @@ package net.imagej.defaultplot;
 
 import net.imagej.plot.NumberAxis;
 
+/**
+ * The dafult implementation of the {@link NumberAxis} interface.
+ *
+ * @author Matthias Arzt
+ */
+
 class DefaultNumberAxis extends AbstractLabeled implements NumberAxis {
 
 	private double min;
@@ -18,6 +24,8 @@ class DefaultNumberAxis extends AbstractLabeled implements NumberAxis {
 		logarithmic = false;
 		rangeStrategy = RangeStrategy.AUTO;
 	}
+
+	// -- NumberAxis methods --
 
 	@Override
 	public void setManualRange(double min, double max) {

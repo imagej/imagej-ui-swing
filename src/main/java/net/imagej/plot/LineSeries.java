@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
+ * A data series of a {@link CategoryChart} to be disiplayed as line or points.
+ *
  * @author Matthias Arzt
  */
 public interface LineSeries<C> extends CategoryChartItem {

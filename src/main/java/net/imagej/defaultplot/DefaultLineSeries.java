@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.Objects;
 
 /**
+ * The default implementation of {@link LineSeries}.
+ *
  * @author Matthias Arzt
  */
 class DefaultLineSeries<C> extends DefaultCategorySeries<C> implements LineSeries<C> {
@@ -17,10 +19,14 @@ class DefaultLineSeries<C> extends DefaultCategorySeries<C> implements LineSerie
 		super();
 	}
 
+	// -- LineSerties methods --
+
+	@Override
 	public void setStyle(SeriesStyle style) {
 		this.style = Objects.requireNonNull(style);
 	}
 
+	@Override
 	public SeriesStyle getStyle() {
 		return style;
 	}

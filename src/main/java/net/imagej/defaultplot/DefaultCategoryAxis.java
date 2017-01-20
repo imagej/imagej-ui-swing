@@ -7,6 +7,8 @@ import net.imagej.plot.CategoryChartItem;
 import java.util.*;
 
 /**
+ * Default Implementation of CategoryAxis."
+ *
  * @author Matthias Arzt
  */
 class DefaultCategoryAxis<C> extends AbstractLabeled implements CategoryAxis<C> {
@@ -20,6 +22,8 @@ class DefaultCategoryAxis<C> extends AbstractLabeled implements CategoryAxis<C> 
 	DefaultCategoryAxis(CategoryChart<C> chart) {
 		this.chart = chart;
 	}
+
+	// -- CategoryAxis methods --
 
 	@Override
 	public void setManualCategories(List<? extends C> categories) {
@@ -53,6 +57,8 @@ class DefaultCategoryAxis<C> extends AbstractLabeled implements CategoryAxis<C> 
 			result.sort(comparator);
 		return result;
 	}
+
+	// -- private helper methods
 
 	private List<C> getCategoriesDefaultOrder() {
 		if(categories == null) {

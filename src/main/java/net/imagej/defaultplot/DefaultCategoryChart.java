@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * Default implementation of {@link CategoryChart}.
+ *
  * @author Matthias Arzt
  */
 class DefaultCategoryChart<C> extends DefaultAbstractPlot implements CategoryChart<C> {
@@ -27,6 +29,8 @@ class DefaultCategoryChart<C> extends DefaultAbstractPlot implements CategoryCha
 		categoryAxis = new DefaultCategoryAxis<>(this);
 		items = new LinkedList<>();
 	}
+
+	// -- CategoryChart methods --
 
 	@Override
 	public SeriesStyle newSeriesStyle(ColorRGB color, LineStyle lineStyle, MarkerStyle markerStyle) {
@@ -68,5 +72,10 @@ class DefaultCategoryChart<C> extends DefaultAbstractPlot implements CategoryCha
 		return Collections.unmodifiableList(items);
 	}
 
-	private <T extends CategoryChartItem> T addItem(T value) { items.add(value); return value; }
+	// -- private helper methods --
+
+	private <T extends CategoryChartItem> T addItem(T value) {
+		items.add(value);
+		return value;
+	}
 }

@@ -5,8 +5,11 @@ import net.imagej.plot.AbstractPlot;
 import java.util.Objects;
 
 /**
+ * An abstract class with default behavior for the {@link AbstractPlot} interface.
+ *
  * @author Matthias Arzt
  */
+
 abstract class DefaultAbstractPlot implements AbstractPlot {
 
 	private String title;
@@ -20,6 +23,8 @@ abstract class DefaultAbstractPlot implements AbstractPlot {
 		preferredWidth = 600;
 		preferredHeight = 400;
 	}
+
+	// -- AbstractPlot methods --
 
 	@Override
 	public void setTitle(String title) {
@@ -37,6 +42,7 @@ abstract class DefaultAbstractPlot implements AbstractPlot {
 		this.preferredHeight = height;
 	}
 
+	@Override
 	public int getPreferredWidth() {
 		return preferredWidth;
 	}

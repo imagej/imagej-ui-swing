@@ -9,12 +9,16 @@ import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
 
 /**
+ * The default implementation of the {@link PlotService} interface.
+ *
  * @author Matthias Arzt
  */
 
 @Plugin(type = Service.class)
 public class DefaultPlotService extends AbstractService implements PlotService {
 
+	// -- PlotService methods --
+	
 	@Override
 	public XYPlot newXYPlot() {
 		return new DefaultXYPlot();

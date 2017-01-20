@@ -1,6 +1,8 @@
 package net.imagej.plot;
 
 /**
+ * Number axis of a chart like {@link XYPlot} or {@link CategoryChart}.
+ *
  * @author Matthias Arzt
  */
 public interface NumberAxis extends Labeled {

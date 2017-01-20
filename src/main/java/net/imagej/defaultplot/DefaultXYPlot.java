@@ -9,6 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
+ * The default implementation of the {@link XYPlot} interface.
+ *
  * @author Matthias Arzt
  */
 class DefaultXYPlot extends DefaultAbstractPlot implements XYPlot {
@@ -24,6 +26,8 @@ class DefaultXYPlot extends DefaultAbstractPlot implements XYPlot {
 		yAxis = new DefaultNumberAxis();
 		items = new LinkedList<>();
 	}
+
+	// -- XYPlot methods --
 
 	@Override
 	public SeriesStyle newSeriesStyle(ColorRGB color, LineStyle lineStyle, MarkerStyle markerStyle) {

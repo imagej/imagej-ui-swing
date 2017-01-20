@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * The default implementation of the {@link XYSeries} interface.
+ *
  * @author Matthias Arzt
  */
 class DefaultXYSeries extends AbstractChartItem implements XYSeries {
@@ -20,8 +22,12 @@ class DefaultXYSeries extends AbstractChartItem implements XYSeries {
 
 	DefaultXYSeries() { }
 
+	// -- XYSeries methods --
+
 	@Override
 	public void setValues(List<Double> xValues, List<Double> yValues) {
+		if(xValues.size() != yValues.size())
+			throw new IllegalArgumentException();
 		this.xValues = Collections.unmodifiableList(xValues);
 		this.yValues = Collections.unmodifiableList(yValues);
 	}

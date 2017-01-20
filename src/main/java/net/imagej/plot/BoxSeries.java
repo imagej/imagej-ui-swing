@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
+ * A data series of a {@link CategoryChart} to be displayed as box plot.
+ *
  * @author Matthias Arzt
  */
 public interface BoxSeries<C> extends CategoryChartItem {

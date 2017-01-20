@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
+ * Default implementation of {@link BoxSeries}.
+ *
  * @author Matthias Arzt
  */
 class DefaultBoxSeries<C> extends AbstractChartItem implements BoxSeries<C> {
@@ -17,6 +19,8 @@ class DefaultBoxSeries<C> extends AbstractChartItem implements BoxSeries<C> {
 	private Map<C, Collection<Double>> values = Collections.emptyMap();
 
 	public DefaultBoxSeries() { }
+
+	// -- BoxSeries methods --
 
 	@Override
 	public Map<C, Collection<Double>> getValues() {
@@ -37,6 +41,8 @@ class DefaultBoxSeries<C> extends AbstractChartItem implements BoxSeries<C> {
 	public void setColor(ColorRGB color) {
 		this.color = color;
 	}
+
+	// -- CategoryChartItem methods --
 
 	@Override
 	public Collection getCategories() {

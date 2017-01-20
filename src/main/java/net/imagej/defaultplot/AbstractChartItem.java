@@ -3,9 +3,11 @@ package net.imagej.defaultplot;
 import java.util.Objects;
 
 /**
+ * An abstract class with default behavior for {@link CategoryCharItem} and {XYPlotItem} interfaces.
+ *
  * @author Matthias Arzt
  */
-class AbstractChartItem extends AbstractLabeled {
+abstract class AbstractChartItem extends AbstractLabeled {
 
 	private boolean legendVisible = true;
 

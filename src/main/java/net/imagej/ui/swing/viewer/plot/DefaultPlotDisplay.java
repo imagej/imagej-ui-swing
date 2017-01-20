@@ -38,7 +38,7 @@ import org.scijava.display.Display;
 import org.scijava.plugin.Plugin;
 
 /**
- * Default display for {@link JfcPlotGenerator}s.
+ * Default display for {@link AbstractPlot}s.
  *
  * @author Curtis Rueden
  */

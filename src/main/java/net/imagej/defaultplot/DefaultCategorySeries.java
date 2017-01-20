@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
+ * An abstract class that implements the common bahavoir of {@link DefaultLineSeries} and {@link DefaultBarSeries}.
+ *
  * @author Matthias Arzt
  */
 
@@ -22,6 +24,8 @@ abstract class DefaultCategorySeries<C> extends AbstractChartItem {
 	public Map<? extends C, Double> getValues() {
 		return values;
 	}
+	
+	// -- CategoryChartItem methods --
 
 	public Collection<? extends C> getCategories() {
 		return values.keySet();
