@@ -29,32 +29,28 @@
  * #L%
  */
 
-package net.imagej.ui.viewer.plot;
+package net.imagej.plot;
 
-import net.imagej.plot.AbstractPlot;
-import net.imagej.ui.swing.viewer.plot.PlotDisplay;
-import net.imagej.ui.swing.viewer.plot.PlotDisplayViewer;
+import org.scijava.util.ColorRGB;
 
-import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
+import java.util.Collection;
+import java.util.List;
 
 /**
- * Implements the UI-independent elements of a {@link AbstractPlot} viewer.
- * 
- * @author Curtis Rueden
+ * Container for data and settings describing an plot, with two number axis X and Y.
+ *
+ * @author Matthias Arzt
  */
-public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<AbstractPlot> implements PlotDisplayViewer
-{
+public interface XYPlot extends AbstractPlot {
 
-	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof PlotDisplay;
-	}
+	SeriesStyle newSeriesStyle(ColorRGB color, LineStyle lineStyle, MarkerStyle markerStyle);
 
-	@Override
-	public PlotDisplay getDisplay() {
-		return (PlotDisplay) super.getDisplay();
-	}
+	XYSeries addXYSeries();
+
+	NumberAxis xAxis();
+
+	NumberAxis yAxis();
+
+	List<XYPlotItem> getItems();
 
 }

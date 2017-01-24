@@ -29,32 +29,32 @@
  * #L%
  */
 
-package net.imagej.ui.viewer.plot;
-
-import net.imagej.plot.AbstractPlot;
-import net.imagej.ui.swing.viewer.plot.PlotDisplay;
-import net.imagej.ui.swing.viewer.plot.PlotDisplayViewer;
-
-import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
+package net.imagej.plot;
 
 /**
- * Implements the UI-independent elements of a {@link AbstractPlot} viewer.
- * 
- * @author Curtis Rueden
+ * Number axis of a chart like {@link XYPlot} or {@link CategoryChart}.
+ *
+ * @author Matthias Arzt
  */
-public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<AbstractPlot> implements PlotDisplayViewer
-{
+public interface NumberAxis extends Labeled {
 
-	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof PlotDisplay;
+	void setManualRange(double min, double max);
+
+	void setAutoRange();
+
+	void setAutoIncludeZeroRange();
+
+	RangeStrategy getRangeStrategy();
+
+	double getMin();
+
+	double getMax();
+
+	void setLogarithmic(boolean logarithmic);
+
+	boolean isLogarithmic();
+
+	enum RangeStrategy {
+		MANUAL, AUTO, AUTO_INCLUDE_ZERO
 	}
-
-	@Override
-	public PlotDisplay getDisplay() {
-		return (PlotDisplay) super.getDisplay();
-	}
-
 }

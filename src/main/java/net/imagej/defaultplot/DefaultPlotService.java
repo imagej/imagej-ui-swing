@@ -29,32 +29,35 @@
  * #L%
  */
 
-package net.imagej.ui.viewer.plot;
 
-import net.imagej.plot.AbstractPlot;
-import net.imagej.ui.swing.viewer.plot.PlotDisplay;
-import net.imagej.ui.swing.viewer.plot.PlotDisplayViewer;
+package net.imagej.defaultplot;
 
-import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
+import net.imagej.plot.CategoryChart;
+import net.imagej.plot.PlotService;
+import net.imagej.plot.XYPlot;
+import org.scijava.plugin.Plugin;
+import org.scijava.service.AbstractService;
+import org.scijava.service.Service;
 
 /**
- * Implements the UI-independent elements of a {@link AbstractPlot} viewer.
- * 
- * @author Curtis Rueden
+ * The default implementation of the {@link PlotService} interface.
+ *
+ * @author Matthias Arzt
  */
-public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<AbstractPlot> implements PlotDisplayViewer
-{
 
+@Plugin(type = Service.class)
+public class DefaultPlotService extends AbstractService implements PlotService {
+
+	// -- PlotService methods --
+	
 	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof PlotDisplay;
+	public XYPlot newXYPlot() {
+		return new DefaultXYPlot();
 	}
 
 	@Override
-	public PlotDisplay getDisplay() {
-		return (PlotDisplay) super.getDisplay();
+	public <C> CategoryChart<C> newCategoryChart(Class<C> categoryType) {
+		return new DefaultCategoryChart<C>(categoryType);
 	}
 
 }

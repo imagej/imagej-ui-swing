@@ -29,32 +29,75 @@
  * #L%
  */
 
-package net.imagej.ui.viewer.plot;
+package net.imagej.defaultplot;
 
-import net.imagej.plot.AbstractPlot;
-import net.imagej.ui.swing.viewer.plot.PlotDisplay;
-import net.imagej.ui.swing.viewer.plot.PlotDisplayViewer;
-
-import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
+import net.imagej.plot.NumberAxis;
 
 /**
- * Implements the UI-independent elements of a {@link AbstractPlot} viewer.
- * 
- * @author Curtis Rueden
+ * The dafult implementation of the {@link NumberAxis} interface.
+ *
+ * @author Matthias Arzt
  */
-public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<AbstractPlot> implements PlotDisplayViewer
-{
+
+class DefaultNumberAxis extends AbstractLabeled implements NumberAxis {
+
+	private double min;
+
+	private double max;
+
+	private boolean logarithmic;
+
+	private RangeStrategy rangeStrategy;
+
+	DefaultNumberAxis() {
+		min = 0;
+		max = 0;
+		logarithmic = false;
+		rangeStrategy = RangeStrategy.AUTO;
+	}
+
+	// -- NumberAxis methods --
 
 	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof PlotDisplay;
+	public void setManualRange(double min, double max) {
+		rangeStrategy = RangeStrategy.MANUAL;
+		this.min = min;
+		this.max = max;
 	}
 
 	@Override
-	public PlotDisplay getDisplay() {
-		return (PlotDisplay) super.getDisplay();
+	public void setAutoRange() {
+		this.rangeStrategy = RangeStrategy.AUTO;
+	}
+
+	@Override
+	public void setAutoIncludeZeroRange() {
+		this.rangeStrategy = RangeStrategy.AUTO_INCLUDE_ZERO;
+	}
+
+	@Override
+	public RangeStrategy getRangeStrategy() {
+		return rangeStrategy;
+	}
+
+	@Override
+	public double getMin() {
+		return min;
+	}
+
+	@Override
+	public double getMax() {
+		return max;
+	}
+
+	@Override
+	public void setLogarithmic(boolean logarithmic) {
+		this.logarithmic = logarithmic;
+	}
+
+	@Override
+	public boolean isLogarithmic() {
+		return logarithmic;
 	}
 
 }

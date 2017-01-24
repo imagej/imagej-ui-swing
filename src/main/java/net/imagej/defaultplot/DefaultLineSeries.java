@@ -29,32 +29,37 @@
  * #L%
  */
 
-package net.imagej.ui.viewer.plot;
+package net.imagej.defaultplot;
 
-import net.imagej.plot.AbstractPlot;
-import net.imagej.ui.swing.viewer.plot.PlotDisplay;
-import net.imagej.ui.swing.viewer.plot.PlotDisplayViewer;
+import net.imagej.plot.LineSeries;
+import net.imagej.plot.SeriesStyle;
 
-import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
+import java.util.Collection;
+import java.util.Objects;
 
 /**
- * Implements the UI-independent elements of a {@link AbstractPlot} viewer.
- * 
- * @author Curtis Rueden
+ * The default implementation of {@link LineSeries}.
+ *
+ * @author Matthias Arzt
  */
-public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<AbstractPlot> implements PlotDisplayViewer
-{
+class DefaultLineSeries<C> extends DefaultCategorySeries<C> implements LineSeries<C> {
+
+	private SeriesStyle style = DefaultSeriesStyle.emptySeriesStyle();
+
+	DefaultLineSeries() {
+		super();
+	}
+
+	// -- LineSerties methods --
 
 	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof PlotDisplay;
+	public void setStyle(SeriesStyle style) {
+		this.style = Objects.requireNonNull(style);
 	}
 
 	@Override
-	public PlotDisplay getDisplay() {
-		return (PlotDisplay) super.getDisplay();
+	public SeriesStyle getStyle() {
+		return style;
 	}
 
 }

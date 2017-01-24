@@ -29,32 +29,72 @@
  * #L%
  */
 
-package net.imagej.ui.viewer.plot;
+package net.imagej.ui.swing.viewer.plot.jfreechart;
 
-import net.imagej.plot.AbstractPlot;
-import net.imagej.ui.swing.viewer.plot.PlotDisplay;
-import net.imagej.ui.swing.viewer.plot.PlotDisplayViewer;
+import net.imagej.plot.LineStyle;
 
-import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
+import java.awt.*;
 
 /**
- * Implements the UI-independent elements of a {@link AbstractPlot} viewer.
- * 
- * @author Curtis Rueden
+ * @author Matthias Arzt
  */
-public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<AbstractPlot> implements PlotDisplayViewer
-{
 
-	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof PlotDisplay;
+class AwtLineStyles {
+
+	private final boolean visible;
+
+	private final BasicStroke stroke;
+
+	private AwtLineStyles(boolean visible, BasicStroke stroke) {
+		this.visible = visible;
+		this.stroke = stroke;
 	}
 
-	@Override
-	public PlotDisplay getDisplay() {
-		return (PlotDisplay) super.getDisplay();
+	public boolean isVisible() {
+		return visible;
+	}
+
+	public BasicStroke getStroke() {
+		return stroke;
+	}
+
+	public static AwtLineStyles getInstance(LineStyle style) {
+		if(style != null)
+			switch (style) {
+				case SOLID:
+					return solid;
+				case DASH:
+					return dash;
+				case DOT:
+					return dot;
+				case NONE:
+					return none;
+			}
+		return solid;
+	}
+
+	// --- Helper Constants ---
+
+	private static AwtLineStyles solid = new AwtLineStyles(true, Strokes.solid);
+
+	private static AwtLineStyles dash = new AwtLineStyles(true, Strokes.dash);
+
+	private static AwtLineStyles dot = new AwtLineStyles(true, Strokes.dot);
+
+	private static AwtLineStyles none = new AwtLineStyles(false, Strokes.none);
+
+	static class Strokes {
+
+		private static BasicStroke solid = new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+
+		private static BasicStroke dash = new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+				.0f, new float[]{6.0f, 6.0f}, 0.0f);
+
+		private static BasicStroke dot = new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+				.0f, new float[]{0.6f, 4.0f}, 0.0f);
+
+		private static BasicStroke none = new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+				.0f, new float[]{0.0f, 100.0f}, 0.0f);
 	}
 
 }

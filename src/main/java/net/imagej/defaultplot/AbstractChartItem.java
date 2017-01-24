@@ -29,32 +29,24 @@
  * #L%
  */
 
-package net.imagej.ui.viewer.plot;
+package net.imagej.defaultplot;
 
-import net.imagej.plot.AbstractPlot;
-import net.imagej.ui.swing.viewer.plot.PlotDisplay;
-import net.imagej.ui.swing.viewer.plot.PlotDisplayViewer;
-
-import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
+import java.util.Objects;
 
 /**
- * Implements the UI-independent elements of a {@link AbstractPlot} viewer.
- * 
- * @author Curtis Rueden
+ * An abstract class with default behavior for {@link CategoryCharItem} and {XYPlotItem} interfaces.
+ *
+ * @author Matthias Arzt
  */
-public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<AbstractPlot> implements PlotDisplayViewer
-{
+abstract class AbstractChartItem extends AbstractLabeled {
 
-	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof PlotDisplay;
+	private boolean legendVisible = true;
+
+	public void setLegendVisible(boolean visible) {
+		legendVisible = visible;
 	}
 
-	@Override
-	public PlotDisplay getDisplay() {
-		return (PlotDisplay) super.getDisplay();
+	public boolean getLegendVisible() {
+		return legendVisible;
 	}
-
 }

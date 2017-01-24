@@ -29,32 +29,25 @@
  * #L%
  */
 
-package net.imagej.ui.viewer.plot;
+package net.imagej.plot;
 
-import net.imagej.plot.AbstractPlot;
-import net.imagej.ui.swing.viewer.plot.PlotDisplay;
-import net.imagej.ui.swing.viewer.plot.PlotDisplayViewer;
-
-import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
+import java.util.List;
 
 /**
- * Implements the UI-independent elements of a {@link AbstractPlot} viewer.
- * 
- * @author Curtis Rueden
+ * A data series of a {@link XYPlot} to be displayed as line or points.
+ *
+ * @author Matthias Arzt
  */
-public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<AbstractPlot> implements PlotDisplayViewer
-{
+public interface XYSeries extends XYPlotItem {
 
-	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof PlotDisplay;
-	}
+	void setValues(List<Double> xValues, List<Double> yValues);
 
-	@Override
-	public PlotDisplay getDisplay() {
-		return (PlotDisplay) super.getDisplay();
-	}
+	List<Double> getXValues();
+
+	List<Double> getYValues();
+
+	SeriesStyle getStyle();
+
+	void setStyle(SeriesStyle style);
 
 }

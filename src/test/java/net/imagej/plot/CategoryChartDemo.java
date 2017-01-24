@@ -29,32 +29,42 @@
  * #L%
  */
 
-package net.imagej.ui.viewer.plot;
+package net.imagej.plot;
 
-import net.imagej.plot.AbstractPlot;
-import net.imagej.ui.swing.viewer.plot.PlotDisplay;
-import net.imagej.ui.swing.viewer.plot.PlotDisplayViewer;
-
-import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
+import java.util.*;
 
 /**
- * Implements the UI-independent elements of a {@link AbstractPlot} viewer.
- * 
- * @author Curtis Rueden
+ * @author Matthias Arzt
  */
-public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<AbstractPlot> implements PlotDisplayViewer
-{
+class CategoryChartDemo extends ChartDemo{
 
-	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof PlotDisplay;
+	public void run() {
+
+		CategoryChart<String> chart = plotService.newCategoryChart(String.class);
+		chart.categoryAxis().setManualCategories(Arrays.asList("one wheel", "bicycle", "car"));
+
+		Map<String, Double> wheelsData = new TreeMap<>();
+		wheelsData.put("one wheel", 1.0);
+		wheelsData.put("bicycle", 2.0);
+		wheelsData.put("car", 4.0);
+
+		LineSeries<String> lineSeries = chart.addLineSeries();
+		lineSeries.setLabel("wheels");
+		lineSeries.setValues(wheelsData);
+
+		Map<String, Double> speedData = new TreeMap<>();
+		speedData.put("one wheel", 10.0);
+		speedData.put("bicycle", 30.0);
+		speedData.put("car", 200.0);
+
+		BarSeries<String> barSeries = chart.addBarSeries();
+		barSeries.setLabel("speed");
+		barSeries.setValues(speedData);
+
+		ui.show(chart);
 	}
 
-	@Override
-	public PlotDisplay getDisplay() {
-		return (PlotDisplay) super.getDisplay();
+	public static void main(final String... args) {
+		new CategoryChartDemo().run();
 	}
-
 }

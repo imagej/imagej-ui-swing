@@ -29,32 +29,37 @@
  * #L%
  */
 
-package net.imagej.ui.viewer.plot;
+package net.imagej.plot;
 
-import net.imagej.plot.AbstractPlot;
-import net.imagej.ui.swing.viewer.plot.PlotDisplay;
-import net.imagej.ui.swing.viewer.plot.PlotDisplayViewer;
+import org.scijava.util.ColorRGB;
 
-import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
+import java.util.List;
 
 /**
- * Implements the UI-independent elements of a {@link AbstractPlot} viewer.
- * 
- * @author Curtis Rueden
+ * Container for data and settings discribing a chart, whose data is organised in categories.
+ *
+ * @author Matthias Arzt
  */
-public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<AbstractPlot> implements PlotDisplayViewer
-{
+public interface CategoryChart<C> extends AbstractPlot {
 
-	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof PlotDisplay;
-	}
+	SeriesStyle newSeriesStyle(ColorRGB color, LineStyle lineStyle, MarkerStyle markerStyle);
 
-	@Override
-	public PlotDisplay getDisplay() {
-		return (PlotDisplay) super.getDisplay();
-	}
+	Class<C> getCategoryType();
+
+	LineSeries<C> addLineSeries();
+
+	BarSeries<C> addBarSeries();
+
+	BoxSeries<C> addBoxSeries();
+
+	NumberAxis numberAxis();
+
+	CategoryAxis<C> categoryAxis();
+
+	List<CategoryChartItem<C>> getItems();
+
+	void setTitle(String title);
+
+	String getTitle();
 
 }

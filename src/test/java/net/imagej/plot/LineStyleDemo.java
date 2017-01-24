@@ -29,32 +29,42 @@
  * #L%
  */
 
-package net.imagej.ui.viewer.plot;
+package net.imagej.plot;
 
-import net.imagej.plot.AbstractPlot;
-import net.imagej.ui.swing.viewer.plot.PlotDisplay;
-import net.imagej.ui.swing.viewer.plot.PlotDisplayViewer;
+import org.scijava.util.Colors;
 
-import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
+import java.util.Arrays;
+import java.util.List;
 
 /**
- * Implements the UI-independent elements of a {@link AbstractPlot} viewer.
- * 
- * @author Curtis Rueden
+ * @author Matthias Arzt
  */
-public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<AbstractPlot> implements PlotDisplayViewer
-{
+class LineStyleDemo extends ChartDemo {
 
-	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof PlotDisplay;
+
+	public void run() {
+		LineStyle[] lineStyles = LineStyle.values();
+
+		XYPlot plot = plotService.newXYPlot();
+		plot.setTitle("Line Styles");
+		plot.xAxis().setManualRange(-1.0, 2.0);
+		plot.yAxis().setManualRange(-1.0, (double) lineStyles.length);
+
+		for(int i = 0; i < lineStyles.length; i++)
+			addSeries(plot, i, lineStyles[i]);
+
+		ui.show(plot);
 	}
 
-	@Override
-	public PlotDisplay getDisplay() {
-		return (PlotDisplay) super.getDisplay();
+	private void addSeries(XYPlot plot, double y, LineStyle lineStyle) {
+		XYSeries series = plot.addXYSeries();
+		series.setLabel(lineStyle.toString());
+		series.setValues(Arrays.asList(0.0,1.0), Arrays.asList(y,y));
+		series.setStyle(plot.newSeriesStyle(Colors.BLACK, lineStyle, MarkerStyle.CIRCLE));
+	}
+
+	public static void main(final String... args) {
+		new LineStyleDemo().run();
 	}
 
 }

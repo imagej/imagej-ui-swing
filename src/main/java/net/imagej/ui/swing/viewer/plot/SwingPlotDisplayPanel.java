@@ -31,24 +31,19 @@
 
 package net.imagej.ui.swing.viewer.plot;
 
-import java.awt.Font;
+import java.awt.*;
+import java.util.Objects;
+import javax.swing.*;
 
-import javax.swing.JPanel;
+import net.imagej.plot.AbstractPlot;
 
-import net.imagej.plot.Plot;
-import net.imagej.plot.PlotDisplay;
-import net.imagej.plot.PlotDisplayPanel;
-import net.imagej.table.Table;
-
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PiePlot;
-import org.jfree.data.general.DefaultPieDataset;
+import org.scijava.convert.ConvertService;
 import org.scijava.ui.viewer.DisplayWindow;
 
 /**
- * A JFreeChart-driven display panel for {@link Plot}s.
+ * A JFreeChart-driven display panel for {@link AbstractPlot}s.
  * 
  * @author Curtis Rueden
  */
@@ -58,19 +53,39 @@ public class SwingPlotDisplayPanel extends JPanel implements PlotDisplayPanel {
 
 	private final DisplayWindow window;
 	private final PlotDisplay display;
-	private final JFreeChart chart;
+	private final ConvertService convertService;
+	private Dimension prefferedSize;
 
 	// -- constructor --
 
 	public SwingPlotDisplayPanel(final PlotDisplay display,
-		final DisplayWindow window)
+		final DisplayWindow window, final ConvertService convertService)
 	{
 		this.display = display;
 		this.window = window;
-		chart = makeChart();
-		ChartPanel panel = new ChartPanel(chart);
-		add(panel);
+		this.convertService = convertService;
+		setLayout(new BorderLayout());
+		initPreferredSize();
+		setupChart();
 		window.setContent(this);
+	}
+
+	private void initPreferredSize() {
+		AbstractPlot plot = display.get(0);
+		prefferedSize = new Dimension(plot.getPreferredWidth(), plot.getPreferredHeight());
+	}
+
+	private void setupChart() {
+		final JFreeChart chart = convertToJFreeChart(display.get(0));
+		add(new ChartPanel(chart));
+	}
+
+	private JFreeChart convertToJFreeChart(AbstractPlot plot) {
+		return Objects.requireNonNull(convertService.convert(plot, JFreeChart.class));
+	}
+
+	public static boolean supports(AbstractPlot abstractPlot, ConvertService convertService) {
+		return convertService.supports(abstractPlot, JFreeChart.class);
 	}
 
 	// -- PlotDisplayPanel methods --
@@ -88,55 +103,17 @@ public class SwingPlotDisplayPanel extends JPanel implements PlotDisplayPanel {
 	}
 
 	@Override
-	public void redoLayout() {
-		// FIXME
-	}
+	public void redoLayout() { }
 
 	@Override
-	public void setLabel(final String s) {
-		// FIXME
-	}
+	public void setLabel(final String s) { }
 
 	@Override
-	public void redraw() {
-		// FIXME
+	public void redraw() { }
+
+	@Override
+	public Dimension getPreferredSize() {
+		return prefferedSize;
 	}
 
-	// -- Helper methods --
-
-	private JFreeChart makeChart() {
-		final Table<?, ?> data = display.get(0).getData();
-
-		// FIXME: make the dataset based on the above Table object instead.
-		// if data cell is of type Number, then cast; else convert.
-		// convertService.convert(dataCell, Number.class)
-		// convertService.convert(dataCell, Double.class)
-		// Or, just Double.parseDouble(dataCell.toString()); // basic conversion
-		// Or: throw an exception
-		// We could type Plot on numerical columns only
-		// Or: throw IllegalStateException or something if Table columns are non-numeric.
-		// Or: skip table columns that are non-numeric.
-		DefaultPieDataset dataset = new DefaultPieDataset();
-		dataset.setValue("One", new Double(43.2));
-		dataset.setValue("Two", new Double(10.0));
-		dataset.setValue("Three", new Double(27.5));
-		dataset.setValue("Four", new Double(17.5));
-		dataset.setValue("Five", new Double(11.0));
-		dataset.setValue("Six", new Double(19.4));
-
-		JFreeChart chart = ChartFactory.createPieChart(
-			"Pie Chart Demo 1",  // chart title
-			dataset,             // data
-			true,               // include legend
-			true,
-			false
-				);
-
-		PiePlot plot = (PiePlot) chart.getPlot();
-		plot.setLabelFont(new Font("SansSerif", Font.PLAIN, 12));
-		plot.setNoDataMessage("No data available");
-		plot.setCircular(false);
-		plot.setLabelGap(0.02);
-		return chart;
-	}
 }

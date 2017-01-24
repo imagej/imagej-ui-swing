@@ -29,32 +29,33 @@
  * #L%
  */
 
-package net.imagej.ui.viewer.plot;
+package net.imagej.ui.swing.viewer.plot.jfreechart;
 
-import net.imagej.plot.AbstractPlot;
-import net.imagej.ui.swing.viewer.plot.PlotDisplay;
-import net.imagej.ui.swing.viewer.plot.PlotDisplayViewer;
-
-import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
+import net.imagej.plot.CategoryChart;
+import org.jfree.chart.JFreeChart;
+import org.scijava.Priority;
+import org.scijava.convert.AbstractConverter;
+import org.scijava.convert.Converter;
+import org.scijava.plugin.Plugin;
 
 /**
- * Implements the UI-independent elements of a {@link AbstractPlot} viewer.
- * 
- * @author Curtis Rueden
+ * @author Matthias Arzt
  */
-public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<AbstractPlot> implements PlotDisplayViewer
-{
-
+@Plugin(type = Converter.class, priority = Priority.NORMAL_PRIORITY)
+public class CategoryChartConverter extends AbstractConverter<CategoryChart, JFreeChart> {
+	@SuppressWarnings("unchecked")
 	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof PlotDisplay;
+	public <T> T convert(Object o, Class<T> aClass) {
+		return (T) CategoryChartGenerator.run((CategoryChart) o);
 	}
 
 	@Override
-	public PlotDisplay getDisplay() {
-		return (PlotDisplay) super.getDisplay();
+	public Class<JFreeChart> getOutputType() {
+		return JFreeChart.class;
 	}
 
+	@Override
+	public Class<CategoryChart> getInputType() {
+		return CategoryChart.class;
+	}
 }

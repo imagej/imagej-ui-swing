@@ -29,32 +29,16 @@
  * #L%
  */
 
-package net.imagej.ui.viewer.plot;
+package net.imagej.ui.swing.viewer.plot;
 
 import net.imagej.plot.AbstractPlot;
-import net.imagej.ui.swing.viewer.plot.PlotDisplay;
-import net.imagej.ui.swing.viewer.plot.PlotDisplayViewer;
-
 import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
 
 /**
- * Implements the UI-independent elements of a {@link AbstractPlot} viewer.
+ * Interface for {@link AbstractPlot} {@link Display}s.
  * 
  * @author Curtis Rueden
  */
-public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<AbstractPlot> implements PlotDisplayViewer
-{
-
-	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof PlotDisplay;
-	}
-
-	@Override
-	public PlotDisplay getDisplay() {
-		return (PlotDisplay) super.getDisplay();
-	}
-
+public interface PlotDisplay extends Display<AbstractPlot> {
+	// This interface intentionally left blank.
 }

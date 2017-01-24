@@ -29,32 +29,38 @@
  * #L%
  */
 
-package net.imagej.ui.viewer.plot;
+package net.imagej.plot;
 
-import net.imagej.plot.AbstractPlot;
-import net.imagej.ui.swing.viewer.plot.PlotDisplay;
-import net.imagej.ui.swing.viewer.plot.PlotDisplayViewer;
-
-import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Implements the UI-independent elements of a {@link AbstractPlot} viewer.
- * 
- * @author Curtis Rueden
+ * @author Matthias Arzt
  */
-public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<AbstractPlot> implements PlotDisplayViewer
-{
+class XYPlotDemo extends ChartDemo{
 
-	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof PlotDisplay;
+	public void run() {
+		XYPlot plot = plotService.newXYPlot();
+		plot.setTitle("A series forming a circle.");
+		plot.xAxis().setAutoRange();
+		plot.yAxis().setAutoRange();
+		plot.setPreferredSize(400, 400);
+
+		List<Double> xs = new ArrayList<>();
+		List<Double> ys = new ArrayList<>();
+		for(double t = 0; t < 2 * Math.PI; t += 0.1) {
+			xs.add(Math.sin(t));
+			ys.add(Math.cos(t));
+		}
+
+		XYSeries series = plot.addXYSeries();
+		series.setLabel("circle");
+		series.setValues(xs, ys);
+
+		ui.show(plot);
 	}
 
-	@Override
-	public PlotDisplay getDisplay() {
-		return (PlotDisplay) super.getDisplay();
+	public static void main(final String... args) {
+		new XYPlotDemo().run();
 	}
-
 }

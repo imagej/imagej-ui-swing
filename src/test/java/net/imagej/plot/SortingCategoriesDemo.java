@@ -31,18 +31,69 @@
 
 package net.imagej.plot;
 
-import net.imagej.ImageJService;
+import java.util.*;
 
 /**
- * An ImageJService that provides factory methods for supported {@link AbstractPlot}s,
- * e.g. {@link XYPlot} and {@link CategoryChart}.
- *
  * @author Matthias Arzt
  */
-public interface PlotService extends ImageJService {
 
-	XYPlot newXYPlot();
+class SortingCategoriesDemo extends ChartDemo{
 
-	<C> CategoryChart<C> newCategoryChart(Class<C> categoryType);
+	public void run() {
+		showSortedCategoryChart(new AxisManipulator() {
+			@Override
+			void manipulate(CategoryAxis<String> axis) {
+				axis.setManualCategories(Arrays.asList("a","c","b"));
+				axis.setLabel("acb");
+			}
+		});
+		showSortedCategoryChart(new AxisManipulator() {
+			@Override
+			void manipulate(CategoryAxis<String> axis) {
+				axis.setManualCategories(Arrays.asList("a","g","c","b"));
+				axis.setLabel("agcb");
+			}
+		});
+		showSortedCategoryChart(new AxisManipulator() {
+			@Override
+			void manipulate(CategoryAxis<String> axis) {
+				axis.setManualCategories(Arrays.asList("d","c","a","b"));
+				axis.setOrder(String::compareTo);
+				axis.setLabel("abcd");
+			}
+		});
+		showSortedCategoryChart(new AxisManipulator() {
+			@Override
+			void manipulate(CategoryAxis<String> axis) {
+				axis.setManualCategories(Arrays.asList());
+				axis.setOrder(String::compareTo);
+				axis.setLabel("empty");
+			}
+		});
+	}
+
+	private static abstract class AxisManipulator {
+		abstract void manipulate(CategoryAxis<String> axis);
+	}
+
+	private void showSortedCategoryChart(AxisManipulator categoryAxisManipulator) {
+		CategoryChart<String> chart = plotService.newCategoryChart(String.class);
+		categoryAxisManipulator.manipulate(chart.categoryAxis());
+
+		Map<String, Double> data = new TreeMap<>();
+		data.put("a", 1.0);
+		data.put("b", 2.0);
+		data.put("c", 3.0);
+		data.put("d", 4.0);
+
+		BarSeries<String> bars = chart.addBarSeries();
+		bars.setValues(data);
+
+		ui.show(chart);
+	}
+
+	public static void main(final String... args) {
+		new SortingCategoriesDemo().run();
+	}
 
 }

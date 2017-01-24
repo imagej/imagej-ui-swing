@@ -29,32 +29,58 @@
  * #L%
  */
 
-package net.imagej.ui.viewer.plot;
+package net.imagej.defaultplot;
 
-import net.imagej.plot.AbstractPlot;
-import net.imagej.ui.swing.viewer.plot.PlotDisplay;
-import net.imagej.ui.swing.viewer.plot.PlotDisplayViewer;
+import net.imagej.plot.SeriesStyle;
+import net.imagej.plot.XYSeries;
 
-import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Implements the UI-independent elements of a {@link AbstractPlot} viewer.
- * 
- * @author Curtis Rueden
+ * The default implementation of the {@link XYSeries} interface.
+ *
+ * @author Matthias Arzt
  */
-public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<AbstractPlot> implements PlotDisplayViewer
-{
+class DefaultXYSeries extends AbstractChartItem implements XYSeries {
+
+	private List<Double> xValues = Collections.emptyList();
+
+	private List<Double> yValues = Collections.emptyList();
+
+	private SeriesStyle style = DefaultSeriesStyle.emptySeriesStyle();
+
+	DefaultXYSeries() { }
+
+	// -- XYSeries methods --
 
 	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof PlotDisplay;
+	public void setValues(List<Double> xValues, List<Double> yValues) {
+		if(xValues.size() != yValues.size())
+			throw new IllegalArgumentException();
+		this.xValues = Collections.unmodifiableList(xValues);
+		this.yValues = Collections.unmodifiableList(yValues);
 	}
 
 	@Override
-	public PlotDisplay getDisplay() {
-		return (PlotDisplay) super.getDisplay();
+	public List<Double> getXValues() {
+		return xValues;
+	}
+
+	@Override
+	public List<Double> getYValues() {
+		return yValues;
+	}
+
+	@Override
+	public SeriesStyle getStyle() {
+		return style;
+	}
+
+	@Override
+	public void setStyle(SeriesStyle style) {
+		this.style = style;
 	}
 
 }

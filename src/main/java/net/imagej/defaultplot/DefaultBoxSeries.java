@@ -29,32 +29,54 @@
  * #L%
  */
 
-package net.imagej.ui.viewer.plot;
+package net.imagej.defaultplot;
 
-import net.imagej.plot.AbstractPlot;
-import net.imagej.ui.swing.viewer.plot.PlotDisplay;
-import net.imagej.ui.swing.viewer.plot.PlotDisplayViewer;
+import net.imagej.plot.BoxSeries;
+import org.scijava.util.ColorRGB;
 
-import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 /**
- * Implements the UI-independent elements of a {@link AbstractPlot} viewer.
- * 
- * @author Curtis Rueden
+ * Default implementation of {@link BoxSeries}.
+ *
+ * @author Matthias Arzt
  */
-public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<AbstractPlot> implements PlotDisplayViewer
-{
+class DefaultBoxSeries<C> extends AbstractChartItem implements BoxSeries<C> {
+
+	private ColorRGB color = null;
+
+	private Map<C, Collection<Double>> values = Collections.emptyMap();
+
+	public DefaultBoxSeries() { }
+
+	// -- BoxSeries methods --
 
 	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof PlotDisplay;
+	public Map<C, Collection<Double>> getValues() {
+		return values;
 	}
 
 	@Override
-	public PlotDisplay getDisplay() {
-		return (PlotDisplay) super.getDisplay();
+	public void setValues(Map<? extends C, ? extends Collection<Double>> values) {
+		this.values = Collections.unmodifiableMap(values);
 	}
 
+	@Override
+	public ColorRGB getColor() {
+		return color;
+	}
+
+	@Override
+	public void setColor(ColorRGB color) {
+		this.color = color;
+	}
+
+	// -- CategoryChartItem methods --
+
+	@Override
+	public Collection getCategories() {
+		return values.keySet();
+	}
 }

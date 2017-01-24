@@ -29,32 +29,30 @@
  * #L%
  */
 
-package net.imagej.ui.viewer.plot;
+package net.imagej.defaultplot;
 
-import net.imagej.plot.AbstractPlot;
-import net.imagej.ui.swing.viewer.plot.PlotDisplay;
-import net.imagej.ui.swing.viewer.plot.PlotDisplayViewer;
+import net.imagej.plot.BarSeries;
+import org.scijava.util.ColorRGB;
 
-import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
+import java.util.Collection;
 
 /**
- * Implements the UI-independent elements of a {@link AbstractPlot} viewer.
- * 
- * @author Curtis Rueden
+ * Default Implementation of {@link BarSeries}.
+ *
+ * @author Matthias Arzt
  */
-public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<AbstractPlot> implements PlotDisplayViewer
-{
+class DefaultBarSeries<C> extends DefaultCategorySeries<C> implements BarSeries<C> {
+
+	private ColorRGB color = null;
+
+	DefaultBarSeries() { super(); }
+
+	// -- BarSeries methods --
 
 	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof PlotDisplay;
-	}
+	public ColorRGB getColor() { return color; }
 
 	@Override
-	public PlotDisplay getDisplay() {
-		return (PlotDisplay) super.getDisplay();
-	}
+	public void setColor(ColorRGB color) { this.color = color; };
 
 }

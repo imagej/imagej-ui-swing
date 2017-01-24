@@ -29,32 +29,39 @@
  * #L%
  */
 
-package net.imagej.ui.viewer.plot;
+package net.imagej.plot;
 
-import net.imagej.plot.AbstractPlot;
-import net.imagej.ui.swing.viewer.plot.PlotDisplay;
-import net.imagej.ui.swing.viewer.plot.PlotDisplayViewer;
-
-import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Implements the UI-independent elements of a {@link AbstractPlot} viewer.
- * 
- * @author Curtis Rueden
+ * @author Matthias Arzt
  */
-public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<AbstractPlot> implements PlotDisplayViewer
-{
+class LogarithmicAxisDemo extends ChartDemo {
 
-	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof PlotDisplay;
+	public void run() {
+
+		XYPlot plot = plotService.newXYPlot();
+		plot.setTitle("Logarithmic");
+		plot.xAxis().setAutoRange();
+		plot.yAxis().setAutoRange();
+		plot.yAxis().setLogarithmic(true);
+
+		List<Double> xs = new ArrayList<>();
+		List<Double> ys = new ArrayList<>();
+		for(double x = 0; x < 10; x += 0.1) {
+			xs.add(x);
+			ys.add(Math.exp(Math.sin(x)));
+		}
+
+		XYSeries series = plot.addXYSeries();
+		series.setLabel("exp(sin(x))");
+		series.setValues(xs, ys);
+
+		ui.show(plot);
 	}
 
-	@Override
-	public PlotDisplay getDisplay() {
-		return (PlotDisplay) super.getDisplay();
+	public static void main(final String... args) {
+		new LogarithmicAxisDemo().run();
 	}
-
 }

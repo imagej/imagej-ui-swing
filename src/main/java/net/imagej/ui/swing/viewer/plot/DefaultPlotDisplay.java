@@ -8,13 +8,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -29,32 +29,24 @@
  * #L%
  */
 
-package net.imagej.ui.viewer.plot;
+package net.imagej.ui.swing.viewer.plot;
 
 import net.imagej.plot.AbstractPlot;
 import net.imagej.ui.swing.viewer.plot.PlotDisplay;
-import net.imagej.ui.swing.viewer.plot.PlotDisplayViewer;
-
+import org.scijava.display.AbstractDisplay;
 import org.scijava.display.Display;
-import org.scijava.ui.viewer.AbstractDisplayViewer;
+import org.scijava.plugin.Plugin;
 
 /**
- * Implements the UI-independent elements of a {@link AbstractPlot} viewer.
- * 
+ * Default display for {@link AbstractPlot}s.
+ *
  * @author Curtis Rueden
  */
-public abstract class AbstractPlotDisplayViewer extends
-	AbstractDisplayViewer<AbstractPlot> implements PlotDisplayViewer
+@Plugin(type = Display.class)
+public class DefaultPlotDisplay extends AbstractDisplay<AbstractPlot> implements
+		PlotDisplay
 {
-
-	@Override
-	public boolean canView(final Display<?> d) {
-		return d instanceof PlotDisplay;
+	public DefaultPlotDisplay() {
+		super(AbstractPlot.class);
 	}
-
-	@Override
-	public PlotDisplay getDisplay() {
-		return (PlotDisplay) super.getDisplay();
-	}
-
 }
