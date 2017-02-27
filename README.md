@@ -1,4 +1,4 @@
-[![](http://jenkins.imagej.net/job/ImageJ-UI-Swing/lastBuild/badge/icon)](http://jenkins.imagej.net/job/ImageJ-UI-Swing/)
+[![](https://travis-ci.org/imagej/imagej-ui-swing.svg?branch=master)](https://travis-ci.org/imagej/imagej-ui-swing)
 
 ImageJ Swing UI
 ---------------
