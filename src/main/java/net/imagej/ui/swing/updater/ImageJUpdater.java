@@ -308,11 +308,24 @@ public class ImageJUpdater implements UpdaterUI {
 			testNetworkConnection();
 		}
 		catch (final SecurityException | IOException exc) {
+			final String msg = exc.getMessage();
+			String friendlyError = "Cannot connect to the Internet.";
+			if (msg != null && msg.indexOf(
+				"Address family not supported by protocol family: connect") >= 0)
+			{
+				friendlyError += "" + //
+					"\n-----------------------------------------------------------" + //
+					"\n* Check your computer for spyware called RelevantKnowledge" + //
+					"\n* Try disabling your antivirus software temporarily" + //
+					"\n* Try disabling IPv6 temporarily" + //
+					"\n* See also http://forum.imagej.net/t/5070" + //
+					"\n-----------------------------------------------------------";
+			}
+			friendlyError += "" + //
+				"\nDo you have a network connection?" + //
+				"\nAre your proxy settings correct?";
+			UpdaterUserInterface.get().error(friendlyError);
 			if (log != null) log.error(exc);
-			final String message = "Cannot connect to the Internet.\n" +
-				"Do you have a network connection?\n" +
-				"Are your proxy settings correct?";
-			UpdaterUserInterface.get().error(message);
 			return true;
 		}
 		return false;
