@@ -127,6 +127,10 @@ public class SitesDialog extends JDialog implements ActionListener {
 				return new DefaultCellEditor(field) {
 					@Override
 					public boolean stopCellEditing() {
+						if (row >= sites.size()) {
+							// In case of stopping after a row has been removed, properly stop editing
+							return super.stopCellEditing();
+						}
 						String value = field.getText();
 						if ((column == 2 || column == 4) && !value.equals("") && !value.endsWith("/")) {
 							value += "/";
@@ -189,41 +193,43 @@ public class SitesDialog extends JDialog implements ActionListener {
 			@Override
 			public void setValueAt(final Object value, final int row, final int column)
 			{
-				final UpdateSite site = getUpdateSite(row);
-				if (column == 0) {
-					if (Boolean.TRUE.equals(value)) {
-						if (column == 0 || column == 2) {
-							activateUpdateSite(site);
+				if (row < sites.size()) {
+					final UpdateSite site = getUpdateSite(row);
+					if (column == 0) {
+						if (Boolean.TRUE.equals(value)) {
+							if (column == 0 || column == 2) {
+								activateUpdateSite(site);
+							}
+						} else {
+							deactivateUpdateSite(site);
 						}
 					} else {
-						deactivateUpdateSite(site);
-					}
-				} else {
-					final String string = (String)value;
-					// if the name changed, or if we auto-fill the name from the URL
-					switch (column) {
-					case 1:
-						final String name = site.getName();
-						if (name.equals(string)) return;
-						files.renameUpdateSite(name, string);
-						break;
-					case 2:
-						if (site.getURL().equals(string)) return;
-						boolean active = site.isActive();
-						if (active) deactivateUpdateSite(site);
-						site.setURL(string);
-						if (active && validURL(string)) activateUpdateSite(site);
-						break;
-					case 3:
-						if (string.equals(site.getHost())) return;
-						site.setHost(string);
-						break;
-					case 4:
-						if (string.equals(site.getUploadDirectory())) return;
-						site.setUploadDirectory(string);
-						break;
-					default:
-						updaterFrame.log.error("Whoa! Column " + column + " is not handled!");
+						final String string = (String)value;
+						// if the name changed, or if we auto-fill the name from the URL
+						switch (column) {
+						case 1:
+							final String name = site.getName();
+							if (name.equals(string)) return;
+							files.renameUpdateSite(name, string);
+							break;
+						case 2:
+							if (site.getURL().equals(string)) return;
+							boolean active = site.isActive();
+							if (active) deactivateUpdateSite(site);
+							site.setURL(string);
+							if (active && validURL(string)) activateUpdateSite(site);
+							break;
+						case 3:
+							if (string.equals(site.getHost())) return;
+							site.setHost(string);
+							break;
+						case 4:
+							if (string.equals(site.getUploadDirectory())) return;
+							site.setUploadDirectory(string);
+							break;
+						default:
+							updaterFrame.log.error("Whoa! Column " + column + " is not handled!");
+						}
 					}
 				}
 				files.setUpdateSitesChanged(true);
@@ -333,6 +339,13 @@ public class SitesDialog extends JDialog implements ActionListener {
 		files.removeUpdateSite(site.getName());
 		sites.remove(row);
 		tableModel.rowChanged(row);
+
+		// Properly stop cell editing
+		TableCellEditor cellEditor = table.getCellEditor();
+		if (cellEditor != null) {
+			cellEditor.stopCellEditing();
+		}
+
 	}
 
 	private void deactivateUpdateSite(final UpdateSite site) {
