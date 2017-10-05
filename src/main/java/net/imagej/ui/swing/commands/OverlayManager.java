@@ -45,8 +45,11 @@ import org.scijava.plugin.Plugin;
  * 
  * @author Adam Fraser
  */
-@Plugin(type = Command.class, menu = { @Menu(label = "Image"), @Menu(label = "Overlay"),
-	@Menu(label = "Overlay Manager") })
+@Plugin(type = Command.class, menu = { //
+	@Menu(label = "Image"), //
+	@Menu(label = "Overlay"), //
+	@Menu(label = "Overlay Manager") //
+})
 public class OverlayManager extends ContextCommand {
 
 	@Parameter
