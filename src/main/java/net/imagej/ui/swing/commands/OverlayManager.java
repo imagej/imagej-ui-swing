@@ -33,12 +33,10 @@ package net.imagej.ui.swing.commands;
 
 import net.imagej.ui.swing.overlay.SwingOverlayManager;
 
-import org.scijava.Context;
 import org.scijava.command.Command;
 import org.scijava.command.ContextCommand;
 import org.scijava.plugin.Attr;
 import org.scijava.plugin.Menu;
-import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 /**
@@ -53,12 +51,9 @@ import org.scijava.plugin.Plugin;
 }, attrs = { @Attr(name = "no-legacy") })
 public class OverlayManager extends ContextCommand {
 
-	@Parameter
-	private Context context;
-
 	@Override
 	public void run() {
-		final SwingOverlayManager overlaymgr = new SwingOverlayManager(context);
+		final SwingOverlayManager overlaymgr = new SwingOverlayManager(getContext());
 		overlaymgr.setVisible(true);
 	}
 
