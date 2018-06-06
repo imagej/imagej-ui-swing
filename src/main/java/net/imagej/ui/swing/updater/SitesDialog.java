@@ -31,52 +31,31 @@
 
 package net.imagej.ui.swing.updater;
 
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.swing.AbstractAction;
-import javax.swing.BoxLayout;
-import javax.swing.DefaultCellEditor;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.TableModelEvent;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
-
 import net.imagej.updater.FilesCollection;
 import net.imagej.updater.UpdateSite;
 import net.imagej.updater.UploaderService;
 import net.imagej.updater.util.UpdaterUtil;
 import net.imagej.util.MediaWikiClient;
 import net.miginfocom.swing.MigLayout;
-
 import org.scijava.ui.swing.StaticSwingUtils;
+
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * The dialog in which the user can choose which update sites to follow.
@@ -514,41 +493,18 @@ public class SitesDialog extends JDialog implements ActionListener {
 
 	private class PersonalSiteDialog extends JDialog implements ActionListener {
 		private String name;
-		private JLabel userLabel, realNameLabel, emailLabel, passwordLabel;
-		private JTextField userField, realNameField, emailField;
-		private JPasswordField passwordField;
+		private JLabel userLabel;
+		private JTextField userField;
 		private JButton cancel, okay;
 
 		public PersonalSiteDialog() {
 			super(SitesDialog.this, "Add Personal Site");
 			setLayout(new MigLayout("wrap 2"));
-			add(new JLabel("<html>" +
-					"<style type='text/css'>p { text-indent: 10px; }</style>" +
-					"<h2>Personal update site setup</h2>" +
-					"<p width=400>For security reasons, personal update sites are associated with a ImageJ Wiki account. " +
-					"Please provide the account name of your ImageJ Wiki account.</p>" +
-					"<p width=400>If your personal update site was not yet initialized, you can initialize it in this dialog.</p>" +
-					"<p width=400>You can register a ImageJ Wiki account here if  you do not have one yet.</p></html>"), "span 2");
 			userLabel = new JLabel("ImageJ Wiki account");
 			add(userLabel);
 			userField = new JTextField();
 			userField.setColumns(30);
 			add(userField);
-			realNameLabel = new JLabel("Real Name");
-			add(realNameLabel);
-			realNameField = new JTextField();
-			realNameField.setColumns(30);
-			add(realNameField);
-			emailLabel = new JLabel("Email");
-			add(emailLabel);
-			emailField = new JTextField();
-			emailField.setColumns(30);
-			add(emailField);
-			passwordLabel = new JLabel("Password");
-			add(passwordLabel);
-			passwordField = new JPasswordField();
-			passwordField.setColumns(30);
-			add(passwordField);
 			final JPanel panel = new JPanel();
 			cancel = new JButton("Cancel");
 			cancel.addActionListener(this);
@@ -557,8 +513,6 @@ public class SitesDialog extends JDialog implements ActionListener {
 			okay.addActionListener(this);
 			panel.add(okay);
 			add(panel, "span 2, right");
-			setWikiAccountFieldsEnabled(false);
-			setChangePasswordEnabled(false);
 			pack();
 			final KeyAdapter keyListener = new KeyAdapter() {
 
@@ -570,27 +524,10 @@ public class SitesDialog extends JDialog implements ActionListener {
 
 			};
 			userField.addKeyListener(keyListener);
-			realNameField.addKeyListener(keyListener);
-			emailField.addKeyListener(keyListener);
-			passwordField.addKeyListener(keyListener);
 			cancel.addKeyListener(keyListener);
 			okay.addKeyListener(keyListener);
 			setModal(true);
 			setVisible(true);
-		}
-
-		private void setWikiAccountFieldsEnabled(final boolean enabled) {
-			realNameLabel.setEnabled(enabled);
-			realNameField.setEnabled(enabled);
-			emailLabel.setEnabled(enabled);
-			emailField.setEnabled(enabled);
-			if (enabled) realNameField.requestFocusInWindow();
-		}
-
-		private void setChangePasswordEnabled(final boolean enabled) {
-			passwordLabel.setEnabled(enabled);
-			passwordField.setEnabled(enabled);
-			if (enabled) passwordField.requestFocusInWindow();
 		}
 
 		@Override
@@ -618,51 +555,28 @@ public class SitesDialog extends JDialog implements ActionListener {
 				final MediaWikiClient wiki = new MediaWikiClient();
 				try {
 					if (!wiki.userExists(newName)) {
-						if (realNameLabel.isEnabled()) {
-							final String realName = realNameField.getText();
-							final String email = emailField.getText();
-							if ("".equals(realName) || "".equals(email)) {
-								error("<html><p width=400>Please provide your name and email address to register an account on the ImageJ Wiki!</p></html>");
-							} else {
-								if (wiki.createUser(newName, realName, email, "Wants a personal site")) {
-									setWikiAccountFieldsEnabled(false);
-									setChangePasswordEnabled(true);
-									info("<html><p width=400>An email with the activation code was sent. " +
-											"Please provide your ImageJ Wiki password after activating the account.</p></html>");
-								} else {
-									error("<html><p width=400>There was a problem creating the user account!</p></html>");
-								}
-							}
-						} else {
-							setWikiAccountFieldsEnabled(true);
-							error("<html><p width=400>Please provide your name and email address to register an account on the ImageJ Wiki</p></html>");
-						}
+						error("<html><p width=400>Wiki user name does not exist yet.</br>Press 'OK' to open a webpage where you can create a new user.</p></html>");
+						openUrl("https://imagej.net/index.php?title=Special:CreateAccount");
 						return;
 					}
-					else if (!passwordField.isEnabled()) {
-						setChangePasswordEnabled(true);
-						error("<html><p width=400>Please type in your the password for your account on the Fiji/ImageJ Wiki</p></html>");
+					else {
+						error("<html><p width=400>Update site for user does not exist yet. Press 'OK' to open a webpage where you can set an upload password to initiate your update site.</p></html>");
+						openUrl("https://imagej.net/Special:ChangeUploadPassword");
 						return;
 					}
-
-					// initialize the personal update site
-					final String password = new String(passwordField.getPassword());
-					if (!wiki.login(newName, password)) {
-						error("Could not log in (incorrect password?)");
-						return;
-					}
-					if (!wiki.changeUploadPassword(password)) {
-						error("Could not initialize the personal update site");
-						return;
-					}
-					wiki.logout();
-					this.name = newName;
-					dispose();
 				} catch (IOException e2) {
 					updaterFrame.log.error(e2);
 					error("<html><p width=400>There was a problem contacting the ImageJ Wiki: " + e2 + "</p></html>");
 					return;
 				}
+			}
+		}
+
+		private void openUrl(String url) {
+			try {
+				java.awt.Desktop.getDesktop().browse(URI.create(url));
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 	}
