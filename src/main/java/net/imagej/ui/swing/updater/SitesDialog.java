@@ -514,6 +514,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 			panel.add(okay);
 			add(panel, "span 2, right");
 			pack();
+			setLocationRelativeTo(null);
 			final KeyAdapter keyListener = new KeyAdapter() {
 
 				@Override
@@ -555,7 +556,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 				final MediaWikiClient wiki = new MediaWikiClient();
 				try {
 					if (!wiki.userExists(newName)) {
-						error("<html><p width=400>Wiki user name does not exist yet.</br>Press 'OK' to open a webpage where you can create a new user.</p></html>");
+						error("<html><p width=400>Wiki user name does not exist yet. Press 'OK' to open a webpage where you can create a new user.</p></html>");
 						openUrl("https://imagej.net/index.php?title=Special:CreateAccount");
 						return;
 					}
