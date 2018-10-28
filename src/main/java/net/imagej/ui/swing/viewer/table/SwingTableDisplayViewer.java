@@ -48,7 +48,10 @@ import org.scijava.ui.viewer.DisplayWindow;
  * {@link JTable}.
  * 
  * @author Curtis Rueden
+ * 
+ * @deprecated replaced by {@link org.scijava.ui.swing.viewer.table.SwingTableDisplayViewer}
  */
+@Deprecated
 @Plugin(type = DisplayViewer.class)
 public class SwingTableDisplayViewer extends AbstractTableDisplayViewer {
 

@@ -46,7 +46,10 @@ import org.scijava.ui.viewer.DisplayWindow;
  * 
  * @author Curtis Rueden
  * @author Barry DeZonia
+ * 
+ * @deprecated replaced by {@link org.scijava.ui.swing.viewer.table.SwingTableDisplayPanel}
  */
+@Deprecated
 public class SwingTableDisplayPanel extends JScrollPane implements
 	TableDisplayPanel
 {
