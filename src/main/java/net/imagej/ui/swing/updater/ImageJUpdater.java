@@ -34,6 +34,7 @@ package net.imagej.ui.swing.updater;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -45,17 +46,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.imagej.ui.swing.updater.ViewOptions.Option;
+import net.imagej.updater.*;
 import net.imagej.updater.Conflicts.Conflict;
-import net.imagej.updater.FileObject;
-import net.imagej.updater.FilesCollection;
-import net.imagej.updater.Installer;
-import net.imagej.updater.UpdaterUI;
-import net.imagej.updater.UploaderService;
-import net.imagej.updater.util.AvailableSites;
-import net.imagej.updater.util.Progress;
-import net.imagej.updater.util.UpdateCanceledException;
-import net.imagej.updater.util.UpdaterUserInterface;
-import net.imagej.updater.util.UpdaterUtil;
+import net.imagej.updater.util.*;
 
 import org.scijava.app.StatusService;
 import org.scijava.command.CommandService;
@@ -66,6 +59,8 @@ import org.scijava.plugin.Menu;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.util.AppUtils;
+
+import javax.swing.*;
 
 /**
  * The Updater. As a command.
@@ -109,7 +104,6 @@ public class ImageJUpdater implements UpdaterUI {
 		final File imagejRoot = imagejDirProperty != null ? new File(imagejDirProperty) :
 			AppUtils.getBaseDirectory("ij.dir", FilesCollection.class, "updater");
 		final FilesCollection files = new FilesCollection(log, imagejRoot);
-		AvailableSites.initializeAndAddSites(files, log);
 
 		UpdaterUserInterface.set(new SwingUserInterface(log, statusService));
 
@@ -142,7 +136,14 @@ public class ImageJUpdater implements UpdaterUI {
 		Progress progress = main.getProgress("Starting up...");
 
 		try {
-			String warnings = files.downloadIndexAndChecksum(progress);
+			files.tryLoadingCollection();
+			HTTPSUtil.checkHTTPSSupport(log);
+			if(!HTTPSUtil.supportsHTTPS()) {
+				main.warn("Your Java might be too old to handle updates via HTTPS. This is a security risk!\n" +
+						"Please download a recent version of this software.\n");
+			}
+			refreshUpdateSites(files);
+			String warnings = files.reloadCollectionAndChecksum(progress);
 			main.checkWritable();
 			main.addCustomViewOptions();
 			if (!warnings.equals("")) main.warn(warnings);
@@ -247,6 +248,21 @@ public class ImageJUpdater implements UpdaterUI {
 		else if (!files.hasChanges()) main.info("Your ImageJ is up to date!");
 
 		main.updateFilesTable();
+	}
+
+	private void refreshUpdateSites(FilesCollection files)
+			throws InterruptedException, InvocationTargetException
+	{
+		List<URLChange>
+				changes = AvailableSites.initializeAndAddSites(files, log);
+		if(ReviewSiteURLsDialog.shouldBeDisplayed(changes)) {
+			ReviewSiteURLsDialog dialog = new ReviewSiteURLsDialog(main, changes);
+			SwingUtilities.invokeAndWait(() -> dialog.setVisible(true));
+			if(dialog.isOkPressed())
+				AvailableSites.applySitesURLUpdates(files, changes);
+		}
+		else
+			AvailableSites.applySitesURLUpdates(files, changes);
 	}
 
 	@EventHandler

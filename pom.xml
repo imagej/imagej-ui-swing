@@ -128,6 +128,7 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 
 		<!-- NB: Define scijava-ui-swing version until pom-scijava 24.0.0 is released -->
 		<scijava-ui-swing.version>0.12.0</scijava-ui-swing.version>
+		<imagej-updater.version>0.10.1</imagej-updater.version>
 	</properties>
 
 	<repositories>
@@ -198,5 +199,11 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 			<artifactId>imagej-ui-awt</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>
