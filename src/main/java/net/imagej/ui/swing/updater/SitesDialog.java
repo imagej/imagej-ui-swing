@@ -72,6 +72,7 @@ import javax.swing.table.TableColumnModel;
 import net.imagej.updater.FilesCollection;
 import net.imagej.updater.UpdateSite;
 import net.imagej.updater.UploaderService;
+import net.imagej.updater.util.HTTPSUtil;
 import net.imagej.updater.util.UpdaterUtil;
 import net.imagej.util.MediaWikiClient;
 import net.miginfocom.swing.MigLayout;
@@ -145,6 +146,15 @@ public class SitesDialog extends JDialog implements ActionListener {
 							if ("/".equals(value)) value = "";
 							final UpdateSite site = getUpdateSite(row);
 							if (value.equals(site.getURL())) return super.stopCellEditing();
+							if(!HTTPSUtil.supportsURLProtocol(value)) {
+								if(showYesNoQuestion("Convert HTTPS URL to HTTP?",
+										"Your installation cannot handle secure communication (HTTPS).\n" +
+												"Please download a recent version of this software.\n\n" +
+												"Do you want to use the insecure URL of this update site (HTTP)?")) {
+									value = HTTPSUtil.userSiteConvertToHTTP(value);
+									field.setText(value);
+								} else return false;
+							}
 							if (validURL(value)) {
 								site.setURL(value);
 								boolean wasActive = site.isActive();
@@ -298,7 +308,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 		}
 	}
 
-	private final static String PERSONAL_SITES_URL = "http://sites.imagej.net/";
+	private final static String PERSONAL_SITES_URL = HTTPSUtil.getProtocol() + "sites.imagej.net/";
 
 	private void addPersonalSite() {
 		final PersonalSiteDialog dialog = new PersonalSiteDialog();
