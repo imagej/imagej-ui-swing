@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>26.0.0</version>
+		<version>27.0.1</version>
 		<relativePath />
 	</parent>
 
@@ -126,8 +126,6 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
 
-		<!-- NB: Define scijava-ui-swing version until pom-scijava 24.0.0 is released -->
-		<scijava-ui-swing.version>0.12.0</scijava-ui-swing.version>
 		<imagej-updater.version>0.10.1</imagej-updater.version>
 	</properties>
 
