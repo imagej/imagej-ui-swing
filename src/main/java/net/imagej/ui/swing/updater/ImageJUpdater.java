@@ -31,27 +31,21 @@
 
 package net.imagej.ui.swing.updater;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.net.Authenticator;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.net.URLConnection;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
-
 import net.imagej.ui.swing.updater.ViewOptions.Option;
-import net.imagej.updater.*;
 import net.imagej.updater.Conflicts.Conflict;
-import net.imagej.updater.util.*;
-
+import net.imagej.updater.FileObject;
+import net.imagej.updater.FilesCollection;
+import net.imagej.updater.Installer;
+import net.imagej.updater.URLChange;
+import net.imagej.updater.UpdaterUI;
+import net.imagej.updater.UploaderService;
+import net.imagej.updater.util.AvailableSites;
+import net.imagej.updater.util.HTTPSUtil;
+import net.imagej.updater.util.Progress;
+import net.imagej.updater.util.UpdateCanceledException;
+import net.imagej.updater.util.UpdaterUserInterface;
+import net.imagej.updater.util.UpdaterUtil;
 import org.scijava.app.StatusService;
-import org.scijava.command.CommandService;
 import org.scijava.event.ContextDisposingEvent;
 import org.scijava.event.EventHandler;
 import org.scijava.log.LogService;
@@ -61,6 +55,16 @@ import org.scijava.plugin.Plugin;
 import org.scijava.util.AppUtils;
 
 import javax.swing.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.Authenticator;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.UnknownHostException;
+import java.util.List;
 
 /**
  * The Updater. As a command.
@@ -84,11 +88,6 @@ public class ImageJUpdater implements UpdaterUI {
 	@Parameter
 	private UploaderService uploaderService;
 
-	@Parameter
-	private CommandService commandService;
-
-	private final static String UPDATER_UPDATING_THREAD_NAME = "Updating the Updater itself!";
-
 	@Override
 	public void run() {
 
@@ -107,7 +106,7 @@ public class ImageJUpdater implements UpdaterUI {
 
 		UpdaterUserInterface.set(new SwingUserInterface(log, statusService));
 
-		if (!areWeUpdatingTheUpdater() && new File(imagejRoot, "update").exists()) {
+		if (new File(imagejRoot, "update").exists()) {
 			if (!UpdaterUserInterface.get().promptYesNo("It is suggested that you restart ImageJ, then continue the update.\n"
 					+ "Alternately, you can attempt to continue the upgrade without\n"
 					+ "restarting, but ImageJ might crash.\n\n"
@@ -170,56 +169,6 @@ public class ImageJUpdater implements UpdaterUI {
 				"Failed to lookup host " + e.getMessage();
 			else message = "There was an error reading the cached metadata: " + e;
 			main.error(message);
-			return;
-		}
-
-		if (!areWeUpdatingTheUpdater() && Installer.isTheUpdaterUpdateable(files, commandService)) {
-			try {
-				// download just the updater
-				Installer.updateTheUpdater(files, main.getProgress("Installing the updater..."), commandService);
-			}
-			catch (final UpdateCanceledException e) {
-				main.error("Canceled");
-				return;
-			}
-			catch (final IOException e) {
-				main.error("Installer failed: " + e);
-				return;
-			}
-
-			// make a class path using the updated files
-			final List<URL> classPath = new ArrayList<>();
-			for (FileObject component : Installer.getUpdaterFiles(files, commandService, false)) {
-				final File updated = files.prefixUpdate(component.getFilename(false));
-				if (updated.exists()) try {
-					classPath.add(updated.toURI().toURL());
-					continue;
-				} catch (MalformedURLException e) {
-					log.error(e);
-				}
-				final String name = component.getLocalFilename(false);
-				File file = files.prefix(name);
-				try {
-					classPath.add(file.toURI().toURL());
-				} catch (MalformedURLException e) {
-					log.error(e);
-				}
-			}
-			try {
-				log.info("Trying to install and execute the new updater");
-				final URL[] urls = classPath.toArray(new URL[classPath.size()]);
-				URLClassLoader remoteClassLoader = new URLClassLoader(urls, getClass().getClassLoader().getParent());
-				Class<?> runnable = remoteClassLoader.loadClass(ImageJUpdater.class.getName());
-				final Thread thread = new Thread((Runnable)runnable.newInstance());
-				thread.setName(UPDATER_UPDATING_THREAD_NAME);
-				thread.start();
-				thread.join();
-				return;
-			} catch (Throwable t) {
-				log.error(t);
-			}
-
-			main.info("Please restart ImageJ and call Help>Update to continue with the update");
 			return;
 		}
 
@@ -417,10 +366,6 @@ public class ImageJUpdater implements UpdaterUI {
 			}
 		}
 		return file.renameTo(backup);
-	}
-
-	private boolean areWeUpdatingTheUpdater() {
-		return UPDATER_UPDATING_THREAD_NAME.equals(Thread.currentThread().getName());
 	}
 
 	public static void main(String[] args) {
