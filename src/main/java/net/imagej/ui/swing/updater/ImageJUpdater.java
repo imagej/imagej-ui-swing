@@ -80,11 +80,6 @@ public class ImageJUpdater implements UpdaterUI {
 	@Parameter(required = false)
 	private UploaderService uploaderService;
 
-	@Parameter(required = false)
-	private CommandService commandService;
-
-	private final static String UPDATER_UPDATING_THREAD_NAME = "Updating the Updater itself!";
-
 	@Override
 	public void run() {
 
@@ -103,7 +98,7 @@ public class ImageJUpdater implements UpdaterUI {
 
 		UpdaterUserInterface.set(new SwingUserInterface(log, statusService));
 
-		if (!areWeUpdatingTheUpdater() && new File(imagejRoot, "update").exists()) {
+		if (new File(imagejRoot, "update").exists()) {
 			if (!UpdaterUserInterface.get().promptYesNo("It is suggested that you restart ImageJ, then continue the update.\n"
 					+ "Alternately, you can attempt to continue the upgrade without\n"
 					+ "restarting, but ImageJ might crash.\n\n"
@@ -162,56 +157,6 @@ public class ImageJUpdater implements UpdaterUI {
 				"Failed to lookup host " + e.getMessage();
 			else message = "There was an error reading the cached metadata: " + e;
 			main.error(message);
-			return;
-		}
-
-		if (!areWeUpdatingTheUpdater() && Installer.isTheUpdaterUpdateable(files, commandService)) {
-			try {
-				// download just the updater
-				Installer.updateTheUpdater(files, main.getProgress("Installing the updater..."), commandService);
-			}
-			catch (final UpdateCanceledException e) {
-				main.error("Canceled");
-				return;
-			}
-			catch (final IOException e) {
-				main.error("Installer failed: " + e);
-				return;
-			}
-
-			// make a class path using the updated files
-			final List<URL> classPath = new ArrayList<>();
-			for (FileObject component : Installer.getUpdaterFiles(files, commandService, false)) {
-				final File updated = files.prefixUpdate(component.getFilename(false));
-				if (updated.exists()) try {
-					classPath.add(updated.toURI().toURL());
-					continue;
-				} catch (MalformedURLException e) {
-					log.error(e);
-				}
-				final String name = component.getLocalFilename(false);
-				File file = files.prefix(name);
-				try {
-					classPath.add(file.toURI().toURL());
-				} catch (MalformedURLException e) {
-					log.error(e);
-				}
-			}
-			try {
-				log.info("Trying to install and execute the new updater");
-				final URL[] urls = classPath.toArray(new URL[classPath.size()]);
-				URLClassLoader remoteClassLoader = new URLClassLoader(urls, getClass().getClassLoader().getParent());
-				Class<?> runnable = remoteClassLoader.loadClass(ImageJUpdater.class.getName());
-				final Thread thread = new Thread((Runnable)runnable.newInstance());
-				thread.setName(UPDATER_UPDATING_THREAD_NAME);
-				thread.start();
-				thread.join();
-				return;
-			} catch (Throwable t) {
-				log.error(t);
-			}
-
-			main.info("Please restart ImageJ and call Help>Update to continue with the update");
 			return;
 		}
 
@@ -411,11 +356,8 @@ public class ImageJUpdater implements UpdaterUI {
 		return file.renameTo(backup);
 	}
 
-	private boolean areWeUpdatingTheUpdater() {
-		return UPDATER_UPDATING_THREAD_NAME.equals(Thread.currentThread().getName());
-	}
-
 	public static void main(String[] args) {
 		new ImageJUpdater().run();
 	}
+
 }
