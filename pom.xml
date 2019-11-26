@@ -139,6 +139,7 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
 
 		<imagej-updater.version>0.10.1</imagej-updater.version>
+		<miglayout-swing.version>5.2</miglayout-swing.version>
 	</properties>
 
 	<repositories>
@@ -181,17 +182,29 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-ui-awt</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.miglayout</groupId>
+					<artifactId>miglayout</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-ui-swing</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.miglayout</groupId>
+					<artifactId>miglayout</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- Third-party dependencies -->
 		<dependency>
 			<groupId>com.miglayout</groupId>
-			<artifactId>miglayout</artifactId>
-			<classifier>swing</classifier>
+			<artifactId>miglayout-swing</artifactId>
+			<version>${miglayout-swing.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jfree</groupId>
