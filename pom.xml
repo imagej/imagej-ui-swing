@@ -136,6 +136,8 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
 
+		<jhotdraw.version>7.6.0</jhotdraw.version>
+
 		<imagej-updater.version>0.10.4</imagej-updater.version>
 		<scijava-ui-awt.version>0.1.7</scijava-ui-awt.version>
 		<scijava-ui-swing.version>0.13.1</scijava-ui-swing.version>
@@ -201,7 +203,7 @@
 		<dependency>
 			<groupId>org.jhotdraw</groupId>
 			<artifactId>jhotdraw</artifactId>
-			<version>7.6.0</version>
+			<version>${jhotdraw.version}</version>
 		</dependency>
 
 		<!-- Runtime ImageJ dependencies -->
