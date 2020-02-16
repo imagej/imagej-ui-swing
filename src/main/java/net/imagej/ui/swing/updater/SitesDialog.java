@@ -67,6 +67,7 @@ import net.imagej.updater.util.UpdaterUtil;
 import net.imagej.util.MediaWikiClient;
 import net.miginfocom.swing.MigLayout;
 
+import org.scijava.log.Logger;
 import org.scijava.ui.swing.StaticSwingUtils;
 
 /**
@@ -364,7 +365,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 	private void updateAvailableUpdateSites() {
 		new Thread(() -> {
 			List<URLChange>
-					changes = AvailableSites.initializeAndAddSites(files, null);
+					changes = AvailableSites.initializeAndAddSites(files, (Logger) null);
 			boolean reviewChanges = ReviewSiteURLsDialog.shouldBeDisplayed(changes);
 			AtomicBoolean changesApproved = new AtomicBoolean(!reviewChanges);
 			try {

@@ -138,7 +138,9 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
 
-		<imagej-updater.version>0.10.1</imagej-updater.version>
+		<imagej-updater.version>0.10.4</imagej-updater.version>
+		<scijava-ui-awt.version>0.1.7</scijava-ui-awt.version>
+		<scijava-ui-swing.version>0.13.1</scijava-ui-swing.version>
 		<miglayout-swing.version>5.2</miglayout-swing.version>
 	</properties>
 
@@ -182,22 +184,10 @@ Institute of Molecular Cell Biology and Genetics.</license.copyrightOwners>
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-ui-awt</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>com.miglayout</groupId>
-					<artifactId>miglayout</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-ui-swing</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>com.miglayout</groupId>
-					<artifactId>miglayout</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!-- Third-party dependencies -->

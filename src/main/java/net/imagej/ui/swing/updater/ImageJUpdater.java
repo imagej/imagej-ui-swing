@@ -55,6 +55,7 @@ import org.scijava.command.CommandService;
 import org.scijava.event.ContextDisposingEvent;
 import org.scijava.event.EventHandler;
 import org.scijava.log.LogService;
+import org.scijava.log.Logger;
 import org.scijava.plugin.Menu;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -254,7 +255,7 @@ public class ImageJUpdater implements UpdaterUI {
 			throws InterruptedException, InvocationTargetException
 	{
 		List<URLChange>
-				changes = AvailableSites.initializeAndAddSites(files, log);
+				changes = AvailableSites.initializeAndAddSites(files, (Logger) log);
 		if(ReviewSiteURLsDialog.shouldBeDisplayed(changes)) {
 			ReviewSiteURLsDialog dialog = new ReviewSiteURLsDialog(main, changes);
 			SwingUtilities.invokeAndWait(() -> dialog.setVisible(true));
