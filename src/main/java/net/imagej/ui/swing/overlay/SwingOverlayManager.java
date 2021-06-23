@@ -593,7 +593,7 @@ public class SwingOverlayManager
 	private void help() {
 		try {
 			final URL url =
-					new URL("http://wiki.imagej.net/ImageJ2/Documentation/Image/Overlay/OverlayManager");
+					new URL("https://imagej.net/software/imagej2/implementation-notes#image--overlay--overlay-manager");
 			platformService.open(url);
 		} catch (IOException e) {
 			// do nothing
