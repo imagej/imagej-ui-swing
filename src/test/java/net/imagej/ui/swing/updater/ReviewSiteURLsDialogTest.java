@@ -28,21 +28,29 @@
  */
 package net.imagej.ui.swing.updater;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
+
+import java.awt.GraphicsEnvironment;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import net.imagej.updater.FilesCollection;
 import net.imagej.updater.URLChange;
 import net.imagej.updater.UpdateSite;
 import net.imagej.updater.util.AvailableSites;
 import net.imagej.updater.util.HTTPSUtil;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import java.awt.event.ActionEvent;
-import java.util.*;
-
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
-import static org.junit.Assume.assumeTrue;
 
 public class ReviewSiteURLsDialogTest {
 
@@ -95,6 +103,8 @@ public class ReviewSiteURLsDialogTest {
 		List< URLChange > changes = Collections.singletonList(change.get());
 		assertTrue(ReviewSiteURLsDialog.shouldBeDisplayed(changes));
 
+		assumeFalse(GraphicsEnvironment.isHeadless());
+
 		// create review dialog
 		ReviewSiteURLsDialog
 				dialog = new ReviewSiteURLsDialog(null, changes);
@@ -111,7 +121,6 @@ public class ReviewSiteURLsDialogTest {
 
 	@Test
 	public void submitBtnTest() {
-
 		// initialize files collection
 		FilesCollection files = new FilesCollection(root.getRoot());
 
@@ -124,6 +133,8 @@ public class ReviewSiteURLsDialogTest {
 		Optional< URLChange > urlChange =
 				URLChange.create(siteA, "http://sites.imagej.net/b/");
 		List< URLChange > urlChanges = Collections.singletonList(urlChange.get());
+
+		assumeFalse(GraphicsEnvironment.isHeadless());
 
 		// create review dialog
 		ReviewSiteURLsDialog
@@ -157,6 +168,8 @@ public class ReviewSiteURLsDialogTest {
 		// since the update site is active, the change needs to be approved, therefore the dialog should be displayed
 		assertTrue(change.isRecommended());
 		assertTrue(ReviewSiteURLsDialog.shouldBeDisplayed(changes));
+
+		assumeFalse(GraphicsEnvironment.isHeadless());
 
 		// create review dialog
 		ReviewSiteURLsDialog dialog = new ReviewSiteURLsDialog(null, changes);
@@ -195,6 +208,8 @@ public class ReviewSiteURLsDialogTest {
 		// add automated change to the URL
 		URLChange change = URLChange.create(siteA, "http://newdomain.net/a/").get();
 		List< URLChange > changes = Collections.singletonList(change);
+
+		assumeFalse(GraphicsEnvironment.isHeadless());
 
 		// create review dialog
 		ReviewSiteURLsDialog dialog = new ReviewSiteURLsDialog(null, changes);
@@ -251,6 +266,8 @@ public class ReviewSiteURLsDialogTest {
 		List<URLChange> changes = Arrays.asList(changeActiveSite, changeInactiveSite);
 		assertTrue(ReviewSiteURLsDialog.shouldBeDisplayed(Collections.singletonList(changeActiveSite)));
 
+		assumeFalse(GraphicsEnvironment.isHeadless());
+
 		// create review dialog
 		ReviewSiteURLsDialog dialog = new ReviewSiteURLsDialog(null, changes);
 		assertEquals(2, dialog.urlChanges.size());
@@ -302,6 +319,8 @@ public class ReviewSiteURLsDialogTest {
 
 		// the change should be accepted after showing a user interface since one site is activated
 		assertTrue(ReviewSiteURLsDialog.shouldBeDisplayed(urlChanges));
+
+		assumeFalse(GraphicsEnvironment.isHeadless());
 
 		// create review dialog
 		ReviewSiteURLsDialog dialog = new ReviewSiteURLsDialog(null, urlChanges);
