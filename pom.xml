@@ -113,7 +113,7 @@
 	</mailingLists>
 
 	<scm>
-		<connection>scm:git:git://github.com/imagej/imagej-ui-swing</connection>
+		<connection>scm:git:https://github.com/imagej/imagej-ui-swing</connection>
 		<developerConnection>scm:git:git@github.com:imagej/imagej-ui-swing</developerConnection>
 		<tag>HEAD</tag>
 		<url>https://github.com/imagej/imagej-ui-swing</url>
