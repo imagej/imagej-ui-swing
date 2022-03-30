@@ -123,15 +123,6 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 	// For developers
 	protected JButton showChanges, rebuildButton;
 	protected boolean canUpload;
-	protected final static String gitVersion;
-
-	static {
-		String version = null;
-		try {
-			version = ProcessUtils.exec(null,  null, null, "git", "--version");
-		} catch (Throwable t) { /* ignore */ }
-		gitVersion = version;
-	}
 
 	public UpdaterFrame(final LogService log,
 		final UploaderService uploaderService, final FilesCollection files)
@@ -339,32 +330,30 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		// includes button to upload to server if is a Developer using
 		bottomPanel2.add(Box.createRigidArea(new Dimension(15, 0)));
 
-		if (gitVersion != null) {
-			bottomPanel2.add(Box.createRigidArea(new Dimension(15, 0)));
-			showChanges =
-				SwingTools.button("Show changes",
-					"Show the differences to the uploaded version", new ActionListener()
-					{
+		bottomPanel2.add(Box.createRigidArea(new Dimension(15, 0)));
+		showChanges =
+			SwingTools.button("Show changes",
+				"Show the differences to the uploaded version", new ActionListener()
+				{
 
-						@Override
-						public void actionPerformed(final ActionEvent e) {
-							new Thread() {
+					@Override
+					public void actionPerformed(final ActionEvent e) {
+						new Thread() {
 
-								@Override
-								public void run() {
-									for (final FileObject file : table.getSelectedFiles()) try {
-										final DiffFile diff = new DiffFile(files, file, Mode.LIST_FILES);
-										diff.setLocationRelativeTo(UpdaterFrame.this);
-										diff.setVisible(true);
-									} catch (MalformedURLException e) {
-										files.log.error(e);
-										UpdaterUserInterface.get().error("There was a problem obtaining the remote version of " + file.getLocalFilename(true));
-									}
+							@Override
+							public void run() {
+								for (final FileObject file : table.getSelectedFiles()) try {
+									final DiffFile diff = new DiffFile(files, file, Mode.LIST_FILES);
+									diff.setLocationRelativeTo(UpdaterFrame.this);
+									diff.setVisible(true);
+								} catch (MalformedURLException e) {
+									files.log.error(e);
+									UpdaterUserInterface.get().error("There was a problem obtaining the remote version of " + file.getLocalFilename(true));
 								}
-							}.start();
-						}
-					}, bottomPanel2);
-		}
+							}
+						}.start();
+					}
+				}, bottomPanel2);
 
 		bottomPanel2.add(Box.createHorizontalGlue());
 
@@ -610,7 +599,7 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		else bottomPanel2.add(updateSites, 0);
 
 		final boolean uploadable = !easyMode && files.hasUploadableSites();
-		if (showChanges != null) showChanges.setVisible(!easyMode && gitVersion != null);
+		if (showChanges != null) showChanges.setVisible(!easyMode);
 		if (rebuildButton != null) rebuildButton.setVisible(uploadable);
 
 		easy.setText(easyMode ? "Advanced mode" : "Easy mode");
