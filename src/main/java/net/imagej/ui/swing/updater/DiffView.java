@@ -371,7 +371,8 @@ public class DiffView extends JScrollPane {
 			@Override
 			public void run() {
 				try {
-					ProcessUtils.exec(null, diff.getPrintStream(), diff.getPrintStream(), "git", "show");
+					final String git = System.getProperty("imagej.updater.git.command", "git");
+					ProcessUtils.exec(null, diff.getPrintStream(), diff.getPrintStream(), git, "show");
 				} catch (RuntimeException e) {
 					if (!(e.getCause() instanceof InterruptedException))
 						e.printStackTrace();

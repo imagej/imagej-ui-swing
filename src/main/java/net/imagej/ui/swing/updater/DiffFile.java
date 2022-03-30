@@ -275,7 +275,8 @@ public class DiffFile extends JFrame {
 						final PrintStream out = diffView.getPrintStream();
 						out.println("\n");
 						if (warning != null) diffView.warn(warning + "\n\n");
-						ProcessUtils.exec(gitWorkingDirectory,  out, out, "git", "log", "-M", "-p", since, commitRange, "--", relativePath);
+						final String git = System.getProperty("imagej.updater.git.command", "git");
+						ProcessUtils.exec(gitWorkingDirectory,  out, out, git, "log", "-M", "-p", since, commitRange, "--", relativePath);
 					}
 				});
 			}
@@ -328,8 +329,9 @@ public class DiffFile extends JFrame {
 				final String sourceFile = analyzer.getSourceFile();
 				if (sourceFile == null) continue;
 				final String suffix = path.substring(0, path.lastIndexOf('/') + 1) + sourceFile;
+				final String git = System.getProperty("imagej.updater.git.command", "git");
 				try {
-					path = ProcessUtils.exec(gitWorkingDirectory, null, null, "git", "ls-files", "*/" + suffix);
+					path = ProcessUtils.exec(gitWorkingDirectory, null, null, git, "ls-files", "*/" + suffix);
 					if (path.length() <= suffix.length()) continue;
 					if (path.endsWith("\n")) path = path.substring(0, path.length() - 1);
 				} catch (RuntimeException e) {
