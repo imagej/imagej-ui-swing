@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
@@ -290,9 +291,7 @@ public class UpdaterGUITest {
 	 * @throws IOException
 	 */
 	protected static File createTempDirectory(final String prefix) throws IOException {
-		final File file = File.createTempFile(prefix, "");
-		file.delete();
-		file.mkdir();
+		final File file = Files.createTempDirectory(prefix).toFile();
 		return file;
 	}
 }
