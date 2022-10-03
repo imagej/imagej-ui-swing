@@ -29,12 +29,15 @@
 
 package net.imagej.ui.swing.widget;
 
+import java.awt.Insets;
 import java.awt.image.BufferedImage;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
 
+import net.imagej.ui.swing.updater.SwingTools;
 import net.imagej.widget.ColorTableWidget;
 import net.imglib2.display.ColorTable;
 
@@ -57,11 +60,13 @@ public class SwingColorTableWidget extends SwingInputWidget<ColorTable>
 
 	private BufferedImage image;
 	private JLabel picLabel;
+	private final int height;
 
 	// -- constructors --
 
 	public SwingColorTableWidget() {
-		image = new BufferedImage(256, 20, BufferedImage.TYPE_INT_RGB);
+		height = colorBarHeight();
+		image = new BufferedImage(256, height, BufferedImage.TYPE_INT_RGB);
 	}
 
 	// -- InputWidget methods --
@@ -102,9 +107,20 @@ public class SwingColorTableWidget extends SwingInputWidget<ColorTable>
 			int g = cTable.get(1, x) & 0xff;
 			int b = cTable.get(2, x) & 0xff;
 			int rgb = (r << 16) | (g << 8) | b;
-			for (int y = 0; y < 20; y++) {
+			for (int y = 0; y < height; y++) {
 				image.setRGB(x, y, rgb);
 			}
 		}
 	}
+
+	private static int colorBarHeight() {
+		try {
+			final Insets insets = UIManager.getInsets("TextPane.margin");
+			return UIManager.getFont("TextField.font").getSize() + insets.top + insets.bottom;
+		} catch (final Exception ignored) {
+			// do nothing
+		}
+		return 24;
+	}
+
 }
