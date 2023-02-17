@@ -54,7 +54,6 @@ import org.scijava.ui.awt.AWTImageTools;
 public final class SwingColorBar extends JComponent {
 
 	private static final int DEFAULT_HEIGHT = 24;
-
 	private final int height;
 
 	private BufferedImage bar;
