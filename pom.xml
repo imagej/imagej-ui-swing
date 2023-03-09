@@ -15,7 +15,7 @@
 
 	<name>ImageJ UI: Swing</name>
 	<description>ImageJ UI for Java Swing.</description>
-	<url>https://imagej.net/ImageJ_UI_Swing</url>
+	<url>https://github.com/imagej/imagej-ui-swing</url>
 	<inceptionYear>2009</inceptionYear>
 	<organization>
 		<name>ImageJ</name>
@@ -32,22 +32,10 @@
 		<developer>
 			<id>ctrueden</id>
 			<name>Curtis Rueden</name>
-			<url>https://imagej.net/User:Rueden</url>
+			<url>https://imagej.net/people/ctrueden</url>
 			<roles>
 				<role>founder</role>
 				<role>lead</role>
-				<role>developer</role>
-				<role>debugger</role>
-				<role>reviewer</role>
-				<role>support</role>
-				<role>maintainer</role>
-			</roles>
-		</developer>
-		<developer>
-			<id>frauzufall</id>
-			<name>Deborah Schmidt</name>
-			<url>https://imagej.net/User:Frauzufall</url>
-			<roles>
 				<role>developer</role>
 				<role>debugger</role>
 				<role>reviewer</role>
@@ -59,49 +47,85 @@
 	<contributors>
 		<contributor>
 			<name>Grant Harris</name>
-			<url>https://imagej.net/User:Harris</url>
+			<url>https://imagej.net/people/tnargsirrah</url>
 			<roles><role>founder</role></roles>
 			<properties><id>tnargsirrah</id></properties>
 		</contributor>
 		<contributor>
 			<name>Johannes Schindelin</name>
-			<url>https://imagej.net/User:Schindelin</url>
+			<url>https://imagej.net/people/dscho</url>
 			<properties><id>dscho</id></properties>
 		</contributor>
 		<contributor>
+			<name>Mark Hiner</name>
+			<url>https://imagej.net/people/hinerm</url>
+			<properties><id>hinerm</id></properties>
+		</contributor>
+		<contributor>
 			<name>Barry DeZonia</name>
-			<url>https://imagej.net/User:Bdezonia</url>
+			<url>https://imagej.net/people/bdezonia</url>
 			<properties><id>bdezonia</id></properties>
 		</contributor>
 		<contributor>
 			<name>Lee Kamentsky</name>
-			<url>https://imagej.net/User:Leek</url>
+			<url>https://imagej.net/people/LeeKamentsky</url>
 			<properties><id>LeeKamentsky</id></properties>
 		</contributor>
 		<contributor>
+			<name>Aivar Grislis</name>
+			<url>https://imagej.net/people/grislis</url>
+			<properties><id>grislis</id></properties>
+		</contributor>
+
+		<contributor>
+			<name>Jonathan Hale</name>
+			<properties><id>Squareys</id></properties>
+		</contributor>
+		<contributor>
+			<name>Deborah Schmidt</name>
+			<url>https://imagej.net/people/frauzufall</url>
+			<properties><id>frauzufall</id></properties>
+		</contributor>
+		<contributor>
 			<name>Jan Eglinger</name>
-			<url>https://imagej.net/User:Eglinger</url>
+			<url>https://imagej.net/people/imagejan</url>
 			<properties><id>imagejan</id></properties>
 		</contributor>
 		<contributor>
-			<name>Aivar Grislis</name>
-			<url>https://imagej.net/User:Grislis</url>
-			<properties><id>grislis</id></properties>
+			<name>Stefan Helfrich</name>
+			<url>https://imagej.net/people/stelfrich</url>
+			<properties><id>stelfrich</id></properties>
 		</contributor>
 		<contributor>
-			<name>Mark Hiner</name>
-			<url>https://imagej.net/User:Hinerm</url>
-			<properties><id>hinerm</id></properties>
+			<name>Luke Stuyvenberg</name>
+			<url>https://imagej.net/people/stuyvenberg</url>
+			<properties><id>stuyvenberg</id></properties>
 		</contributor>
 		<contributor>
-			<name>Benjamin Nanes</name>
-			<url>https://imagej.net/User:Bnanes</url>
-			<properties><id>bnanes</id></properties>
+			<name>Robert Haase</name>
+			<url>https://imagej.net/people/haesleinhuepf</url>
+			<properties><id>haesleinhuepf</id></properties>
+		</contributor>
+		<contributor>
+			<name>Tiago Ferreira</name>
+			<url>https://imagej.net/people/tferr</url>
+			<properties><id>tferr</id></properties>
 		</contributor>
 		<contributor>
 			<name>David Pinto</name>
-			<url>https://imagej.net/User:Carandraug</url>
+			<url>https://imagej.net/people/carandraug</url>
 			<properties><id>carandraug</id></properties>
+		</contributor>
+		<contributor>
+			<name>Leon Yang</name>
+			<url>https://imagej.net/people/lnyng</url>
+			<properties><id>lnyng</id></properties>
+		</contributor>
+
+		<contributor>
+			<name>Benjamin Nanes</name>
+			<url>https://imagej.net/people/bnanes</url>
+			<properties><id>bnanes</id></properties>
 		</contributor>
 	</contributors>
 
