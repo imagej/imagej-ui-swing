@@ -11,7 +11,7 @@
 
 	<groupId>net.imagej</groupId>
 	<artifactId>imagej-ui-swing</artifactId>
-	<version>0.23.4-SNAPSHOT</version>
+	<version>1.0.1-SNAPSHOT</version>
 
 	<name>ImageJ UI: Swing</name>
 	<description>ImageJ UI for Java Swing.</description>
