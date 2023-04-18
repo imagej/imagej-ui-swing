@@ -33,7 +33,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -152,14 +151,7 @@ public class SwingDimSelectionWidget extends SwingInputWidget<TypedAxis[]>
 			final JToggleButton button =
 				new DimensionSelectionToggleButton(m_typedAxi.type().getLabel());
 
-			button.addActionListener(new ActionListener() {
-
-				@Override
-				public void actionPerformed(final ActionEvent e) {
-					toogleButtonChanged(e);
-				}
-
-			});
+			button.addActionListener(e -> toogleButtonChanged(e));
 
 			m_dimLabelButtonList.add(button);
 			getComponent().add(button);

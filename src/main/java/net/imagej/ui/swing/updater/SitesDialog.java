@@ -33,6 +33,8 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -47,7 +49,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.AbstractAction;
-import javax.swing.BoxLayout;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -104,14 +105,14 @@ public class SitesDialog extends JDialog implements ActionListener {
 
 	public SitesDialog(final UpdaterFrame owner, final FilesCollection files)
 	{
-		super(owner, "Manage update sites");
+		super(owner, "Manage Update Sites");
 		updaterFrame = owner;
 		this.files = files;
 
 		sites = new ArrayList<>(files.getUpdateSites(true));
 
 		final Container contentPane = getContentPane();
-		contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
+		contentPane.setLayout(new GridBagLayout());
 
 		tableModel = new DataModel();
 		table = new JTable(tableModel) {
@@ -292,13 +293,27 @@ public class SitesDialog extends JDialog implements ActionListener {
 				filterTable();
 			}
 		});
-		final JPanel searchPanel = SwingTools.labelComponentRigid("Search:", searchTerm);
-		contentPane.add(searchPanel);
 
-		// Adjust table size, column widths and scrollbars
+		// Add all components to dialog
+		final JPanel searchPanel = SwingTools.labelComponentRigid("Search:", searchTerm);
 		scrollpane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		contentPane.add(scrollpane);
+		final JPanel buttons = new JPanel();
+		final GridBagConstraints c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.weightx = 1;
+		c.fill = GridBagConstraints.BOTH;
+		c.weighty = 0;
+		contentPane.add(searchPanel, c);
+		c.gridy++;
+		c.weighty = 1;
+		contentPane.add(scrollpane, c);
+		c.gridy++;
+		c.weighty = 0;
+		contentPane.add(buttons, c);
+
+		// Adjust table size, column widths and scrollbars
 		tableModel.setColumnWidths();
 		scrollpane.setPreferredSize(new Dimension(tableModel.tableWidth, 500));
 		contentPane.addComponentListener(new ComponentAdapter() {
@@ -313,13 +328,11 @@ public class SitesDialog extends JDialog implements ActionListener {
 			}
 		});
 
-		final JPanel buttons = new JPanel();
-		addNewSite = SwingTools.button("Add update site", "Add your own update site", this, buttons);
+		addNewSite = SwingTools.button("Add update site", "Add a new/unlisted update site", this, buttons);
 		remove = SwingTools.button("Remove", "Remove selected update site(s)", this, buttons);
 		remove.setEnabled(false);
-		checkForUpdates = SwingTools.button("Update URLs", "Check whether update sites are using outdated URLs", this, buttons);
-		close = SwingTools.button("Close", "Dismiss this window", this, buttons);
-		contentPane.add(buttons);
+		checkForUpdates = SwingTools.button("Validate URLs", "Check whether update sites are using outdated URLs", this, buttons);
+		close = SwingTools.button("Close", "Dismiss this window [ESC]", this, buttons);
 
 		getRootPane().setDefaultButton(close);
 		escapeCancels(this);
@@ -473,8 +486,8 @@ public class SitesDialog extends JDialog implements ActionListener {
 		protected int tableWidth;
 		protected int[] minWidths = { 20, 380, 280, 125, 125, 500 };
 		protected String[] headers = { "Active", "Name", "URL", "Host", "Directory on Host", "Description" };
-		protected String[] canonicalRows = { "", "Fuzzy logic and artificial neural",
-				"sites.imagej.net/Fiji-Legacy/", "webdav:User", "/path", " Large description with maintainer name"};
+		private String[] canonicalRows = { "Active", "Fuzzy logic and artificial neural",
+				"sites.imagej.net/Fiji-Legacy/", "webdav:User", "/path", " Large description with maintainer name" };
 
 		public void setColumnWidths() {
 			table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); // otherwise horizontal scrollbar is not displayed

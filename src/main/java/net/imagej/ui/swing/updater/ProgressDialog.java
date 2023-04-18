@@ -33,8 +33,6 @@ import java.awt.Adjustable;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.KeyAdapter;
@@ -85,22 +83,12 @@ public class ProgressDialog extends JDialog implements Progress {
 
 		final JPanel buttons = new JPanel();
 		detailsToggle = new JButton("Show Details");
-		detailsToggle.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(final ActionEvent event) {
-				toggleDetails();
-			}
-		});
+		detailsToggle.addActionListener(event -> toggleDetails());
 		buttons.add(detailsToggle);
 		final JButton cancel = new JButton("Cancel");
-		cancel.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				canceled = true;
-				ProgressDialog.this.dispose();
-			}
+		cancel.addActionListener(e -> {
+			canceled = true;
+			ProgressDialog.this.dispose();
 		});
 		buttons.add(cancel);
 		buttons.setMaximumSize(buttons.getMinimumSize());
@@ -171,13 +159,10 @@ public class ProgressDialog extends JDialog implements Progress {
 
 	protected void setTitle() {
 		checkIfCanceled();
-		SwingTools.invokeOnEDT(new Runnable() {
-			@Override
-			public void run() {
-				if (detailsScrollPane.isVisible() || latestDetail == null) progress
-					.setString(title);
-				else progress.setString(title + ": " + latestDetail.getString());
-			}
+		SwingTools.invokeOnEDT(() -> {
+			if (detailsScrollPane.isVisible() || latestDetail == null) progress
+				.setString(title);
+			else progress.setString(title + ": " + latestDetail.getString());
 		});
 		repaint();
 	}
@@ -186,12 +171,9 @@ public class ProgressDialog extends JDialog implements Progress {
 	public void setCount(final int count, final int total) {
 		checkIfCanceled();
 		if (updatesTooFast()) return;
-		SwingTools.invokeOnEDT(new Runnable() {
-			@Override
-			public void run() {
-				progress.setMaximum(total);
-				progress.setValue(count);
-			}
+		SwingTools.invokeOnEDT(() -> {
+			progress.setMaximum(total);
+			progress.setValue(count);
 		});
 		repaint();
 	}
@@ -210,13 +192,10 @@ public class ProgressDialog extends JDialog implements Progress {
 	public void setItemCount(final int count, final int total) {
 		checkIfCanceled();
 		if (itemUpdatesTooFast()) return;
-		SwingTools.invokeOnEDT(new Runnable() {
-			@Override
-			public void run() {
-				latestDetail.setMaximum(total);
-				latestDetail.setValue(count);
-				repaint();
-			}
+		SwingTools.invokeOnEDT(() -> {
+			latestDetail.setMaximum(total);
+			latestDetail.setValue(count);
+			repaint();
 		});
 	}
 
@@ -224,41 +203,30 @@ public class ProgressDialog extends JDialog implements Progress {
 	public void itemDone(final Object item) {
 		checkIfCanceled();
 		if (itemUpdatesTooFast() && !detailsScrollPane.isVisible()) return;
-		SwingTools.invokeOnEDT(new Runnable() {
-			@Override
-			public void run() {
-				latestDetail.setValue(latestDetail.getMaximum());
-			}
-		});
+		SwingTools.invokeOnEDT(() -> latestDetail.setValue(latestDetail.getMaximum()));
 	}
 
 	@Override
 	public void done() {
 		if (latestDetail != null) latestDetail.setValue(latestDetail.getMaximum());
-		SwingTools.invokeOnEDT(new Runnable() {
-			@Override
-			public void run() {
-				progress.setValue(progress.getMaximum());
-				dispose();
-			}
+		SwingTools.invokeOnEDT(() -> {
+			progress.setValue(progress.getMaximum());
+			dispose();
 		});
 	}
 
 	public void toggleDetails() {
-		SwingTools.invokeOnEDT(new Runnable() {
-			@Override
-			public void run() {
-				final boolean show = !detailsScrollPane.isVisible();
-				detailsScrollPane.setVisible(show);
-				detailsScrollPane.invalidate();
-				detailsToggle.setText(show ? "Hide Details" : "Show Details");
-				setTitle();
+		SwingTools.invokeOnEDT(() -> {
+			final boolean show = !detailsScrollPane.isVisible();
+			detailsScrollPane.setVisible(show);
+			detailsScrollPane.invalidate();
+			detailsToggle.setText(show ? "Hide Details" : "Show Details");
+			setTitle();
 
-				final Dimension dimension = getSize();
-				if (toggleHeight == -1) toggleHeight = dimension.height + 100;
-				setSize(new Dimension(dimension.width, toggleHeight));
-				toggleHeight = dimension.height;
-			}
+			final Dimension dimension = getSize();
+			if (toggleHeight == -1) toggleHeight = dimension.height + 100;
+			setSize(new Dimension(dimension.width, toggleHeight));
+			toggleHeight = dimension.height;
 		});
 	}
 

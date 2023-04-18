@@ -33,12 +33,10 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.FontMetrics;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +59,6 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
 
 import net.imagej.updater.FileObject;
-import net.imagej.updater.FileObject.Action;
 import net.imagej.updater.FileObject.Status;
 import net.imagej.updater.FilesCollection;
 import net.imagej.updater.GroupAction;
@@ -81,9 +78,9 @@ public class FileTable extends JTable {
 	private FileTableModel fileTableModel;
 	protected Font plain, bold;
 
-	final static int NAME_COLUMN = 0;
-	final static int ACTION_COLUMN = 1;
-	final static int SITE_COLUMN = 2;
+	static final int NAME_COLUMN = 0;
+	static final int ACTION_COLUMN = 1;
+	static final int SITE_COLUMN = 2;
 
 	public FileTable(final UpdaterFrame updaterFrame) {
 		this.updaterFrame = updaterFrame;
@@ -129,17 +126,10 @@ public class FileTable extends JTable {
 		fileTableModel = new FileTableModel(files);
 		setModel(fileTableModel);
 		getModel().addTableModelListener(this);
-		setColumnWidths(250, 100, 80);
+		setColumnWidths();
 		TableRowSorter<FileTableModel> sorter =
 			new TableRowSorter<>(fileTableModel);
-		sorter.setComparator(ACTION_COLUMN, new Comparator<FileObject.Action>() {
-
-			@Override
-			public int compare(Action o1, Action o2) {
-				return o1.toString().compareTo(o2.toString());
-			}
-
-		});
+		sorter.setComparator(ACTION_COLUMN, (o1, o2) -> o1.toString().compareTo(o2.toString()));
 		setRowSorter(sorter);
 
 		setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
@@ -176,25 +166,22 @@ public class FileTable extends JTable {
 		if (file == null) return;
 		comp.setFont(file.actionSpecified() || file.isLocallyModified() ? bold
 			: plain);
-		comp.setForeground(file.getStatus() == Status.OBSOLETE_MODIFIED ? Color.red
-			: Color.black);
+		if (file.getStatus() == Status.OBSOLETE_MODIFIED) comp.setForeground(Color.RED);
 	}
 
-	private void setColumnWidths(final int nameColumnWidth,
-		final int actionColumnWidth, final int siteColumnWidth)
-	{
+	private void setColumnWidths() {
 		final TableColumn nameColumn = getColumnModel().getColumn(NAME_COLUMN);
 		final TableColumn actionColumn = getColumnModel().getColumn(ACTION_COLUMN);
 		final TableColumn siteColumn = getColumnModel().getColumn(SITE_COLUMN);
-
-		nameColumn.setPreferredWidth(nameColumnWidth);
-		nameColumn.setMinWidth(nameColumnWidth);
-		nameColumn.setResizable(false);
-		actionColumn.setPreferredWidth(actionColumnWidth);
-		actionColumn.setMinWidth(actionColumnWidth);
+		final FontMetrics fm = getFontMetrics(getFont());
+		nameColumn.setPreferredWidth(fm.stringWidth("jars/imagej-plugins-commands"));
+		nameColumn.setMinWidth(fm.stringWidth("jars/bij.jar"));
+		nameColumn.setResizable(true);
+		actionColumn.setPreferredWidth(fm.stringWidth("Locally modified "));
+		actionColumn.setMinWidth(fm.stringWidth("Up-to-date"));
 		actionColumn.setResizable(true);
-		siteColumn.setPreferredWidth(siteColumnWidth);
-		siteColumn.setMinWidth(siteColumnWidth);
+		siteColumn.setPreferredWidth(fm.stringWidth("BigVolumeViewer Demo"));
+		siteColumn.setMinWidth(fm.stringWidth("Fiji"));
 		siteColumn.setResizable(true);
 	}
 
@@ -222,14 +209,10 @@ public class FileTable extends JTable {
 		int count = 0;
 		for (final GroupAction action : files.getValidActions(selected)) {
 			final JMenuItem item = new JMenuItem(action.getLabel(files, selected));
-			item.addActionListener(new ActionListener() {
-
-				@Override
-				public void actionPerformed(final ActionEvent e) {
-					for (final FileObject file : selected) {
-						action.setAction(files, file);
-						fireFileChanged(file);
-					}
+			item.addActionListener(e -> {
+				for (final FileObject file : selected) {
+					action.setAction(files, file);
+					fireFileChanged(file);
 				}
 			});
 			menu.add(item);

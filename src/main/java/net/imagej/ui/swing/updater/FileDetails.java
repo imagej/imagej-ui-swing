@@ -52,7 +52,9 @@ import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.Position;
 import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
 import net.imagej.updater.FileObject;
@@ -75,11 +77,11 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 	UpdaterFrame updaterFrame;
 
 	static {
-		italic = getStyle(Color.black, true, false, "Verdana", 12);
-		bold = getStyle(Color.black, false, true, "Verdana", 12);
-		normal = getStyle(Color.black, false, false, "Verdana", 12);
-		title = getStyle(Color.black, false, false, "Impact", 18);
-
+		final int size = SwingTools.defaultFontSize();
+		italic = getStyle(null, true, false, java.awt.Font.SANS_SERIF, size);
+		bold = getStyle(null, false, true, java.awt.Font.SANS_SERIF, size);
+		normal = getStyle(null, false, false, java.awt.Font.SANS_SERIF, size);
+		title = getStyle(null, false, false, java.awt.Font.SANS_SERIF, (int)1.5 * size);
 		hand = new Cursor(Cursor.HAND_CURSOR);
 		defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
 	}
@@ -116,14 +118,7 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 	public void reset() {
 		setEditable(false);
 		setText("");
-		final Comparator<Position> comparator = new Comparator<Position>() {
-
-			@Override
-			public int compare(final Position p1, final Position p2) {
-				return p1.getOffset() - p2.getOffset();
-			}
-		};
-
+		final Comparator<Position> comparator = (p1, p2) -> p1.getOffset() - p2.getOffset();
 		editables = new TreeMap<>(comparator);
 		dummySpace = null;
 	}
@@ -144,10 +139,8 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 	}
 
 	private AttributeSet getLinkAttribute(final String url) {
-		// TODO: Verdana? Java is platform-independent, if this introduces a
-		// platform dependency, it needs to be thrown out, quickly!
-		final SimpleAttributeSet style =
-			getStyle(Color.blue, false, false, "Verdana", 12);
+		final Style style = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
+		StyleConstants.setForeground(style, Color.BLUE);
 		style.addAttribute(LINK_ATTRIBUTE, url);
 		return style;
 	}
@@ -157,10 +150,10 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 		final int fontSize)
 	{
 		final SimpleAttributeSet style = new SimpleAttributeSet();
-		StyleConstants.setForeground(style, color);
+		if (color != null) StyleConstants.setForeground(style, color);
 		StyleConstants.setItalic(style, italic);
 		StyleConstants.setBold(style, bold);
-		StyleConstants.setFontFamily(style, fontName);
+		if (fontName != null) StyleConstants.setFontFamily(style, fontName);
 		StyleConstants.setFontSize(style, fontSize);
 		return style;
 	}

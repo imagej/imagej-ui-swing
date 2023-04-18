@@ -80,30 +80,31 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 	 */
 	public ReviewSiteURLsDialog(final UpdaterFrame owner, final List< URLChange > urlChanges)
 	{
-		super(owner, "Changes to available update sites", ModalityType.DOCUMENT_MODAL);
+		super(owner, "Changes to Available Update Sites", ModalityType.DOCUMENT_MODAL);
 
 		this.urlChanges = urlChanges;
 
-		final Container contentPane = getContentPane();
+		final JPanel contentPane = new JPanel();
 		contentPane.setLayout(new MigLayout("fill, gap 0"));
 
 		this.urlChanges.forEach( change -> change.setApproved(change.isRecommended()));
 
 		if( this.urlChanges.size() > 0) {
-			setMinimumSize(new Dimension(900, 0));
+			//setMinimumSize(new Dimension(900, 0));
 			contentPane.add(createHeader(), "span, grow");
 			contentPane.add(createUpdateSiteScrollPane(), "newline, span, grow, push");
 			contentPane.add(createButtonsPanel(), "dock south");
 			updateGeneralChoices();
 		} else {
-			setMinimumSize(new Dimension(0, 0));
+			//setMinimumSize(new Dimension(0, 0));
 			contentPane.add(createOkPanel(), "dock south");
-			contentPane.add(createOkIcon(), "w 70px!");
+			contentPane.add(createOkIcon());
 			contentPane.add(createEverythingIsFineMessage());
 		}
 
 		escapeCancels(this);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		setContentPane(contentPane);
 		pack();
 		setLocationRelativeTo(owner);
 	}
@@ -122,17 +123,17 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 	}
 
 	private Component createEverythingIsFineMessage() {
-		JEditorPane text = createHTMLText("<html><h2>Software package sources up to date</h2>" +
+		JEditorPane text = createHTMLText("<html><h3>Software package sources up to date</h3>" +
 				"No updated URLs found for activated update sites.</html>");
 		text.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 25));
-		text.setMinimumSize(new Dimension(0,0));
+		//text.setMinimumSize(new Dimension(0,0));
 		return text;
 	}
 
 	private Component createOkPanel() {
 		JPanel panel = new JPanel();
 		ok = new JButton("OK");
-		panel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.darkGray));
+		//panel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.darkGray));
 		panel.add(ok);
 		ok.addActionListener(this);
 		getRootPane().setDefaultButton(ok);
@@ -159,15 +160,16 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 	}
 
 	private static Component createOkIcon() {
-		JLabel label = new JLabel(":-)", SwingConstants.CENTER);
-		label.setFont(new Font(label.getFont().getName(), Font.BOLD, 32));
-		label.setForeground(new Color(114, 200, 218));
+		JLabel label = new JLabel("<html><h2>:-)</h2>", SwingConstants.CENTER);
+		label.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+		//label.setFont(new Font(label.getFont().getName(), Font.BOLD, (int) (label.getFont().getSize() * 2.5)));
+		//label.setForeground(new Color(114, 200, 218));
 		return label;
 //		return new JLabel(javax.swing.UIManager.getIcon("OptionPane.informationIcon"));
 	}
 
 	private static Component createUpdatesAvailableMessage() {
-		return createHTMLText("<html><h2>Updated software package sources</h2>" +
+		return createHTMLText("<html><h3>Updated software package sources</h3>" +
 				"<p>Please review the following update site URL changes.<br/>" +
 				"If you have never heard of update sites," +
 				" just click <b>OK</b> at the bottom.</p></html>");
@@ -176,14 +178,14 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 	private static Component createHTTPSInfo() {
 		// TODO remove note in Updater V2
 		JEditorPane text = createHTMLText("<html><h3>ImageJ is improving<br/>data security!</h3>" +
-				"From now on ImageJ is supposed to update more securely via HTTPS. " +
+				"From now on ImageJ updates more securely via HTTPS. " +
 				"Therefore addresses of update sites currently in use by your ImageJ installation " +
 				"need to be updated.</html>");
-		text.setBackground(new Color(250,250,250));
-		text.setBorder(BorderFactory.createEmptyBorder(25,15,25,25));
-		String bodyRule = "body { color: #404042; }";
-		((HTMLDocument)text.getDocument()).getStyleSheet().addRule(bodyRule);
-		text.setOpaque(true);
+		//text.setBackground(new Color(250,250,250));
+		//text.setBorder(BorderFactory.createEmptyBorder(25,15,25,25));
+		//String bodyRule = "body { color: #404042; }";
+		//((HTMLDocument)text.getDocument()).getStyleSheet().addRule(bodyRule);
+		//text.setOpaque(true);
 		return text;
 	}
 
@@ -233,7 +235,7 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 	private Component createUpdateSiteScrollPane() {
 		JScrollPane scrollPane = new JScrollPane(createUpdatableSitesTable());
 		scrollPane.setPreferredSize(new Dimension(tableModel.tableWidth, 150));
-		scrollPane.setMinimumSize(new Dimension(0,0));
+		//scrollPane.setMinimumSize(new Dimension(0,0));
 		return scrollPane;
 	}
 

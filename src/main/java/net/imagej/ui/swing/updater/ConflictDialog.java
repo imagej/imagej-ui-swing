@@ -83,7 +83,6 @@ public abstract class ConflictDialog extends JDialog implements ActionListener {
 
 		bold = new SimpleAttributeSet();
 		StyleConstants.setBold(bold, true);
-		StyleConstants.setFontSize(bold, 16);
 		indented = new SimpleAttributeSet();
 		StyleConstants.setLeftIndent(indented, 40);
 		italic = new SimpleAttributeSet();
@@ -95,8 +94,9 @@ public abstract class ConflictDialog extends JDialog implements ActionListener {
 		SwingTools.scrollPane(panel, 650, 450, rootPanel);
 
 		final JPanel buttons = new JPanel();
-		ok = SwingTools.button("OK", "OK", this, buttons);
-		cancel = SwingTools.button("Cancel", "Cancel", this, buttons);
+		ok = SwingTools.button("OK", "Apply resolutions [Enter]", this, buttons);
+		cancel = SwingTools.button("Cancel", "Dismiss [Esc]", this, buttons);
+		buttons.setMaximumSize(buttons.getPreferredSize()); // do not allow vertical resizing
 		rootPanel.add(buttons);
 
 		// do not show, right now
@@ -136,13 +136,7 @@ public abstract class ConflictDialog extends JDialog implements ActionListener {
 	public void setVisible(final boolean visible) {
 		if (SwingUtilities.isEventDispatchThread()) super.setVisible(visible);
 		else try {
-			SwingUtilities.invokeAndWait(new Runnable() {
-
-				@Override
-				public void run() {
-					setVisible(visible);
-				}
-			});
+			SwingUtilities.invokeAndWait(() -> setVisible(visible));
 		}
 		catch (final InterruptedException e) {
 			updaterFrame.log.error(e);
@@ -174,13 +168,9 @@ public abstract class ConflictDialog extends JDialog implements ActionListener {
 			addText("\n");
 			for (final Resolution resolution : conflict.getResolutions()) {
 				addText("\n    ");
-				addButton(resolution.getDescription(), new ActionListener() {
-
-					@Override
-					public void actionPerformed(final ActionEvent e) {
-						resolution.resolve();
-						listIssues();
-					}
+				addButton(resolution.getDescription(), e -> {
+					resolution.resolve();
+					listIssues();
 				});
 			}
 		}

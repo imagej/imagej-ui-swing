@@ -57,6 +57,7 @@ import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.event.DocumentListener;
 
 /**
@@ -87,7 +88,8 @@ public class SwingTools {
 	{
 		final JScrollPane scroll = new JScrollPane(component);
 		scroll.getViewport().setBackground(component.getBackground());
-		scroll.setPreferredSize(new Dimension(width, height));
+		if (width > -1 && height > -1)
+			scroll.setPreferredSize(new Dimension(width, height));
 		if (addTo != null) addTo.add(scroll);
 		return scroll;
 	}
@@ -231,14 +233,11 @@ public class SwingTools {
 	public static void showMessageBox(final Component owner,
 		final String message, final int type)
 	{
-		SwingTools.invokeOnEDT(new Runnable() {
-			@Override
-			public void run() {
-				final String title =
-					type == JOptionPane.ERROR_MESSAGE ? "Error"
-						: type == JOptionPane.WARNING_MESSAGE ? "Warning" : "Information";
-				JOptionPane.showMessageDialog(owner, message, title, type);
-			}
+		SwingTools.invokeOnEDT(() -> {
+			final String title =
+				type == JOptionPane.ERROR_MESSAGE ? "Error"
+					: type == JOptionPane.WARNING_MESSAGE ? "Warning" : "Information";
+			JOptionPane.showMessageDialog(owner, message, title, type);
 		});
 	}
 
@@ -275,6 +274,14 @@ public class SwingTools {
 			}
 		}
 		catch (final InterruptedException e) { /* ignore */}
+	}
+
+	public static int defaultFontSize() {
+		try {
+			return UIManager.getDefaults().getFont("TextPane.font").getSize();
+		} catch (final NullPointerException ignored) {
+			return 12;
+		}
 	}
 
 	public static void invokeOnEDT(final Runnable job) {
