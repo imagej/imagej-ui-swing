@@ -32,8 +32,11 @@ package net.imagej.ui.swing.updater;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.FontMetrics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -56,7 +59,10 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import javax.swing.RowFilter;
 import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
@@ -64,6 +70,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableRowSorter;
 
 import net.imagej.updater.FilesCollection;
 import net.imagej.updater.URLChange;
@@ -92,6 +99,8 @@ public class SitesDialog extends JDialog implements ActionListener {
 	protected JTable table;
 	protected JScrollPane scrollpane;
 	protected JButton addNewSite, remove, close, checkForUpdates;
+	private JTextField searchTerm;
+	private TableRowSorter<DataModel> sorter;
 
 	public SitesDialog(final UpdaterFrame owner, final FilesCollection files)
 	{
@@ -234,6 +243,9 @@ public class SitesDialog extends JDialog implements ActionListener {
 							if (string.equals(site.getUploadDirectory())) return;
 							site.setUploadDirectory(string);
 							break;
+						case 5:
+							// do nothing: description column
+							break;
 						default:
 							updaterFrame.log.error("Whoa! Column " + column + " is not handled!");
 						}
@@ -258,17 +270,55 @@ public class SitesDialog extends JDialog implements ActionListener {
 		table.setColumnSelectionAllowed(false);
 		table.setRowSelectionAllowed(true);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		tableModel.setColumnWidths();
-		scrollpane = new JScrollPane(table);
-		scrollpane.setPreferredSize(new Dimension(tableModel.tableWidth, 400));
+
+		// row filtering
+		sorter = new TableRowSorter<>(tableModel);
+		table.setRowSorter(sorter);
+		searchTerm = new JTextField();
+		searchTerm.getDocument().addDocumentListener(new DocumentListener() {
+
+			@Override
+			public void changedUpdate(final DocumentEvent e) {
+				filterTable();
+			}
+
+			@Override
+			public void removeUpdate(final DocumentEvent e) {
+				filterTable();
+			}
+
+			@Override
+			public void insertUpdate(final DocumentEvent e) {
+				filterTable();
+			}
+		});
+		final JPanel searchPanel = SwingTools.labelComponentRigid("Search:", searchTerm);
+		contentPane.add(searchPanel);
+
+		// Adjust table size, column widths and scrollbars
+		scrollpane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		contentPane.add(scrollpane);
+		tableModel.setColumnWidths();
+		scrollpane.setPreferredSize(new Dimension(tableModel.tableWidth, 500));
+		contentPane.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(final ComponentEvent e) {
+				if (table.getPreferredSize().width < getWidth()) {
+					// unlikely to happen given current column widths
+					table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+				} else {
+					table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+				}
+			}
+		});
 
 		final JPanel buttons = new JPanel();
-		addNewSite = SwingTools.button("Add update site", "Add update site", this, buttons);
-		remove = SwingTools.button("Remove", "Remove", this, buttons);
+		addNewSite = SwingTools.button("Add update site", "Add your own update site", this, buttons);
+		remove = SwingTools.button("Remove", "Remove selected update site(s)", this, buttons);
 		remove.setEnabled(false);
-		checkForUpdates = SwingTools.button("Update URLs", "Check activated update sites for new URLs", this, buttons);
-		close = SwingTools.button("Close", "Close", this, buttons);
+		checkForUpdates = SwingTools.button("Update URLs", "Check whether update sites are using outdated URLs", this, buttons);
+		close = SwingTools.button("Close", "Dismiss this window", this, buttons);
 		contentPane.add(buttons);
 
 		getRootPane().setDefaultButton(close);
@@ -278,9 +328,31 @@ public class SitesDialog extends JDialog implements ActionListener {
 		setLocationRelativeTo(owner);
 	}
 
+	private void filterTable() {
+		SwingTools.invokeOnEDT(() -> {
+			try {
+				// case insensitive search for columns: Name (1), URL(2), and Description (5)
+				sorter.setRowFilter(RowFilter.regexFilter("(?i)" + searchTerm.getText(), 1, 2, 5));
+			} catch (final java.util.regex.PatternSyntaxException e) {
+				// do nothing if expression doesn't parse
+				return;
+			}
+		});
+	}
+
+	private static String inlineSynopsis(final UpdateSite site) {
+		if (site == null) return "";
+		final StringBuilder sb = new StringBuilder();
+		String s = site.getDescription();
+		if (s != null) sb.append(s.replace("\n", " "));
+		s = site.getMaintainer();
+		if (s != null) sb.append(" Maintainer:").append(s);
+		return  sb.toString();
+	}
+
 	private static String wrapToolTip(final String description, final String maintainer) {
 		if (description == null) return null;
-		return  "<html><p width='400'>" + description.replaceAll("\n", "<br />")
+		return  "<html><p width='500'>" + description.replaceAll("\n", "<br />")
 			+ (maintainer != null ? "</p><p>Maintainer: " + maintainer + "</p>": "")
 			+ "</p></html>";
 	}
@@ -379,6 +451,13 @@ public class SitesDialog extends JDialog implements ActionListener {
 	}
 
 	@Override
+	public void setVisible(boolean b) {
+		if (b)
+			searchTerm.requestFocusInWindow();
+		super.setVisible(b);
+	}
+
+	@Override
 	public void actionPerformed(final ActionEvent e) {
 		final Object source = e.getSource();
 		if (source == addNewSite) addNew();
@@ -392,24 +471,26 @@ public class SitesDialog extends JDialog implements ActionListener {
 	protected class DataModel extends DefaultTableModel {
 
 		protected int tableWidth;
-		protected int[] widths = { 20, 150, 280, 125, 125 };
-		protected String[] headers = { "Active", "Name", "URL", "Host",
-			"Directory on Host" };
+		protected int[] minWidths = { 20, 380, 280, 125, 125, 500 };
+		protected String[] headers = { "Active", "Name", "URL", "Host", "Directory on Host", "Description" };
+		protected String[] canonicalRows = { "", "Fuzzy logic and artificial neural",
+				"sites.imagej.net/Fiji-Legacy/", "webdav:User", "/path", " Large description with maintainer name"};
 
 		public void setColumnWidths() {
+			table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); // otherwise horizontal scrollbar is not displayed
 			final TableColumnModel columnModel = table.getColumnModel();
-			for (int i = 0; i < tableModel.widths.length && i < getColumnCount(); i++)
-			{
+			final FontMetrics fm = table.getFontMetrics(table.getFont());
+			for (int i = 0; i < tableModel.minWidths.length && i < getColumnCount(); i++) {
 				final TableColumn column = columnModel.getColumn(i);
-				column.setPreferredWidth(tableModel.widths[i]);
-				column.setMinWidth(tableModel.widths[i]);
-				tableWidth += tableModel.widths[i];
+				column.setPreferredWidth(fm.stringWidth(canonicalRows[i]));
+				column.setMinWidth(tableModel.minWidths[i]);
+				tableWidth += column.getPreferredWidth();
 			}
 		}
 
 		@Override
 		public int getColumnCount() {
-			return 5;
+			return 6;
 		}
 
 		@Override
@@ -435,6 +516,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 			if (col == 2) return site.getURL();
 			if (col == 3) return site.getHost();
 			if (col == 4) return site.getUploadDirectory();
+			if (col == 5) return inlineSynopsis(site);
 			return null;
 		}
 
