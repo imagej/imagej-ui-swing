@@ -328,11 +328,11 @@ public class SitesDialog extends JDialog implements ActionListener {
 			}
 		});
 
-		addNewSite = SwingTools.button("Add update site", "Add a new/unlisted update site", this, buttons);
-		remove = SwingTools.button("Remove", "Remove selected update site(s)", this, buttons);
+		addNewSite = SwingTools.button("Add Unlisted Site", "Add a new entry for a site not listed", this, buttons);
+		remove = SwingTools.button("Remove", "Remove highlighted site from list", this, buttons);
 		remove.setEnabled(false);
 		checkForUpdates = SwingTools.button("Validate URLs", "Check whether update sites are using outdated URLs", this, buttons);
-		close = SwingTools.button("Close", "Dismiss this window [ESC]", this, buttons);
+		close = SwingTools.button("Apply and Close", "Confirm subscriptions and dismiss [ESC]", this, buttons);
 
 		getRootPane().setDefaultButton(close);
 		escapeCancels(this);
@@ -379,6 +379,8 @@ public class SitesDialog extends JDialog implements ActionListener {
 	}
 
 	private void addNew() {
+		searchTerm.setText(""); // Reset table or a row index out of range is triggered
+		table.requestFocusInWindow();
 		add(new UpdateSite(makeUniqueSiteName("New"), "", "", "", null, null, 0l));
 
 		table.changeSelection( table.getRowCount()-1, 2, false, false);

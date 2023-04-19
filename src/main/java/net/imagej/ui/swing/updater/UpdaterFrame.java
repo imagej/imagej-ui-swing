@@ -437,8 +437,9 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 	public UploaderService getUploaderService() {
 		if (uploaderService == null) {
 			setClassLoaderIfNecessary();
-			final Context context = new Context(UploaderService.class);
-			uploaderService = context.getService(UploaderService.class);
+			try (Context context = new Context(UploaderService.class)) {
+				uploaderService = context.getService(UploaderService.class);
+			}
 		}
 
 		return uploaderService;

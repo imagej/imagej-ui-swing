@@ -36,6 +36,7 @@ import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -57,6 +58,9 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
+import org.scijava.Context;
+import org.scijava.platform.PlatformService;
+
 import net.imagej.updater.FileObject;
 import net.imagej.updater.FilesCollection;
 import net.imagej.updater.util.UpdaterUserInterface;
@@ -69,9 +73,10 @@ import net.imagej.updater.util.UpdaterUserInterface;
 @SuppressWarnings("serial")
 public class FileDetails extends JTextPane implements UndoableEditListener {
 
-	private final static AttributeSet bold, italic, normal, title;
-	private final static Cursor hand, defaultCursor;
-	private final static String LINK_ATTRIBUTE = "URL";
+	private static final AttributeSet bold, italic, normal, title;
+	private static final Cursor hand, defaultCursor;
+	private static final String LINK_ATTRIBUTE = "URL";
+	private PlatformService platformService;
 	SortedMap<Position, EditableRegion> editables;
 	Position dummySpace;
 	UpdaterFrame updaterFrame;
@@ -94,12 +99,13 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 			public void mouseClicked(final MouseEvent e) {
 				final String url = getLinkAt(e.getPoint());
 				try {
-					if (url != null) UpdaterUserInterface.get().openURL(url);
-				}
-				catch (final Exception exception) {
+					if (url != null) {
+						// UpdaterUserInterface#openURL() has no implementation!?
+						getOrInitPlatformService().open(new URL(url));
+					}
+				} catch (final Exception exception) {
 					updaterFrame.log.error(exception);
-					UpdaterUserInterface.get().error(
-						"Could not open " + url + ": " + exception.getMessage());
+					UpdaterUserInterface.get().error("Could not open " + url + ": " + exception.getMessage());
 				}
 			}
 		});
@@ -113,6 +119,15 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 
 		reset();
 		getDocument().addUndoableEditListener(this);
+	}
+
+	private PlatformService getOrInitPlatformService() {
+		if (platformService == null) {
+			final Context context = new Context(PlatformService.class);
+			platformService = context.getService(PlatformService.class);
+			context.close();
+		}
+		return platformService;
 	}
 
 	public void reset() {
@@ -193,7 +208,7 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 		if (!updaterFrame.files.hasUploadableSites() &&
 			(description == null || description.trim().equals(""))) return;
 		blankLine();
-		bold("Description " + (file.descriptionFromPOM ? " (from pom.xml) " : "") + ":\n");
+		bold("Description" + (file.descriptionFromPOM ? " (from pom.xml):" : ":") + ":\n");
 		final int offset = getCaretPosition();
 		normal(description);
 		if (!file.descriptionFromPOM)
@@ -260,13 +275,14 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 	public void showFileDetails(final FileObject file) {
 		setCaretPosition(getDocument().getLength());
 		if (!getText().equals("")) blankLine();
+		bold("File:\n");
 		title(file.getLocalFilename(true));
 		if (file.isUpdateable()) italic("\n(Update available)");
-		else if (file.isLocalOnly()) italic("(Local-only)");
+		else if (file.isLocalOnly()) italic(" (Local-only)");
 		if (file.isLocallyModified()) {
 			blankLine();
-			bold("Warning: ");
-			italic("This file was locally modified.");
+			bold("Warning:\n");
+			italic("This file was locally modified");
 		}
 		blankLine();
 		if (file.current == null) bold("This file is no longer needed");
@@ -275,7 +291,7 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 			normal(prettyPrintTimestamp(file.current.timestamp));
 		}
 		description(file.getDescription(), file);
-		list("Author", false, file.getAuthors(), ", ", file);
+		list("Author:", false, file.getAuthors(), ", ", file);
 		if (updaterFrame.files.hasUploadableSites()) list("Platform", false, file
 			.getPlatforms(), ", ", file);
 		list("Category", false, file.getCategories(), ", ", file);
