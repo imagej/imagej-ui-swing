@@ -208,7 +208,7 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 		if (!updaterFrame.files.hasUploadableSites() &&
 			(description == null || description.trim().equals(""))) return;
 		blankLine();
-		bold("Description" + (file.descriptionFromPOM ? " (from pom.xml):" : ":") + ":\n");
+		bold("Description" + (file.descriptionFromPOM ? " (from pom.xml)" : "") + ":\n");
 		final int offset = getCaretPosition();
 		normal(description);
 		if (!file.descriptionFromPOM)
@@ -291,7 +291,7 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 			normal(prettyPrintTimestamp(file.current.timestamp));
 		}
 		description(file.getDescription(), file);
-		list("Author:", false, file.getAuthors(), ", ", file);
+		list("Author", false, file.getAuthors(), ", ", file);
 		if (updaterFrame.files.hasUploadableSites()) list("Platform", false, file
 			.getPlatforms(), ", ", file);
 		list("Category", false, file.getCategories(), ", ", file);

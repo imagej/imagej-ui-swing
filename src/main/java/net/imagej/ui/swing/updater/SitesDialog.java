@@ -35,6 +35,7 @@ import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -47,14 +48,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
 
 import javax.swing.AbstractAction;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -101,6 +105,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 	protected JScrollPane scrollpane;
 	protected JButton addNewSite, remove, close, checkForUpdates;
 	private JTextField searchTerm;
+	private boolean searchDescription, searchURL;
 	private TableRowSorter<DataModel> sorter;
 
 	public SitesDialog(final UpdaterFrame owner, final FilesCollection files)
@@ -275,6 +280,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 		// row filtering
 		sorter = new TableRowSorter<>(tableModel);
 		table.setRowSorter(sorter);
+		setSearchDescription(true);
 		searchTerm = new JTextField();
 		searchTerm.getDocument().addDocumentListener(new DocumentListener() {
 
@@ -295,7 +301,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 		});
 
 		// Add all components to dialog
-		final JPanel searchPanel = SwingTools.labelComponentRigid("Search:", searchTerm);
+		final JPanel labeledSearchField = SwingTools.labelComponentRigid(" Search:", searchTerm);
 		scrollpane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		final JPanel buttons = new JPanel();
@@ -305,7 +311,12 @@ public class SitesDialog extends JDialog implements ActionListener {
 		c.weightx = 1;
 		c.fill = GridBagConstraints.BOTH;
 		c.weighty = 0;
-		contentPane.add(searchPanel, c);
+		contentPane.add(labeledSearchField, c);
+		c.gridx++;
+		c.weightx = 0;
+		contentPane.add(searchOptionsButton(), c);
+		c.gridwidth = 2;
+		c.gridx = 0;
 		c.gridy++;
 		c.weighty = 1;
 		contentPane.add(scrollpane, c);
@@ -341,11 +352,68 @@ public class SitesDialog extends JDialog implements ActionListener {
 		setLocationRelativeTo(owner);
 	}
 
+	private JButton searchOptionsButton() {
+		final JPopupMenu popup = new JPopupMenu();
+		final JCheckBoxMenuItem jcbmi0 = new JCheckBoxMenuItem("Search Site Names", true);
+		jcbmi0.setToolTipText("Site names are always searched");
+		jcbmi0.setEnabled(false); // dummy checkbox: Site names are always searched
+		popup.add(jcbmi0);
+		final JCheckBoxMenuItem jcbmi1 = new JCheckBoxMenuItem("Search Site URLs", isSearchURL());
+		jcbmi1.addItemListener(e -> {
+			setSearchURL(jcbmi1.isSelected());
+			filterTable();
+		});
+		popup.add(jcbmi1);
+		final JCheckBoxMenuItem jcbmi2 = new JCheckBoxMenuItem("Search Site Descriptions", isSearchDescription());
+		jcbmi2.addItemListener(e -> {
+			setSearchDescription(jcbmi2.isSelected());
+			filterTable();
+		});
+		popup.add(jcbmi2);
+		final JButton options = optionsButton(searchTerm);
+		options.addActionListener(e -> popup.show(options, options.getWidth() / 2, options.getHeight() / 2));
+		return options;
+	}
+
+	private JButton optionsButton(final JComponent main) {
+		final JButton b = new JButton("⋮");
+		b.setToolTipText("Search options");
+		final float factor = .5f;
+		final Insets insets = b.getMargin();
+		if (insets != null)
+			b.setMargin(new Insets((int) (insets.top * factor), (int) (insets.left * factor),
+					(int) (insets.bottom * factor), (int) (insets.right * factor)));
+		b.setPreferredSize(new Dimension(b.getPreferredSize().width, (int) main.getPreferredSize().getHeight()));
+		b.setMaximumSize(new Dimension(b.getMaximumSize().width, (int) main.getPreferredSize().getHeight()));
+		return b;
+	}
+
+	private boolean isSearchDescription() {
+		return searchDescription;
+	}
+
+	private void setSearchDescription(final boolean searchDescription) {
+		this.searchDescription = searchDescription;
+	}
+
+	private boolean isSearchURL() {
+		return searchURL;
+	}
+
+	private void setSearchURL(final boolean searchURL) {
+		this.searchURL = searchURL;
+	}
+
 	private void filterTable() {
+		final List<Integer> cols = new ArrayList<>();
+		cols.add(1); // Name column
+		if (isSearchURL()) cols.add(2); // URL column
+		if (isSearchDescription()) cols.add(5); // Description column
+		final String query = Pattern.quote(searchTerm.getText());
 		SwingTools.invokeOnEDT(() -> {
 			try {
-				// case insensitive search for columns: Name (1), URL(2), and Description (5)
-				sorter.setRowFilter(RowFilter.regexFilter("(?i)" + searchTerm.getText(), 1, 2, 5));
+				sorter.setRowFilter(RowFilter.regexFilter("(?i)" + query,
+						cols.stream().mapToInt(i -> i).toArray()));
 			} catch (final java.util.regex.PatternSyntaxException e) {
 				// do nothing if expression doesn't parse
 				return;
