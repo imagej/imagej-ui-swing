@@ -125,7 +125,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 			@Override
 			public void valueChanged(final ListSelectionEvent e) {
 				super.valueChanged(e);
-				remove.setEnabled(getSelectedRow() > 0);
+				remove.setEnabled(!getSelectionModel().isSelectionEmpty());
 			}
 
 			@Override
@@ -438,16 +438,26 @@ public class SitesDialog extends JDialog implements ActionListener {
 			+ "</p></html>";
 	}
 
+	/*
+	 * returns the name of the update site associated with the _viewed_ row by
+	 * mapping its index to the table model
+	 */
 	protected String getUpdateSiteName(int row) {
-		return sites.get(row).getName();
+		return getUpdateSite(row).getName();
 	}
 
+	/*
+	 * returns the update site associated with the _viewed_ row by mapping its index
+	 * to the table model
+	 */
 	protected UpdateSite getUpdateSite(int row) {
-		return sites.get(row);
+		// table model does not change but the table _display_ does change during
+		// filtering so we need to look up the proper index of displayed rows
+		return sites.get(table.convertRowIndexToModel(row));
 	}
 
 	private void addNew() {
-		searchTerm.setText(""); // Reset table or a row index out of range is triggered
+		searchTerm.setText(""); // Reset filtering so that displayed rows match row model
 		table.requestFocusInWindow();
 		add(new UpdateSite(makeUniqueSiteName("New"), "", "", "", null, null, 0l));
 
@@ -526,6 +536,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 				e.printStackTrace();
 			}
 			if(changesApproved.get()) {
+				searchTerm.setText(""); // Reset filtering
 				AvailableSites.applySitesURLUpdates(files, changes);
 			}
 			tableModel.rowsChanged(0, tableModel.getRowCount()-1);
@@ -593,8 +604,8 @@ public class SitesDialog extends JDialog implements ActionListener {
 
 		@Override
 		public Object getValueAt(final int row, final int col) {
-			if (col == 1) return getUpdateSiteName(row);
-			final UpdateSite site = getUpdateSite(row);
+			if (col == 1) return sites.get(row).getName();
+			final UpdateSite site = sites.get(row);
 			if (col == 0) return Boolean.valueOf(site.isActive());
 			if (col == 2) return site.getURL();
 			if (col == 3) return site.getHost();
