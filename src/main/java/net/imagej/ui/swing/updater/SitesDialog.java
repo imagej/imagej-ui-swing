@@ -326,7 +326,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 
 		// Adjust table size, column widths and scrollbars
 		tableModel.setColumnWidths();
-		scrollpane.setPreferredSize(new Dimension(tableModel.tableWidth, 500));
+		scrollpane.setPreferredSize(new Dimension(tableModel.tableWidth, 12 * table.getRowHeight()));
 		contentPane.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(final ComponentEvent e) {
@@ -343,7 +343,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 		remove = SwingTools.button("Remove", "Remove highlighted site from list", this, buttons);
 		remove.setEnabled(false);
 		checkForUpdates = SwingTools.button("Validate URLs", "Check whether update sites are using outdated URLs", this, buttons);
-		close = SwingTools.button("Apply and Close", "Confirm subscriptions and dismiss [ESC]", this, buttons);
+		close = SwingTools.button("Apply and Close", "Confirm activations and dismiss [ESC]", this, buttons);
 
 		getRootPane().setDefaultButton(close);
 		escapeCancels(this);
@@ -565,7 +565,6 @@ public class SitesDialog extends JDialog implements ActionListener {
 	protected class DataModel extends DefaultTableModel {
 
 		protected int tableWidth;
-		protected int[] minWidths = { 20, 380, 280, 125, 125, 500 };
 		protected String[] headers = { "Active", "Name", "URL", "Host", "Directory on Host", "Description" };
 		private String[] canonicalRows = { "Active", "Fuzzy logic and artificial neural",
 				"sites.imagej.net/Fiji-Legacy/", "webdav:User", "/path", " Large description with maintainer name" };
@@ -574,10 +573,9 @@ public class SitesDialog extends JDialog implements ActionListener {
 			table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); // otherwise horizontal scrollbar is not displayed
 			final TableColumnModel columnModel = table.getColumnModel();
 			final FontMetrics fm = table.getFontMetrics(table.getFont());
-			for (int i = 0; i < tableModel.minWidths.length && i < getColumnCount(); i++) {
+			for (int i = 0; i < tableModel.headers.length && i < getColumnCount(); i++) {
 				final TableColumn column = columnModel.getColumn(i);
 				column.setPreferredWidth(fm.stringWidth(canonicalRows[i]));
-				column.setMinWidth(tableModel.minWidths[i]);
 				tableWidth += column.getPreferredWidth();
 			}
 		}
