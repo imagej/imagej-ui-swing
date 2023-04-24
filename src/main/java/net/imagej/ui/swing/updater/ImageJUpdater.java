@@ -124,12 +124,7 @@ public class ImageJUpdater implements UpdaterUI {
 		UpdaterUtil.useSystemProxies();
 		Authenticator.setDefault(new SwingAuthenticator());
 
-		SwingTools.invokeOnEDT(new Runnable() {
-			@Override
-			public void run() {
-				main = new UpdaterFrame(log, uploaderService, files);
-			}
-		});
+		SwingTools.invokeOnEDT(() -> main = new UpdaterFrame(log, uploaderService, files));
 
 		main.setEasyMode(true);
 		Progress progress = main.getProgress("Starting up...");
@@ -148,7 +143,7 @@ public class ImageJUpdater implements UpdaterUI {
 			if (!warnings.equals("")) main.warn(warnings);
 			final List<Conflict> conflicts = files.getConflicts();
 			if (conflicts != null && conflicts.size() > 0 &&
-					!new ConflictDialog(main, "Conflicting versions") {
+					!new ConflictDialog(main, "Conflicting Versions") {
 						private static final long serialVersionUID = 1L;
 
 						@Override

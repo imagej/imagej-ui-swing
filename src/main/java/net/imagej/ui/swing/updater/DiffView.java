@@ -73,8 +73,9 @@ public class DiffView extends JScrollPane {
 	private static final long serialVersionUID = 1L;
 
 	protected static final String ACTION_ATTRIBUTE = "ACTION";
-	protected static final String FONT = "Courier";
-	protected static final int FONT_SIZE = 12, BIG_FONT_SIZE = 15;
+	protected static final String FONT = java.awt.Font.MONOSPACED;
+	protected static final int FONT_SIZE = SwingTools.defaultFontSize();
+	protected static final int BIG_FONT_SIZE = (int) 1.25 * FONT_SIZE;
 
 	protected JPanel panel;
 	protected JTextPane textPane;
@@ -94,10 +95,10 @@ public class DiffView extends JScrollPane {
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		getViewport().setView(panel);
 
-		normal = getStyle(Color.black, false, false, FONT, FONT_SIZE);
+		normal = getStyle(null, false, false, FONT, FONT_SIZE);
 		bigBold = getStyle(Color.blue, false, true, FONT, BIG_FONT_SIZE);
-		bold = getStyle(Color.black, false, true, FONT, FONT_SIZE);
-		italic = getStyle(Color.black, true, false, FONT, FONT_SIZE);
+		bold = getStyle(null, false, true, FONT, FONT_SIZE);
+		italic = getStyle(null, true, false, FONT, FONT_SIZE);
 		red = getStyle(Color.red, false, false, FONT, FONT_SIZE);
 		green = getStyle(new Color(0, 128, 32), false, false, FONT, FONT_SIZE);
 
@@ -144,7 +145,7 @@ public class DiffView extends JScrollPane {
 	public static SimpleAttributeSet getStyle(Color color, boolean italic,
 			boolean bold, String fontName, int fontSize) {
 		SimpleAttributeSet style = new SimpleAttributeSet();
-		StyleConstants.setForeground(style, color);
+		if (color != null) StyleConstants.setForeground(style, color);
 		StyleConstants.setItalic(style, italic);
 		StyleConstants.setBold(style, bold);
 		StyleConstants.setFontFamily(style, fontName);

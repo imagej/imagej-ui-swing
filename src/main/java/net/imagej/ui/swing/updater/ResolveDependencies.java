@@ -55,7 +55,7 @@ public class ResolveDependencies extends ConflictDialog {
 	public ResolveDependencies(final UpdaterFrame owner,
 		final FilesCollection files, final boolean forUpload)
 	{
-		super(owner, "Resolve dependencies");
+		super(owner, "Resolve Dependencies");
 
 		this.forUpload = forUpload;
 		conflicts = new Conflicts(files);

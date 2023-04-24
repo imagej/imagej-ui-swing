@@ -126,17 +126,14 @@ public class DiffFile extends JFrame {
 	 *            the mode to diff to
 	 */
 	protected void show(final Mode mode) {
-		show(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					setTitle(title + " (" + mode + ")");
-					diff.showDiff(filename, remote, local, mode);
-				} catch (MalformedURLException e) {
-					log.error(e);
-				} catch (IOException e) {
-					log.error(e);
-				}
+		show(() -> {
+			try {
+				setTitle(title + " (" + mode + ")");
+				diff.showDiff(filename, remote, local, mode);
+			} catch (MalformedURLException e) {
+				log.error(e);
+			} catch (IOException e) {
+				log.error(e);
 			}
 		});
 	}
@@ -265,22 +262,14 @@ public class DiffFile extends JFrame {
 
 		if (diffView.getDocument().getLength() > 0)
 			diffView.normal(" ");
-		diffView.link("Git Log", new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				show(new Runnable() {
-					@Override
-					public void run() {
-						setTitle(title + " (Git Log)");
-						final PrintStream out = diffView.getPrintStream();
-						out.println("\n");
-						if (warning != null) diffView.warn(warning + "\n\n");
-						final String git = System.getProperty("imagej.updater.git.command", "git");
-						ProcessUtils.exec(gitWorkingDirectory,  out, out, git, "log", "-M", "-p", since, commitRange, "--", relativePath);
-					}
-				});
-			}
-		});
+		diffView.link("Git Log", e -> show(() -> {
+			setTitle(title + " (Git Log)");
+			final PrintStream out = diffView.getPrintStream();
+			out.println("\n");
+			if (warning != null) diffView.warn(warning + "\n\n");
+			final String git = System.getProperty("imagej.updater.git.command", "git");
+			ProcessUtils.exec(gitWorkingDirectory,  out, out, git, "log", "-M", "-p", since, commitRange, "--", relativePath);
+		}));
 	}
 
 	/**

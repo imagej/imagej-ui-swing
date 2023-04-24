@@ -36,6 +36,7 @@ import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -52,8 +53,13 @@ import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.Position;
 import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
+
+import org.scijava.Context;
+import org.scijava.platform.PlatformService;
 
 import net.imagej.updater.FileObject;
 import net.imagej.updater.FilesCollection;
@@ -67,19 +73,20 @@ import net.imagej.updater.util.UpdaterUserInterface;
 @SuppressWarnings("serial")
 public class FileDetails extends JTextPane implements UndoableEditListener {
 
-	private final static AttributeSet bold, italic, normal, title;
-	private final static Cursor hand, defaultCursor;
-	private final static String LINK_ATTRIBUTE = "URL";
+	private static final AttributeSet bold, italic, normal, title;
+	private static final Cursor hand, defaultCursor;
+	private static final String LINK_ATTRIBUTE = "URL";
+	private PlatformService platformService;
 	SortedMap<Position, EditableRegion> editables;
 	Position dummySpace;
 	UpdaterFrame updaterFrame;
 
 	static {
-		italic = getStyle(Color.black, true, false, "Verdana", 12);
-		bold = getStyle(Color.black, false, true, "Verdana", 12);
-		normal = getStyle(Color.black, false, false, "Verdana", 12);
-		title = getStyle(Color.black, false, false, "Impact", 18);
-
+		final int size = SwingTools.defaultFontSize();
+		italic = getStyle(null, true, false, java.awt.Font.SANS_SERIF, size);
+		bold = getStyle(null, false, true, java.awt.Font.SANS_SERIF, size);
+		normal = getStyle(null, false, false, java.awt.Font.SANS_SERIF, size);
+		title = getStyle(null, false, false, java.awt.Font.SANS_SERIF, (int)1.5 * size);
 		hand = new Cursor(Cursor.HAND_CURSOR);
 		defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
 	}
@@ -92,12 +99,13 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 			public void mouseClicked(final MouseEvent e) {
 				final String url = getLinkAt(e.getPoint());
 				try {
-					if (url != null) UpdaterUserInterface.get().openURL(url);
-				}
-				catch (final Exception exception) {
+					if (url != null) {
+						// UpdaterUserInterface#openURL() has no implementation!?
+						getOrInitPlatformService().open(new URL(url));
+					}
+				} catch (final Exception exception) {
 					updaterFrame.log.error(exception);
-					UpdaterUserInterface.get().error(
-						"Could not open " + url + ": " + exception.getMessage());
+					UpdaterUserInterface.get().error("Could not open " + url + ": " + exception.getMessage());
 				}
 			}
 		});
@@ -113,17 +121,19 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 		getDocument().addUndoableEditListener(this);
 	}
 
+	private PlatformService getOrInitPlatformService() {
+		if (platformService == null) {
+			final Context context = new Context(PlatformService.class);
+			platformService = context.getService(PlatformService.class);
+			context.close();
+		}
+		return platformService;
+	}
+
 	public void reset() {
 		setEditable(false);
 		setText("");
-		final Comparator<Position> comparator = new Comparator<Position>() {
-
-			@Override
-			public int compare(final Position p1, final Position p2) {
-				return p1.getOffset() - p2.getOffset();
-			}
-		};
-
+		final Comparator<Position> comparator = (p1, p2) -> p1.getOffset() - p2.getOffset();
 		editables = new TreeMap<>(comparator);
 		dummySpace = null;
 	}
@@ -144,10 +154,8 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 	}
 
 	private AttributeSet getLinkAttribute(final String url) {
-		// TODO: Verdana? Java is platform-independent, if this introduces a
-		// platform dependency, it needs to be thrown out, quickly!
-		final SimpleAttributeSet style =
-			getStyle(Color.blue, false, false, "Verdana", 12);
+		final Style style = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
+		StyleConstants.setForeground(style, Color.BLUE);
 		style.addAttribute(LINK_ATTRIBUTE, url);
 		return style;
 	}
@@ -157,10 +165,10 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 		final int fontSize)
 	{
 		final SimpleAttributeSet style = new SimpleAttributeSet();
-		StyleConstants.setForeground(style, color);
+		if (color != null) StyleConstants.setForeground(style, color);
 		StyleConstants.setItalic(style, italic);
 		StyleConstants.setBold(style, bold);
-		StyleConstants.setFontFamily(style, fontName);
+		if (fontName != null) StyleConstants.setFontFamily(style, fontName);
 		StyleConstants.setFontSize(style, fontSize);
 		return style;
 	}
@@ -200,7 +208,7 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 		if (!updaterFrame.files.hasUploadableSites() &&
 			(description == null || description.trim().equals(""))) return;
 		blankLine();
-		bold("Description " + (file.descriptionFromPOM ? " (from pom.xml) " : "") + ":\n");
+		bold("Description" + (file.descriptionFromPOM ? " (from pom.xml)" : "") + ":\n");
 		final int offset = getCaretPosition();
 		normal(description);
 		if (!file.descriptionFromPOM)
@@ -267,13 +275,14 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 	public void showFileDetails(final FileObject file) {
 		setCaretPosition(getDocument().getLength());
 		if (!getText().equals("")) blankLine();
+		bold("File:\n");
 		title(file.getLocalFilename(true));
 		if (file.isUpdateable()) italic("\n(Update available)");
-		else if (file.isLocalOnly()) italic("(Local-only)");
+		else if (file.isLocalOnly()) italic(" (Local-only)");
 		if (file.isLocallyModified()) {
 			blankLine();
-			bold("Warning: ");
-			italic("This file was locally modified.");
+			bold("Warning:\n");
+			italic("This file was locally modified");
 		}
 		blankLine();
 		if (file.current == null) bold("This file is no longer needed");

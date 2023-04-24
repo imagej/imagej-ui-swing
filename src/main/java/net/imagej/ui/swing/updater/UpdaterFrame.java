@@ -58,11 +58,14 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.RowSorter.SortKey;
 import javax.swing.SortOrder;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
@@ -90,7 +93,6 @@ import net.imagej.updater.util.UpdaterUtil;
 
 import org.scijava.Context;
 import org.scijava.log.LogService;
-import org.scijava.util.ProcessUtils;
 
 /**
  * TODO
@@ -114,25 +116,32 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 	protected FileTable table;
 	protected JLabel fileSummary;
 	protected JPanel summaryPanel;
-	protected JPanel rightPanel;
 	protected FileDetails fileDetails;
-	protected JPanel bottomPanel, bottomPanel2;
-	protected JButton applyOrUpload, cancel, easy, updateSites;
+	protected JPanel bottomPanel, easyBottomPanel;
+	protected JButton applyOrUpload, cancel, easy, easy2, updateSites;
 	protected boolean easyMode;
 
 	// For developers
 	protected JButton showChanges, rebuildButton;
 	protected boolean canUpload;
+	private CollapsibleLeftRightSplitPane splitPane;
 
 	public UpdaterFrame(final LogService log,
 		final UploaderService uploaderService, final FilesCollection files)
 	{
 		super("ImageJ Updater");
-		setPreferredSize(new Dimension(780, 560));
+		//setPreferredSize(new Dimension((easyMode) ? 700 : 900, 560));
 
 		this.log = log;
 		this.uploaderService = uploaderService;
 		this.files = files;
+
+		// make sure that sezpoz finds the classes when triggered from the EDT
+		final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+		SwingTools.invokeOnEDT(() -> {
+			if (contextClassLoader != null)
+				Thread.currentThread().setContextClassLoader(contextClassLoader);
+		});
 
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter() {
@@ -145,14 +154,9 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 
 		// ======== Start: LEFT PANEL ========
 		final JPanel leftPanel = new JPanel();
-		final GridBagLayout gb = new GridBagLayout();
+		GridBagLayout gb = new GridBagLayout();
 		leftPanel.setLayout(gb);
-		final GridBagConstraints c = new GridBagConstraints(0, 0, // x, y
-			9, 1, // rows, cols
-			0, 0, // weightx, weighty
-			GridBagConstraints.NORTHWEST, // anchor
-			GridBagConstraints.HORIZONTAL, // fill
-			new Insets(0, 0, 0, 0), 0, 0); // ipadx, ipady
+		GridBagConstraints c = Utils.gbConstraints();
 
 		searchTerm = new JTextField();
 		searchTerm.getDocument().addDocumentListener(new DocumentListener() {
@@ -176,19 +180,13 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		gb.setConstraints(searchPanel, c);
 		leftPanel.add(searchPanel);
 
-		Component box = Box.createRigidArea(new Dimension(0, 10));
+		Component box = Utils.vSpace();
 		c.gridy = 1;
 		gb.setConstraints(box, c);
 		leftPanel.add(box);
 
 		viewOptions = new ViewOptions();
-		viewOptions.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				updateFilesTable();
-			}
-		});
+		viewOptions.addActionListener(e -> updateFilesTable());
 
 		viewOptionsPanel =
 			SwingTools.labelComponentRigid("View Options:", viewOptions);
@@ -196,7 +194,7 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		gb.setConstraints(viewOptionsPanel, c);
 		leftPanel.add(viewOptionsPanel);
 
-		box = Box.createRigidArea(new Dimension(0, 10));
+		box = Utils.vSpace();
 		c.gridy = 3;
 		gb.setConstraints(box, c);
 		leftPanel.add(box);
@@ -209,7 +207,7 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		gb.setConstraints(chooseLabel, c);
 		leftPanel.add(chooseLabel);
 
-		box = Box.createRigidArea(new Dimension(0, 5));
+		box = Utils.vSpace();
 		c.gridy = 5;
 		gb.setConstraints(box, c);
 		leftPanel.add(box);
@@ -217,6 +215,7 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		// Label text for file summaries
 		fileSummary = new JLabel();
 		summaryPanel = SwingTools.horizontalPanel();
+		summaryPanel.add(Utils.hSpace());
 		summaryPanel.add(fileSummary);
 		summaryPanel.add(Box.createHorizontalGlue());
 
@@ -233,150 +232,145 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		gb.setConstraints(fileListScrollpane, c);
 		leftPanel.add(fileListScrollpane);
 
-		box = Box.createRigidArea(new Dimension(0, 5));
+		box = Utils.vSpace();
 		c.gridy = 7;
 		c.weightx = 0;
 		c.weighty = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		gb.setConstraints(box, c);
 		leftPanel.add(box);
-
 		// ======== End: LEFT PANEL ========
 
 		// ======== Start: RIGHT PANEL ========
-		rightPanel = SwingTools.verticalPanel();
+		final JPanel rightPanel = new JPanel();
+		gb = new GridBagLayout();
+		rightPanel.setLayout(gb);
+		c = Utils.gbConstraints();
 
-		rightPanel.add(Box.createVerticalGlue());
+		updateSites = manageButton();
+		c.fill = GridBagConstraints.NONE;
+		c.anchor = GridBagConstraints.NORTHEAST;
+		gb.setConstraints(updateSites, c);
+		rightPanel.add(updateSites);
+
+		box = Utils.vSpace();
+		c.gridy = 1;
+		gb.setConstraints(box, c);
+		rightPanel.add(box);
+
+		easy = easyButton();
+		Utils.equalizeDimensions(easy, updateSites);
+		c.gridy = 2;
+		gb.setConstraints(easy, c);
+		rightPanel.add(easy);
+
+		box = Utils.vSpace();
+		c.gridy = 3;
+		gb.setConstraints(box, c);
+		rightPanel.add(box);
+
+		final JPanel dummyLabel = SwingTools.label("", null);
+		c.gridy = 4;
+		gb.setConstraints(dummyLabel, c);
+		rightPanel.add(dummyLabel);
+
+		box = Utils.vSpace();
+		c.gridy = 5;
+		gb.setConstraints(box, c);
+		rightPanel.add(box);
 
 		fileDetails = new FileDetails(this);
-		SwingTools.tab(fileDetails, "Details", "Individual file information", 350,
-			315, rightPanel);
-		// TODO: put this into SwingTools, too
-		rightPanel.add(Box.createRigidArea(new Dimension(0, 25)));
+		fileDetails.setBackground(table.getBackground());
+		JTabbedPane tabbedPane = new JTabbedPane();
+		tabbedPane.addTab("Details", null, SwingTools.scrollPane(fileDetails, -1, -1, null),
+				"Individual file information");
+
+		c.gridy = 6;
+		c.weightx = 1;
+		c.weighty = 1;
+		c.anchor = GridBagConstraints.NORTHWEST;
+		c.fill = GridBagConstraints.BOTH;
+		gb.setConstraints(tabbedPane, c);
+		rightPanel.add(tabbedPane);
+
+		box = Utils.vSpace();
+		c.gridy = 7;
+		c.weightx = 0;
+		c.weighty = 0;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		gb.setConstraints(box, c);
+		rightPanel.add(box);
+//		rightPanel.setMaximumSize(new Dimension((int) (leftPanel.getPreferredSize().getWidth() * .25),
+//				rightPanel.getMaximumSize().height));
 		// ======== End: RIGHT PANEL ========
 
 		// ======== Start: TOP PANEL (LEFT + RIGHT) ========
+		splitPane = new CollapsibleLeftRightSplitPane(leftPanel, rightPanel);
 		final JPanel topPanel = SwingTools.horizontalPanel();
-		topPanel.add(leftPanel);
-		topPanel.add(Box.createRigidArea(new Dimension(15, 0)));
-		topPanel.add(rightPanel);
-		topPanel.setBorder(BorderFactory.createEmptyBorder(20, 15, 5, 15));
+		topPanel.add(splitPane);
+		topPanel.setBorder(Utils.defaultBorder());
 		// ======== End: TOP PANEL (LEFT + RIGHT) ========
 
-		bottomPanel2 = SwingTools.horizontalPanel();
+		easyBottomPanel = SwingTools.horizontalPanel();
+		easyBottomPanel.add(manageButton());
+		easyBottomPanel.add(Utils.hSpace());
+		easyBottomPanel.add(easy2 = easyButton());
+		easyBottomPanel.add(Utils.hSpace());
+		easyBottomPanel.setVisible(easyMode);
+
 		bottomPanel = SwingTools.horizontalPanel();
-		bottomPanel.setBorder(BorderFactory.createEmptyBorder(5, 15, 15, 15));
+		bottomPanel.setBorder(Utils.defaultBorder());
+		bottomPanel.add(easyBottomPanel);
 		bottomPanel.add(new FileActionButton(new KeepAsIs()));
-		bottomPanel.add(Box.createRigidArea(new Dimension(15, 0)));
+		bottomPanel.add(Utils.hSpace());
 		bottomPanel.add(new FileActionButton(new InstallOrUpdate()));
-		bottomPanel.add(Box.createRigidArea(new Dimension(15, 0)));
+		bottomPanel.add(Utils.hSpace());
 		bottomPanel.add(new FileActionButton(new Uninstall()));
+		bottomPanel.add(Utils.hSpace());
+		showChanges =
+				SwingTools.button("Diff",
+					"Show the differences to the uploaded version", e -> new Thread() {
 
+						@Override
+						public void run() {
+							for (final FileObject file : table.getSelectedFiles()) try {
+								final DiffFile diff = new DiffFile(files, file, Mode.LIST_FILES);
+								diff.setLocationRelativeTo(UpdaterFrame.this);
+								diff.setVisible(true);
+							} catch (MalformedURLException e) {
+								files.log.error(e);
+								UpdaterUserInterface.get().error("There was a problem obtaining the remote version of " + file.getLocalFilename(true));
+							}
+						}
+					}.start(), bottomPanel);
 		bottomPanel.add(Box.createHorizontalGlue());
-
-		// make sure that sezpoz finds the classes when triggered from the EDT
-		final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-		SwingTools.invokeOnEDT(new Runnable() {
-			@Override
-			public void run() {
-				if (contextClassLoader != null)
-					Thread.currentThread().setContextClassLoader(contextClassLoader);
-			}
-		});
-
 		// Button to start actions
 		applyOrUpload =
-			SwingTools.button("Apply changes", "Start installing/uninstalling/uploading files",
-				new ActionListener() {
-
-					@Override
-					public void actionPerformed(final ActionEvent e) {
-						if (files.hasUploadOrRemove()) {
-							new Thread() {
-
-								@Override
-								public void run() {
-									try {
-										upload();
-									}
-									catch (final InstantiationException e) {
-										log.error(e);
-										error("Could not upload (possibly unknown protocol)");
-									}
-								}
-							}.start();
-						}
-						else if (files.hasChanges()) {
-							applyChanges();
-						}
-					}
-				}, bottomPanel);
-		enableApplyOrUpload();
-
-		// Manage update sites
-		updateSites =
-			SwingTools.button("Manage update sites",
-				"Manage multiple update sites for updating and uploading",
-				new ActionListener() {
-
-					@Override
-					public void actionPerformed(final ActionEvent e) {
-						new SitesDialog(UpdaterFrame.this, UpdaterFrame.this.files).setVisible(true);
-					}
-				}, bottomPanel2);
-
-		// TODO: unify upload & apply changes (probably apply changes first, then
-		// upload)
-		// includes button to upload to server if is a Developer using
-		bottomPanel2.add(Box.createRigidArea(new Dimension(15, 0)));
-
-		bottomPanel2.add(Box.createRigidArea(new Dimension(15, 0)));
-		showChanges =
-			SwingTools.button("Show changes",
-				"Show the differences to the uploaded version", new ActionListener()
-				{
-
-					@Override
-					public void actionPerformed(final ActionEvent e) {
+			SwingTools.button("Apply Changes", "Start installing/uninstalling/uploading files",
+				e -> {
+					if (files.hasUploadOrRemove()) {
 						new Thread() {
 
 							@Override
 							public void run() {
-								for (final FileObject file : table.getSelectedFiles()) try {
-									final DiffFile diff = new DiffFile(files, file, Mode.LIST_FILES);
-									diff.setLocationRelativeTo(UpdaterFrame.this);
-									diff.setVisible(true);
-								} catch (MalformedURLException e) {
-									files.log.error(e);
-									UpdaterUserInterface.get().error("There was a problem obtaining the remote version of " + file.getLocalFilename(true));
+								try {
+									upload();
+								}
+								catch (final InstantiationException e) {
+									log.error(e);
+									error("Could not upload (possibly unknown protocol)");
 								}
 							}
 						}.start();
 					}
-				}, bottomPanel2);
-
-		bottomPanel2.add(Box.createHorizontalGlue());
-
-		bottomPanel.add(Box.createRigidArea(new Dimension(15, 0)));
-		easy =
-			SwingTools.button("Toggle easy mode",
-				"Toggle between easy and verbose mode", new ActionListener() {
-
-					@Override
-					public void actionPerformed(final ActionEvent e) {
-						toggleEasyMode();
+					else if (files.hasChanges()) {
+						applyChanges();
 					}
 				}, bottomPanel);
+		enableApplyOrUpload();
 
-		bottomPanel.add(Box.createRigidArea(new Dimension(15, 0)));
-		cancel =
-			SwingTools.button("Close", "Exit Update Manager", new ActionListener() {
-
-				@Override
-				public void actionPerformed(final ActionEvent e) {
-					quit();
-				}
-			}, bottomPanel);
+		bottomPanel.add(Utils.hSpace());
+		cancel = SwingTools.button("Close", "Exit Updater [Esc]", e -> quit(), bottomPanel);
 		// ======== End: BOTTOM PANEL ========
 
 		getContentPane().setLayout(
@@ -384,12 +378,9 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		getContentPane().add(topPanel);
 		getContentPane().add(summaryPanel);
 		getContentPane().add(bottomPanel);
-		getContentPane().add(bottomPanel2);
 
 		getRootPane().setDefaultButton(applyOrUpload);
-
 		table.getModel().addTableModelListener(this);
-
 		pack();
 
 		SwingTools.addAccelerator(cancel, (JComponent) getContentPane(), cancel
@@ -400,15 +391,10 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 	public void setVisible(final boolean visible) {
 		if (!SwingUtilities.isEventDispatchThread()) {
 			try {
-				SwingUtilities.invokeAndWait(new Runnable() {
-					@Override
-					public void run() {
-						setVisible(visible);
-					}
-				});
-			} catch (InterruptedException e) {
+				SwingUtilities.invokeAndWait(() -> setVisible(visible));
+			} catch (final InterruptedException e) {
 				// ignore
-			} catch (InvocationTargetException e) {
+			} catch (final InvocationTargetException e) {
 				log.error(e);
 			}
 			return;
@@ -451,8 +437,9 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 	public UploaderService getUploaderService() {
 		if (uploaderService == null) {
 			setClassLoaderIfNecessary();
-			final Context context = new Context(UploaderService.class);
-			uploaderService = context.getService(UploaderService.class);
+			try (Context context = new Context(UploaderService.class)) {
+				uploaderService = context.getService(UploaderService.class);
+			}
 		}
 
 		return uploaderService;
@@ -512,34 +499,28 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 	}
 
 	public void setViewOption(final ViewOptions.Option option) {
-		SwingTools.invokeOnEDT(new Runnable() {
-			@Override
-			public void run() {
-				viewOptions.setSelectedItem(option);
-				updateFilesTable();
-			}
+		SwingTools.invokeOnEDT(() -> {
+			viewOptions.setSelectedItem(option);
+			updateFilesTable();
 		});
 	}
 
 	public void updateFilesTable() {
-		SwingTools.invokeOnEDT(new Runnable() {
-			@Override
-			public void run() {
-				Iterable<FileObject> view = viewOptions.getView(table);
-				final Set<FileObject> selected = new HashSet<>();
-				for (final FileObject file : table.getSelectedFiles())
-					selected.add(file);
-				table.clearSelection();
+		SwingTools.invokeOnEDT(() -> {
+			Iterable<FileObject> view = viewOptions.getView(table);
+			final Set<FileObject> selected = new HashSet<>();
+			for (final FileObject file : table.getSelectedFiles())
+				selected.add(file);
+			table.clearSelection();
 
-				final String search = searchTerm.getText().trim();
-				if (!search.equals("")) view = FilesCollection.filter(search, view);
+			final String search = searchTerm.getText().trim();
+			if (!search.equals("")) view = FilesCollection.filter(search, view);
 
-				// Directly update the table for display
-				table.setFiles(view);
-				for (int i = 0; i < table.getRowCount(); i++)
-					if (selected.contains(table.getFile(i))) table.addRowSelectionInterval(i,
-						i);
-			}
+			// Directly update the table for display
+			table.setFiles(view);
+			for (int i = 0; i < table.getRowCount(); i++)
+				if (selected.contains(table.getFile(i))) table.addRowSelectionInterval(i,
+					i);
 		});
 	}
 
@@ -594,15 +575,14 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		viewOptionsPanel.setVisible(!easyMode);
 		chooseLabel.setVisible(!easyMode);
 		summaryPanel.setVisible(!easyMode);
-		rightPanel.setVisible(!easyMode);
-		if (easyMode) bottomPanel.add(updateSites, 0);
-		else bottomPanel2.add(updateSites, 0);
-
+		splitPane.setRightPaneVisible(!easyMode);
+		easyBottomPanel.setVisible(easyMode);
 		final boolean uploadable = !easyMode && files.hasUploadableSites();
 		if (showChanges != null) showChanges.setVisible(!easyMode);
 		if (rebuildButton != null) rebuildButton.setVisible(uploadable);
 
-		easy.setText(easyMode ? "Advanced mode" : "Easy mode");
+		easy.setText(easyMode ? "Advanced Mode" : "Easy Mode");
+		easy2.setText(easyMode ? "Advanced Mode" : "Easy Mode");
 	}
 
 	public void toggleEasyMode() {
@@ -695,7 +675,7 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		}
 		String text = "";
 		if (install > 0) text +=
-			" install/update: " + install + (implicated > 0 ? "+" + implicated : "") +
+			" Install/update: " + install + (implicated > 0 ? "+" + implicated : "") +
 				" (" + sizeToString(bytesToDownload) + ")";
 		if (uninstall > 0) text += " uninstall: " + uninstall;
 		if (files.hasUploadableSites() && upload > 0) text +=
@@ -750,10 +730,10 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 	void enableApplyOrUpload() {
 		if (files.hasUploadOrRemove()) {
 			applyOrUpload.setEnabled(true);
-			applyOrUpload.setText("Apply changes (upload)");
+			applyOrUpload.setText("Apply Changes (Upload)");
 		}
 		else {
-			applyOrUpload.setText("Apply changes");
+			applyOrUpload.setText("Apply Changes");
 			applyOrUpload.setEnabled(files.hasChanges());
 		}
 	}
@@ -856,4 +836,90 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 	public void info(final String message) {
 		SwingTools.showMessageBox(this, message, JOptionPane.INFORMATION_MESSAGE);
 	}
+
+	JButton easyButton() {
+		return SwingTools.button("Easy Mode", "Toggle between simplified and advanced view", e -> toggleEasyMode(),
+				null);
+	}
+
+	JButton manageButton() {
+		 return SwingTools.button("Manage Update Sites",
+					"Manage subscriptions of update sites for updating and uploading",
+					e -> new SitesDialog(UpdaterFrame.this, UpdaterFrame.this.files).setVisible(true), null);
+	}
+
+	private class CollapsibleLeftRightSplitPane extends JSplitPane {
+
+		static final double DEF_DIVIDER_LOCATION = .85d;
+		final int defDividerSize;
+		int lastVisibleDividerLocation;
+		private Dimension rightComponentPreferredSize;
+
+		CollapsibleLeftRightSplitPane(final Component leftComponent, final Component rightComponent) {
+			super(HORIZONTAL_SPLIT, leftComponent, rightComponent);
+			defDividerSize = getDividerSize();
+			setDividerLocation(DEF_DIVIDER_LOCATION);
+			lastVisibleDividerLocation = getDividerLocation();
+			setResizeWeight(.90); // right component should minimally change on resize
+		}
+
+		void setResizable(final boolean resizable) {
+			if (resizable) {
+				setDividerSize(defDividerSize);
+			} else {
+				setDividerSize(0);
+			}
+			setEnabled(resizable);
+			//((BasicSplitPaneUI) getUI()).getDivider().setEnabled(resizable);
+		}
+
+		void setRightPaneVisible(final boolean visible) {
+			if (visible) {
+				setDividerLocation(lastVisibleDividerLocation);
+				getRightComponent().setPreferredSize(rightComponentPreferredSize);
+			} else {
+				lastVisibleDividerLocation = getDividerLocation();
+				rightComponentPreferredSize = getRightComponent().getPreferredSize();
+				setDividerLocation(1d);
+				getRightComponent().setPreferredSize(new Dimension(0,0));
+			}
+			getRightComponent().setVisible(visible);
+			setResizable(visible);
+			if (isVisible()) pack();
+		}
+	}
+
+	private static class Utils {
+
+		static Border defaultBorder() {
+			return BorderFactory.createEmptyBorder(5, 10, 10, 5);
+		}
+
+		static Component hSpace() {
+			return Box.createRigidArea(new Dimension(10, 0));
+		}
+
+		static Component vSpace() {
+			return Box.createRigidArea(new Dimension(0, 5));
+		}
+
+		static GridBagConstraints gbConstraints() {
+			return new GridBagConstraints(//
+					0, 0, // x, y
+					9, 1, // rows, cols
+					0, 0, // weightx, weighty
+					GridBagConstraints.NORTHWEST, // anchor
+					GridBagConstraints.HORIZONTAL, // fill
+					new Insets(0, 0, 0, 0), // insets
+					0, 0 // ipadx, ipady
+			);
+		}
+
+		static void equalizeDimensions(final JComponent source, final JComponent target) {
+			source.setMinimumSize(target.getMinimumSize());
+			source.setPreferredSize(target.getPreferredSize());
+			source.setMaximumSize(target.getMaximumSize());
+		}
+	}
+
 }
