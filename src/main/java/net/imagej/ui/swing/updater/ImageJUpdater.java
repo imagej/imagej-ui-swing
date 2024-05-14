@@ -29,37 +29,43 @@
 
 package net.imagej.ui.swing.updater;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
-import java.net.Authenticator;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.net.URLConnection;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
+import java.net.*;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 import net.imagej.ui.swing.updater.ViewOptions.Option;
 import net.imagej.updater.*;
 import net.imagej.updater.Conflicts.Conflict;
 import net.imagej.updater.util.*;
 
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.scijava.app.StatusService;
 import org.scijava.command.CommandService;
+import org.scijava.download.Download;
+import org.scijava.download.DownloadService;
 import org.scijava.event.ContextDisposingEvent;
 import org.scijava.event.EventHandler;
+import org.scijava.io.location.LocationService;
 import org.scijava.log.LogService;
 import org.scijava.log.Logger;
 import org.scijava.plugin.Menu;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.ui.DialogPrompt;
+import org.scijava.ui.UIService;
 import org.scijava.util.AppUtils;
+import org.scijava.util.PropertiesHelper;
 
 import javax.swing.*;
+
+import static org.scijava.ui.DialogPrompt.MessageType.QUESTION_MESSAGE;
+import static org.scijava.ui.DialogPrompt.OptionType.YES_NO_OPTION;
 
 /**
  * The Updater. As a command.
@@ -79,7 +85,16 @@ public class ImageJUpdater implements UpdaterUI {
 	private StatusService statusService;
 
 	@Parameter
+	private DownloadService downloadService;
+
+	@Parameter
+	private LocationService locationService;
+
+	@Parameter
 	private LogService log;
+
+	@Parameter
+	private UIService uiService;
 
 	@Parameter
 	private UploaderService uploaderService;
@@ -105,6 +120,19 @@ public class ImageJUpdater implements UpdaterUI {
 		final File imagejRoot = imagejDirProperty != null ? new File(
 			imagejDirProperty) : AppUtils.getBaseDirectory("ij.dir",
 				FilesCollection.class, "updater");
+
+		// -- Check for HTTPs support in Java --
+		HTTPSUtil.checkHTTPSSupport(log);
+		if (!HTTPSUtil.supportsHTTPS()) {
+			main.warn(
+				"Your Java might be too old to handle updates via HTTPS. This is a security risk!\n" +
+					"Please download a recent version of this software.\n");
+		}
+
+		// check if there is a new Java update available
+		updateJavaIfNecessary(imagejRoot);
+
+		// -- Determine which files are governed by the updater --
 		final FilesCollection files = new FilesCollection(log, imagejRoot);
 
 		UpdaterUserInterface.set(new SwingUserInterface(log, statusService));
@@ -136,12 +164,6 @@ public class ImageJUpdater implements UpdaterUI {
 
 		try {
 			files.tryLoadingCollection();
-			HTTPSUtil.checkHTTPSSupport(log);
-			if (!HTTPSUtil.supportsHTTPS()) {
-				main.warn(
-					"Your Java might be too old to handle updates via HTTPS. This is a security risk!\n" +
-						"Please download a recent version of this software.\n");
-			}
 			refreshUpdateSites(files);
 			main.updateFilesTable();
 			String warnings = files.reloadCollectionAndChecksum(progress);
@@ -263,6 +285,195 @@ public class ImageJUpdater implements UpdaterUI {
 		else if (!files.hasChanges()) main.info("Your ImageJ is up to date!");
 
 		main.updateFilesTable();
+	}
+
+	/**
+	 * Helper method to download and extract the appropriate JDK for this platform
+	 * to the corresponding ImageJ java subdirectory.
+	 */
+	private boolean updateJava(final Map<String, String> jdkVersions,
+		final File imagejRoot)
+	{
+		// Download and unzip the new JDK
+		final String platform = UpdaterUtil.getPlatform();
+		final String jdkUrl = jdkVersions.get(platform);
+		final String jdkName = jdkUrl.substring(jdkUrl.lastIndexOf("/") + 1);
+		final File jdkDir = new File(imagejRoot + File.separator + "java" +
+			File.separator + platform);
+
+		if (!jdkDir.exists() && !jdkDir.mkdirs()) {
+			log.error("Unable to create platform Java directory: " + jdkDir);
+			return false;
+		}
+
+		// Download the JDK
+		final File jdkDlLoc = new File(jdkDir.getAbsolutePath() + File.separator +
+			jdkName);
+		jdkDlLoc.deleteOnExit();
+		try {
+			log.debug("Downloading " + locationService.resolve(jdkUrl) + " to " +
+				locationService.resolve(jdkDlLoc.toURI()));
+			Download download = downloadService.download(locationService.resolve(
+				jdkUrl), locationService.resolve(jdkDlLoc.toURI()));
+			download.task().waitFor();
+		}
+		catch (URISyntaxException | ExecutionException | InterruptedException e) {
+			log.error(e);
+			return false;
+		}
+
+		String javaLoc = jdkDlLoc.getAbsolutePath();
+		int extensionLength = 0;
+
+		// Extract the JDK
+		if (jdkDlLoc.toString().endsWith("tar.gz")) {
+			try (FileInputStream fis = new FileInputStream(jdkDlLoc);
+					GzipCompressorInputStream gzIn = new GzipCompressorInputStream(fis);
+					TarArchiveInputStream tarIn = new TarArchiveInputStream(gzIn))
+			{
+				doExtraction(jdkDir, tarIn);
+				extensionLength = 7;
+			}
+			catch (IOException e) {
+				log.error(e);
+				return false;
+			}
+		}
+		else if (jdkDlLoc.toString().endsWith("zip")) {
+			try (FileInputStream fis = new FileInputStream(jdkDlLoc);
+					ZipArchiveInputStream zis = new ZipArchiveInputStream(fis))
+			{
+				doExtraction(jdkDir, zis);
+				extensionLength = 4;
+			}
+			catch (IOException e) {
+				log.error(e);
+				return false;
+			}
+		}
+
+		// Notify user of success
+		uiService.showDialog("Java version updated!" +
+			" Please restart to take advantage of the new Java.",
+			DialogPrompt.MessageType.INFORMATION_MESSAGE);
+
+		// Update the app configuration file to use the newly downloaded JDK
+		javaLoc = javaLoc.substring(0, javaLoc.length() - extensionLength);
+		String exeName = System.getProperty("ij.executable");
+		if (exeName != null && !exeName.trim().isEmpty()) {
+			exeName = exeName.substring(exeName.lastIndexOf(File.separator));
+			exeName = exeName.substring(0, exeName.indexOf("-"));
+			final File appCfg = new File(imagejRoot + File.separator + exeName +
+				".cfg");
+			Map<String, String> appProps = appCfg.exists() ? PropertiesHelper.get(
+				appCfg) : new HashMap<>();
+			appProps.put("jvm.app-configured", javaLoc);
+			PropertiesHelper.put(appProps, appCfg);
+		}
+		return true;
+	}
+
+	/**
+	 * Helper method to extract an archive
+	 */
+	private void doExtraction(final File jdkDir, final ArchiveInputStream tarIn)
+		throws IOException
+	{
+		ArchiveEntry entry;
+		while ((entry = tarIn.getNextEntry()) != null) {
+			if (entry.isDirectory()) {
+				new File(jdkDir, entry.getName()).mkdirs();
+			}
+			else {
+				byte[] buffer = new byte[1024];
+				File outputFile = new File(jdkDir, entry.getName());
+				OutputStream fos = new FileOutputStream(outputFile);
+				int len;
+				while ((len = tarIn.read(buffer)) != -1) {
+					fos.write(buffer, 0, len);
+				}
+				fos.close();
+			}
+		}
+	}
+
+	/**
+	 * Helper method that checks the remote JDK list and compares to a locally
+	 * cached version. If the remote list is newer an available Java update is
+	 * indicated. If the user agrees, the new JDK is downloaded and extracted to
+	 * the appropriate directory.
+	 */
+	private void updateJavaIfNecessary(final File imagejRoot) {
+		final File jdkUrls = new File(imagejRoot.getAbsolutePath() +
+			File.separator + "jdk-urls.txt");
+		final String modifiedKey = "LAST_MODIFIED";
+		final String jdkUrl = "https://downloads.imagej.net/java/jdk-urls.txt";
+		long lastModifiedRemote;
+
+		// Get the last modified time on the remote JDK list
+		try {
+			HttpURLConnection connection = (HttpURLConnection) new URL(jdkUrl)
+				.openConnection();
+			connection.setRequestMethod("HEAD");
+			lastModifiedRemote = connection.getLastModified();
+		}
+		catch (IOException e) {
+			log.error("Unable to read remote JDK list", e);
+			return;
+		}
+
+		// Check if we've already cached a local version of the JDK list
+		if (jdkUrls.exists()) {
+			// check when the remote was last modified
+			Map<String, String> jdkVersionProps = PropertiesHelper.get(jdkUrls);
+			if (lastModifiedRemote == 0) { // 0 means "not provided"
+				log.error("No modification date found in jdk-urls.txt");
+				return;
+			}
+			long lastModifiedLocal = Long.parseLong(jdkVersionProps.getOrDefault(
+				modifiedKey, "0"));
+
+			// return if up to date
+			if (lastModifiedLocal == lastModifiedRemote) return;
+
+			// Otherwise delete the conf file and re-download
+			jdkUrls.delete();
+		}
+
+		// Download the new properties file
+		try {
+			Download dl = downloadService.download(locationService.resolve(jdkUrl),
+				locationService.resolve(jdkUrls.toURI()));
+			dl.task().waitFor();
+		}
+		catch (URISyntaxException e) {
+			log.error("Failed to download the remote JDK url list: bad URI");
+			return;
+		}
+		catch (ExecutionException | InterruptedException e) {
+			log.error(
+				"Failed to download the remote JDK url list: download task failed");
+			return;
+		}
+
+		// Inject the last modification date to the JDK list
+		Map<String, String> jdkUrlMap = PropertiesHelper.get(jdkUrls);
+		jdkUrlMap.put(modifiedKey, Long.toString(lastModifiedRemote));
+
+		// Ask the user if they would like to proceed with a Java update
+		DialogPrompt.Result result = uiService.showDialog(
+			"A newer version of Java is recommended.\n" +
+				"Downloading this may take longer than normal updates, but will " +
+				"eventually be required for continued updates.\n" +
+				"Would you like to update now?", QUESTION_MESSAGE, YES_NO_OPTION);
+
+		// Do the update, if desired
+		if (result == DialogPrompt.Result.YES_OPTION && updateJava(jdkUrlMap,
+			imagejRoot))
+		{
+			// Store the current url list if we updated Java
+			PropertiesHelper.put(jdkUrlMap, jdkUrls);
+		}
 	}
 
 	private void refreshUpdateSites(FilesCollection files)
