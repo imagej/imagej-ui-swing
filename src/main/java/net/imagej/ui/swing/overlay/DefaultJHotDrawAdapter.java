@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -60,7 +60,7 @@ import org.scijava.util.ColorRGB;
  * The default adapter handles any kind of overlay. It uses the fill color and
  * alpha of the overlay to draw the mask and leaves the rest of the figure
  * transparent.
- * 
+ *
  * @author Lee Kamentsky
  */
 @Plugin(type = JHotDrawAdapter.class,
@@ -95,8 +95,8 @@ public class DefaultJHotDrawAdapter extends
 	}
 
 	@Override
-	public void
-		updateFigure(final OverlayView overlay, final ImageFigure figure)
+	public void updateFigure(final OverlayView overlay,
+		final ImageFigure figure)
 	{
 		super.updateFigure(overlay, figure);
 
@@ -109,18 +109,16 @@ public class DefaultJHotDrawAdapter extends
 			final long minY = (long) Math.floor(roi.realMin(1));
 			final long maxY = (long) Math.ceil(roi.realMax(1)) + 1;
 			final ColorRGB color = overlay.getData().getFillColor();
-			final IndexColorModel cm =
-				new IndexColorModel(1, 2, new byte[] { 0, (byte) color.getRed() },
-					new byte[] { 0, (byte) color.getGreen() }, new byte[] { 0,
-						(byte) color.getBlue() }, new byte[] { 0,
-						(byte) overlay.getData().getAlpha() });
+			final IndexColorModel cm = new IndexColorModel(1, 2, new byte[] { 0,
+				(byte) color.getRed() }, new byte[] { 0, (byte) color.getGreen() },
+				new byte[] { 0, (byte) color.getBlue() }, new byte[] { 0, (byte) overlay
+					.getData().getAlpha() });
 			final int w = (int) (maxX - minX);
 			final int h = (int) (maxY - minY);
-			final BufferedImage img =
-				new BufferedImage(w, h, BufferedImage.TYPE_BYTE_INDEXED, cm);
-			final SampleModel sm =
-				new SinglePixelPackedSampleModel(DataBuffer.TYPE_BYTE, w, h,
-					new int[] { 1 });
+			final BufferedImage img = new BufferedImage(w, h,
+				BufferedImage.TYPE_BYTE_INDEXED, cm);
+			final SampleModel sm = new SinglePixelPackedSampleModel(
+				DataBuffer.TYPE_BYTE, w, h, new int[] { 1 });
 			final DataBuffer dbuncast = sm.createDataBuffer();
 			assert dbuncast instanceof DataBufferByte;
 			final DataBufferByte db = (DataBufferByte) dbuncast;
@@ -140,8 +138,8 @@ public class DefaultJHotDrawAdapter extends
 					index++;
 				}
 			}
-			final Raster raster =
-				Raster.createRaster(sm, db, new java.awt.Point(0, 0));
+			final Raster raster = Raster.createRaster(sm, db, new java.awt.Point(0,
+				0));
 			img.setData(raster);
 			figure.setBounds(new Rectangle2D.Double(minX, minY, w, h));
 			figure.setBufferedImage(img);

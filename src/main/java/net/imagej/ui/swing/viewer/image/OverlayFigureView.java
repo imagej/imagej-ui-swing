@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -46,11 +46,12 @@ import org.scijava.plugin.Parameter;
 /**
  * A figure view that links an ImageJ {@link OverlayView} to a JHotDraw
  * {@link Figure}.
- * 
+ *
  * @author Curtis Rueden
  * @author Lee Kamentsky
  */
-public class OverlayFigureView extends AbstractContextual implements FigureView
+public class OverlayFigureView extends AbstractContextual implements
+	FigureView
 {
 
 	private final SwingImageDisplayViewer displayViewer;
@@ -70,7 +71,7 @@ public class OverlayFigureView extends AbstractContextual implements FigureView
 
 	/**
 	 * Constructor to use to discover the figure to use for an overlay
-	 * 
+	 *
 	 * @param displayViewer - hook to this display viewer
 	 * @param overlayView - represent this overlay
 	 */
@@ -83,7 +84,7 @@ public class OverlayFigureView extends AbstractContextual implements FigureView
 	/**
 	 * Constructor to use if the figure already exists, for instance if it was
 	 * created using the CreationTool
-	 * 
+	 *
 	 * @param displayViewer - hook to this display viewer
 	 * @param overlayView - represent this overlay
 	 * @param figure - draw using this figure

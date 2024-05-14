@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -103,7 +103,7 @@ import org.scijava.util.RealRect;
 /**
  * A renderer of an {@link ImageCanvas}, which uses JHotDraw's
  * {@link DefaultDrawingView} component to do most of the work.
- * 
+ *
  * @author Curtis Rueden
  * @author Lee Kamentsky
  */
@@ -213,7 +213,8 @@ public class JHotDrawImageCanvas extends JPanel implements AdjustmentListener,
 		dispatcher.register(drawingView, true, true);
 	}
 
-	public void addEventDispatcher(final AWTDropTargetEventDispatcher dispatcher)
+	public void addEventDispatcher(
+		final AWTDropTargetEventDispatcher dispatcher)
 	{
 		dispatcher.register(drawingView);
 	}
@@ -225,8 +226,8 @@ public class JHotDrawImageCanvas extends JPanel implements AdjustmentListener,
 	public Dataset capture() {
 		final ImageDisplay display = getDisplay();
 		if (display == null) return null;
-		final DatasetView datasetView =
-			imageDisplayService.getActiveDatasetView(display);
+		final DatasetView datasetView = imageDisplayService.getActiveDatasetView(
+			display);
 		if (datasetView == null) return null;
 
 		final ARGBScreenImage screenImage = datasetView.getScreenImage();
@@ -236,8 +237,8 @@ public class JHotDrawImageCanvas extends JPanel implements AdjustmentListener,
 		final int h = pixels.getHeight(null);
 
 		// draw the backdrop image info
-		final BufferedImage outputImage =
-			new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+		final BufferedImage outputImage = new BufferedImage(w, h,
+			BufferedImage.TYPE_INT_ARGB);
 		final Graphics2D outputGraphics = outputImage.createGraphics();
 		outputGraphics.drawImage(pixels, 0, 0, null);
 
@@ -247,9 +248,9 @@ public class JHotDrawImageCanvas extends JPanel implements AdjustmentListener,
 		}
 
 		// create a dataset that has view data with overlay info on top
-		final Dataset dataset =
-			datasetService.create(new long[] { w, h, 3 }, "Captured view",
-				new AxisType[] { Axes.X, Axes.Y, Axes.CHANNEL }, 8, false, false);
+		final Dataset dataset = datasetService.create(new long[] { w, h, 3 },
+			"Captured view", new AxisType[] { Axes.X, Axes.Y, Axes.CHANNEL }, 8,
+			false, false);
 		dataset.setRGBMerged(true);
 		final RandomAccess<? extends RealType<?>> accessor = dataset.randomAccess();
 		for (int x = 0; x < w; x++) {
@@ -283,7 +284,7 @@ public class JHotDrawImageCanvas extends JPanel implements AdjustmentListener,
 	/**
 	 * Responds to the JHotDraw figure selection event by selecting and
 	 * deselecting views whose state has changed.
-	 * 
+	 *
 	 * @param event Event indicating that the figure selections have changed.
 	 */
 	@Override
@@ -403,8 +404,8 @@ public class JHotDrawImageCanvas extends JPanel implements AdjustmentListener,
 		if (drawingView.getSelectedFigures().contains(event.getFigure())) {
 			overlay.setSelected(true);
 		}
-		final OverlayFigureView figureView =
-			new OverlayFigureView(displayViewer, overlay, event.getFigure());
+		final OverlayFigureView figureView = new OverlayFigureView(displayViewer,
+			overlay, event.getFigure());
 		figureViews.add(figureView);
 		display.add(overlay);
 		display.update();
@@ -417,16 +418,16 @@ public class JHotDrawImageCanvas extends JPanel implements AdjustmentListener,
 			FigureView figureView = getFigureView(dataView);
 			if (figureView == null) {
 				if (dataView instanceof DatasetView) {
-					figureView =
-						new DatasetFigureView(this.displayViewer, (DatasetView) dataView);
+					figureView = new DatasetFigureView(this.displayViewer,
+						(DatasetView) dataView);
 				}
 				else if (dataView instanceof OverlayView) {
-					figureView =
-						new OverlayFigureView(this.displayViewer, (OverlayView) dataView);
+					figureView = new OverlayFigureView(this.displayViewer,
+						(OverlayView) dataView);
 				}
 				else {
-					log.error("Don't know how to make a figure view for " +
-						dataView.getClass().getName());
+					log.error("Don't know how to make a figure view for " + dataView
+						.getClass().getName());
 					continue;
 				}
 				figureViews.add(figureView);
@@ -494,24 +495,24 @@ public class JHotDrawImageCanvas extends JPanel implements AdjustmentListener,
 		final double canvasZoom = canvas.getZoomFactor();
 		final IntCoords canvasOffset = canvas.getPanOffset();
 
-		final boolean sizeChanged =
-			uiSize.width != canvasWidth || uiSize.height != canvasHeight;
-		final boolean offsetChanged =
-			uiOffset.x != canvasOffset.x || uiOffset.y != canvasOffset.y;
+		final boolean sizeChanged = uiSize.width != canvasWidth ||
+			uiSize.height != canvasHeight;
+		final boolean offsetChanged = uiOffset.x != canvasOffset.x ||
+			uiOffset.y != canvasOffset.y;
 		final boolean zoomChanged = uiZoom != canvasZoom;
 
 		if (!sizeChanged && !offsetChanged && !zoomChanged) return;
 
 		if (log.isDebug()) {
-			log.debug(getClass().getSimpleName() + " " +
-				(updateCanvas ? "syncCanvas: " : "syncUI: ") + "\n\tUI size = " +
-				uiSize.width + " x " + uiSize.height + "\n\tUI offset = " + uiOffset.x +
-				", " + uiOffset.y + "\n\tUI zoom = " + uiZoom + "\n\tCanvas size = " +
+			log.debug(getClass().getSimpleName() + " " + (updateCanvas
+				? "syncCanvas: " : "syncUI: ") + "\n\tUI size = " + uiSize.width +
+				" x " + uiSize.height + "\n\tUI offset = " + uiOffset.x + ", " +
+				uiOffset.y + "\n\tUI zoom = " + uiZoom + "\n\tCanvas size = " +
 				canvasWidth + " x " + canvasHeight + "\n\tCanvas offset = " +
 				canvasOffset.x + ", " + canvasOffset.y + "\n\tCanvas zoom = " +
 				canvasZoom + "\n\t" + (sizeChanged ? "sizeChanged " : "") +
-				(offsetChanged ? "offsetChanged " : "") +
-				(zoomChanged ? "zoomChanged " : ""));
+				(offsetChanged ? "offsetChanged " : "") + (zoomChanged ? "zoomChanged "
+					: ""));
 		}
 
 		if (updateCanvas) {
@@ -550,11 +551,10 @@ public class JHotDrawImageCanvas extends JPanel implements AdjustmentListener,
 		final Rectangle bounds = StaticSwingUtils.getWorkSpaceBounds();
 		final RealRect imageBounds = getDisplay().getPlaneExtents();
 		final ImageCanvas canvas = getDisplay().getCanvas();
-		final IntCoords topLeft =
-			canvas.dataToPanelCoords(new RealCoords(imageBounds.x, imageBounds.y));
-		final IntCoords bottomRight =
-			canvas.dataToPanelCoords(new RealCoords(
-				imageBounds.x + imageBounds.width, imageBounds.y + imageBounds.height));
+		final IntCoords topLeft = canvas.dataToPanelCoords(new RealCoords(
+			imageBounds.x, imageBounds.y));
+		final IntCoords bottomRight = canvas.dataToPanelCoords(new RealCoords(
+			imageBounds.x + imageBounds.width, imageBounds.y + imageBounds.height));
 		if (bottomRight.x - topLeft.x > bounds.width) return;
 		if (bottomRight.y - topLeft.y > bounds.height) return;
 
@@ -579,8 +579,8 @@ public class JHotDrawImageCanvas extends JPanel implements AdjustmentListener,
 	/**
 	 * Clears any resources associated with this canvas. This is necessary to
 	 * avoid deadlocks where finalization-dependent cleanup operations (e.g.
-	 * PhantomReference queueing) are unable to proceed because this object
-	 * is being held by a hard reference by the Finalizer (which the downstream
+	 * PhantomReference queueing) are unable to proceed because this object is
+	 * being held by a hard reference by the Finalizer (which the downstream
 	 * resources are waiting on) implicit in upstream {@link JViewport} use.
 	 */
 	@Override

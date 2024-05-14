@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -46,7 +46,7 @@ import org.scijava.ui.viewer.DisplayWindow;
  * A Swing image display viewer, which displays 2D planes in grayscale or
  * composite color. Intended to be subclassed by a concrete implementation that
  * provides a {@link DisplayWindow} in which the display should be housed.
- * 
+ *
  * @author Curtis Rueden
  * @author Lee Kamentsky
  * @author Grant Harris
@@ -76,8 +76,8 @@ public abstract class AbstractSwingImageDisplayViewer extends
 	@Override
 	public void view(final DisplayWindow w, final Display<?> d) {
 		super.view(w, d);
-		
-		// NB: resolve the racing condition when other consumer are looking up the 
+
+		// NB: resolve the racing condition when other consumer are looking up the
 		// active display
 		getContext().service(DisplayService.class).setActiveDisplay(getDisplay());
 
@@ -109,7 +109,7 @@ public abstract class AbstractSwingImageDisplayViewer extends
 	}
 
 	// -- Disposable methods --
-	
+
 	/**
 	 * NB: a reference to the imgCanvas is held, ultimately, by a finalizable
 	 * parent of a javax.swing.JViewport. This means that the entire resource

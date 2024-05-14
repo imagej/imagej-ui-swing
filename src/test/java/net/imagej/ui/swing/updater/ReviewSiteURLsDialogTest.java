@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package net.imagej.ui.swing.updater;
 
 import static org.junit.Assert.assertEquals;
@@ -68,13 +69,14 @@ public class ReviewSiteURLsDialogTest {
 		files.addUpdateSite(siteA);
 
 		// this will propose a change to the URL
-		Optional< URLChange > urlChange =
-				URLChange.create(siteA, "http://sites.imagej.net/b/");
+		Optional<URLChange> urlChange = URLChange.create(siteA,
+			"http://sites.imagej.net/b/");
 		assertTrue(urlChange.isPresent());
 		assertEquals("http://sites.imagej.net/b/", urlChange.get().getNewURL());
 
-		// the change should be accepted without showing a user interface since the site is deactivated
-		List< URLChange > changes = Collections.singletonList(urlChange.get());
+		// the change should be accepted without showing a user interface since the
+		// site is deactivated
+		List<URLChange> changes = Collections.singletonList(urlChange.get());
 		assertFalse(ReviewSiteURLsDialog.shouldBeDisplayed(changes));
 
 		// apply the change to the URL
@@ -96,18 +98,18 @@ public class ReviewSiteURLsDialogTest {
 		files.addUpdateSite(siteA);
 
 		// propose a change to the site URL
-		Optional< URLChange > change =
-				URLChange.create(siteA, "http://sites.imagej.net/b/");
+		Optional<URLChange> change = URLChange.create(siteA,
+			"http://sites.imagej.net/b/");
 
-		// this change should be approved by the user since the update site is active
-		List< URLChange > changes = Collections.singletonList(change.get());
+		// this change should be approved by the user since the update site is
+		// active
+		List<URLChange> changes = Collections.singletonList(change.get());
 		assertTrue(ReviewSiteURLsDialog.shouldBeDisplayed(changes));
 
 		assumeFalse(GraphicsEnvironment.isHeadless());
 
 		// create review dialog
-		ReviewSiteURLsDialog
-				dialog = new ReviewSiteURLsDialog(null, changes);
+		ReviewSiteURLsDialog dialog = new ReviewSiteURLsDialog(null, changes);
 
 		// trigger cancel button
 		dialog.actionPerformed(createActionEvent(dialog.cancel));
@@ -130,15 +132,14 @@ public class ReviewSiteURLsDialogTest {
 		files.addUpdateSite(siteA);
 
 		// propose a change to the site URL
-		Optional< URLChange > urlChange =
-				URLChange.create(siteA, "http://sites.imagej.net/b/");
-		List< URLChange > urlChanges = Collections.singletonList(urlChange.get());
+		Optional<URLChange> urlChange = URLChange.create(siteA,
+			"http://sites.imagej.net/b/");
+		List<URLChange> urlChanges = Collections.singletonList(urlChange.get());
 
 		assumeFalse(GraphicsEnvironment.isHeadless());
 
 		// create review dialog
-		ReviewSiteURLsDialog
-				dialog = new ReviewSiteURLsDialog(null, urlChanges);
+		ReviewSiteURLsDialog dialog = new ReviewSiteURLsDialog(null, urlChanges);
 
 		// trigger submit button
 		dialog.actionPerformed(createActionEvent(dialog.submit));
@@ -163,9 +164,10 @@ public class ReviewSiteURLsDialogTest {
 
 		// add automated change to the URL
 		URLChange change = URLChange.create(siteA, "http://newdomain.net/a/").get();
-		List< URLChange > changes = Collections.singletonList(change);
+		List<URLChange> changes = Collections.singletonList(change);
 
-		// since the update site is active, the change needs to be approved, therefore the dialog should be displayed
+		// since the update site is active, the change needs to be approved,
+		// therefore the dialog should be displayed
 		assertTrue(change.isRecommended());
 		assertTrue(ReviewSiteURLsDialog.shouldBeDisplayed(changes));
 
@@ -207,7 +209,7 @@ public class ReviewSiteURLsDialogTest {
 
 		// add automated change to the URL
 		URLChange change = URLChange.create(siteA, "http://newdomain.net/a/").get();
-		List< URLChange > changes = Collections.singletonList(change);
+		List<URLChange> changes = Collections.singletonList(change);
 
 		assumeFalse(GraphicsEnvironment.isHeadless());
 
@@ -224,18 +226,20 @@ public class ReviewSiteURLsDialogTest {
 		dialog.actionPerformed(createActionEvent(dialog.submit));
 
 		// apply changes
-		AvailableSites.applySitesURLUpdates(files,changes);
+		AvailableSites.applySitesURLUpdates(files, changes);
 
 		// test whether the old update site URL is still in use
 		assertEquals("http://sites.imagej.net/a/", siteA.getURL());
 		assertTrue(siteA.shouldKeepURL());
 
 		// again add automated change to URL
-		URLChange change2 = URLChange.create(siteA, "http://newdomain.net/a/").get();
+		URLChange change2 = URLChange.create(siteA, "http://newdomain.net/a/")
+			.get();
 		// test whether the choice of keeping the old URL is remembered
 		assertFalse(change2.isRecommended());
 		assertFalse(change2.isApproved());
-		assertFalse(ReviewSiteURLsDialog.shouldBeDisplayed(Collections.singletonList(change2)));
+		assertFalse(ReviewSiteURLsDialog.shouldBeDisplayed(Collections
+			.singletonList(change2)));
 	}
 
 	@Test
@@ -250,21 +254,26 @@ public class ReviewSiteURLsDialogTest {
 
 		// add an official update site
 		UpdateSite siteA = createOfficialSite("a", "http://sites.imagej.net/a/");
-		URLChange changeInactiveSite =
-				URLChange.create(siteA, "https://sites.imagej.net/a/").get();
+		URLChange changeInactiveSite = URLChange.create(siteA,
+			"https://sites.imagej.net/a/").get();
 
-		// the change should be accepted without showing a user interface since the site is deactivated
-		assertFalse(ReviewSiteURLsDialog.shouldBeDisplayed(Collections.singletonList(changeInactiveSite)));
+		// the change should be accepted without showing a user interface since the
+		// site is deactivated
+		assertFalse(ReviewSiteURLsDialog.shouldBeDisplayed(Collections
+			.singletonList(changeInactiveSite)));
 
 		// add another official update site, activate it
 		UpdateSite siteB = createOfficialSite("b", "http://sites.imagej.net/b/");
 		siteB.setActive(true);
-		URLChange changeActiveSite =
-				URLChange.create(siteB, "https://sites.imagej.net/b/").get();
+		URLChange changeActiveSite = URLChange.create(siteB,
+			"https://sites.imagej.net/b/").get();
 
-		// the change should be accepted after showing a user interface since one site is activated
-		List<URLChange> changes = Arrays.asList(changeActiveSite, changeInactiveSite);
-		assertTrue(ReviewSiteURLsDialog.shouldBeDisplayed(Collections.singletonList(changeActiveSite)));
+		// the change should be accepted after showing a user interface since one
+		// site is activated
+		List<URLChange> changes = Arrays.asList(changeActiveSite,
+			changeInactiveSite);
+		assertTrue(ReviewSiteURLsDialog.shouldBeDisplayed(Collections.singletonList(
+			changeActiveSite)));
 
 		assumeFalse(GraphicsEnvironment.isHeadless());
 
@@ -300,11 +309,12 @@ public class ReviewSiteURLsDialogTest {
 		List<URLChange> urlChanges = new ArrayList<>();
 
 		// check if update site URL has to be changed
-		Optional< URLChange > changeA = URLChange.create(siteA,
-				HTTPSUtil.fixImageJUserSiteProtocol(siteA.getURL()));
-		changeA.ifPresent( urlChanges::add );
+		Optional<URLChange> changeA = URLChange.create(siteA, HTTPSUtil
+			.fixImageJUserSiteProtocol(siteA.getURL()));
+		changeA.ifPresent(urlChanges::add);
 
-		// the change should be accepted without showing a user interface since the site is deactivated
+		// the change should be accepted without showing a user interface since the
+		// site is deactivated
 		assertFalse(ReviewSiteURLsDialog.shouldBeDisplayed(urlChanges));
 
 		// add another official update site, activate it
@@ -313,11 +323,12 @@ public class ReviewSiteURLsDialogTest {
 		files.addUpdateSite(siteB);
 
 		// check if update site URL has to be changed
-		Optional< URLChange > changeB = URLChange.create(siteB,
-				HTTPSUtil.fixImageJUserSiteProtocol(siteB.getURL()));
-		changeB.ifPresent( urlChanges::add );
+		Optional<URLChange> changeB = URLChange.create(siteB, HTTPSUtil
+			.fixImageJUserSiteProtocol(siteB.getURL()));
+		changeB.ifPresent(urlChanges::add);
 
-		// the change should be accepted after showing a user interface since one site is activated
+		// the change should be accepted after showing a user interface since one
+		// site is activated
 		assertTrue(ReviewSiteURLsDialog.shouldBeDisplayed(urlChanges));
 
 		assumeFalse(GraphicsEnvironment.isHeadless());

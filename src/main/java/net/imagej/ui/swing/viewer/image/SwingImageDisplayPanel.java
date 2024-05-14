@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -75,12 +75,14 @@ import org.scijava.ui.viewer.DisplayWindow;
  * pane containing an {@link ImageCanvas}, and panel containing dimensional
  * controllers. This panel is added to a top-level {@link DisplayWindow} display
  * container.
- * 
+ *
  * @author Curtis Rueden
  * @author Grant Harris
  * @author Barry DeZonia
  */
-public class SwingImageDisplayPanel extends JPanel implements ImageDisplayPanel {
+public class SwingImageDisplayPanel extends JPanel implements
+	ImageDisplayPanel
+{
 
 	private final SwingImageDisplayViewer displayViewer;
 	private final ImageDisplay display;
@@ -94,8 +96,7 @@ public class SwingImageDisplayPanel extends JPanel implements ImageDisplayPanel 
 	private final Map<AxisType, JScrollBar> axisSliders =
 		new ConcurrentHashMap<>();
 
-	private final Map<AxisType, JLabel> axisLabels =
-		new HashMap<>();
+	private final Map<AxisType, JLabel> axisLabels = new HashMap<>();
 
 	@Parameter
 	private ImageDisplayService imageDisplayService;
@@ -197,7 +198,8 @@ public class SwingImageDisplayPanel extends JPanel implements ImageDisplayPanel 
 	@Override
 	public void redraw() {
 		final DatasetView view = imageDisplayService.getActiveDatasetView(display);
-		if (view == null || view.getProjector() == null) return; // no active dataset
+		if (view == null || view.getProjector() == null) return; // no active
+																															// dataset
 		view.getProjector().map();
 		displayViewer.getCanvas().update();
 	}
@@ -251,8 +253,8 @@ public class SwingImageDisplayPanel extends JPanel implements ImageDisplayPanel 
 				label.setHorizontalAlignment(SwingConstants.RIGHT);
 				axisLabels.put(axis, label);
 
-				final JScrollBar slider =
-					new JScrollBar(Adjustable.HORIZONTAL, value, 1, min, max);
+				final JScrollBar slider = new JScrollBar(Adjustable.HORIZONTAL, value,
+					1, min, max);
 				slider.addAdjustmentListener(new AdjustmentListener() {
 
 					@Override
@@ -304,7 +306,7 @@ public class SwingImageDisplayPanel extends JPanel implements ImageDisplayPanel 
 	// calling display.update() by testing such. We need to make the display
 	// update mechanism smarter if possible. Perhaps by giving it hints about
 	// the changes being made.
-	
+
 	private void updateAxis(final AxisType axis) {
 		final int value = (int) display.getLongPosition(axis);
 		if (axis == Axes.CHANNEL) updateColorBar(value);
@@ -329,8 +331,8 @@ public class SwingImageDisplayPanel extends JPanel implements ImageDisplayPanel 
 		final int extraSpace = 0;
 
 		// determine largest viewable panel sizes
-		final int maxViewHeight =
-			deskBounds.height - labelHeight - sliderHeight - extraSpace;
+		final int maxViewHeight = deskBounds.height - labelHeight - sliderHeight -
+			extraSpace;
 		final int maxViewWidth = deskBounds.width - extraSpace;
 
 		// is canvas bigger than largest viewable panel?

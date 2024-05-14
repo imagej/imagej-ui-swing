@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -49,7 +49,7 @@ import org.scijava.util.Prefs;
 
 /**
  * TODO
- * 
+ *
  * @author Johannes Schindelin
  */
 public class SwingUserInterface extends UpdaterUserInterface {
@@ -57,7 +57,9 @@ public class SwingUserInterface extends UpdaterUserInterface {
 	protected final LogService log;
 	protected final StatusService statusService;
 
-	public SwingUserInterface(final LogService log, final StatusService statusService) {
+	public SwingUserInterface(final LogService log,
+		final StatusService statusService)
+	{
 		this.log = log;
 		this.statusService = statusService;
 	}
@@ -169,6 +171,7 @@ public class SwingUserInterface extends UpdaterUserInterface {
 
 		panel.add(new JLabel("User"));
 		final JTextField user = new JTextField() {
+
 			private static final long serialVersionUID = 1L;
 			int counter = 5;
 
@@ -185,7 +188,8 @@ public class SwingUserInterface extends UpdaterUserInterface {
 		panel.add(user);
 
 		if (JOptionPane.showConfirmDialog(null, panel, title,
-				JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+			JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION)
+		{
 			return user.getText();
 		}
 		return null;
@@ -199,6 +203,7 @@ public class SwingUserInterface extends UpdaterUserInterface {
 
 		panel.add(new JLabel("Password:"));
 		final JPasswordField password = new JPasswordField() {
+
 			private static final long serialVersionUID = 1L;
 			int counter = 15;
 
@@ -215,7 +220,7 @@ public class SwingUserInterface extends UpdaterUserInterface {
 		panel.add(password);
 
 		int option = JOptionPane.showConfirmDialog(null, panel, title,
-				JOptionPane.OK_CANCEL_OPTION);
+			JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.CANCEL_OPTION || option < 0) return null;
 		return new String(password.getPassword());
 

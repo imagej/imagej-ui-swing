@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -38,9 +38,9 @@ import org.jhotdraw.draw.handle.BezierNodeHandle;
 
 /**
  * The BezierFigure uses a BezierNodeHandle which can change the curve
- * connecting vertices from a line to a Bezier curve. We subclass both
- * the figure and the node handle to defeat this.
- * 
+ * connecting vertices from a line to a Bezier curve. We subclass both the
+ * figure and the node handle to defeat this.
+ *
  * @author Johannes Schindelin
  */
 public class PolygonNodeHandle extends BezierNodeHandle {
@@ -60,9 +60,9 @@ public class PolygonNodeHandle extends BezierNodeHandle {
 		final int modifiersEx)
 	{
 		// Remove the behavior associated with the shift keys
-		super.trackEnd(anchor, lead, modifiersEx &
-			~(InputEvent.META_DOWN_MASK | InputEvent.CTRL_DOWN_MASK |
-				InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+		super.trackEnd(anchor, lead, modifiersEx & ~(InputEvent.META_DOWN_MASK |
+			InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK |
+			InputEvent.SHIFT_DOWN_MASK));
 	}
 
 }

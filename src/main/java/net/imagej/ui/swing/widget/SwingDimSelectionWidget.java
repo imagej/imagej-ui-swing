@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -56,7 +56,7 @@ import org.scijava.widget.WidgetModel;
 
 /**
  * Default Swing implementation of dimension selector widget.
- * 
+ *
  * @author Daniel Seebacher
  * @author Curtis Rueden
  */
@@ -117,7 +117,8 @@ public class SwingDimSelectionWidget extends SwingInputWidget<TypedAxis[]>
 		m_minNumDims = getMinDims();
 		m_maxNumDims = getMaxDims();
 		if (m_minNumDims > m_maxNumDims) {
-			throw new IllegalArgumentException("Minimum can't be larger than maximum");
+			throw new IllegalArgumentException(
+				"Minimum can't be larger than maximum");
 		}
 
 		buildUI();
@@ -148,8 +149,8 @@ public class SwingDimSelectionWidget extends SwingInputWidget<TypedAxis[]>
 		m_activeToogleButtonsQueue = new LinkedList<>();
 
 		for (final TypedAxis m_typedAxi : m_typedAxis) {
-			final JToggleButton button =
-				new DimensionSelectionToggleButton(m_typedAxi.type().getLabel());
+			final JToggleButton button = new DimensionSelectionToggleButton(m_typedAxi
+				.type().getLabel());
 
 			button.addActionListener(e -> toogleButtonChanged(e));
 
@@ -158,7 +159,8 @@ public class SwingDimSelectionWidget extends SwingInputWidget<TypedAxis[]>
 		}
 
 		// activate m_maxNumDims number of dimensions
-		for (int i = 0; i < Math.min(m_dimLabelButtonList.size(), m_maxNumDims); i++)
+		for (int i = 0; i < Math.min(m_dimLabelButtonList.size(),
+			m_maxNumDims); i++)
 		{
 			final JToggleButton button = m_dimLabelButtonList.get(i);
 			button.setSelected(true);
@@ -187,7 +189,7 @@ public class SwingDimSelectionWidget extends SwingInputWidget<TypedAxis[]>
 	 * button must be added or removed from the activeToggleButtonsQueue. Also it
 	 * is ensured that no more than {@link #getMaxDims() getMaxDims} and no less
 	 * than {@link #getMinDims() getMinsDims} are selected.
-	 * 
+	 *
 	 * @param e the ActionEvent of the pressed ToggleButton.
 	 */
 	private void toogleButtonChanged(final ActionEvent e) {
@@ -220,7 +222,7 @@ public class SwingDimSelectionWidget extends SwingInputWidget<TypedAxis[]>
 
 	/**
 	 * Extract the Axis from the {@link Dataset}.
-	 * 
+	 *
 	 * @param model A {@link WidgetModel}
 	 * @return The Axis of the {@link Dataset} or null if no {@link Dataset} was
 	 *         found.
@@ -257,7 +259,7 @@ public class SwingDimSelectionWidget extends SwingInputWidget<TypedAxis[]>
 
 	/**
 	 * Better looking dimension selection button. Changes color on click.
-	 * 
+	 *
 	 * @author <a href="mailto:dietzc85@googlemail.com">Christian Dietz</a>
 	 * @author <a href="mailto:horn_martin@gmx.de">Martin Horn</a>
 	 * @author <a href="mailto:michael.zinsmaier@googlemail.com">Michael

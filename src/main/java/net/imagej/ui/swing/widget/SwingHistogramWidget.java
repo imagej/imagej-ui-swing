@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -64,7 +64,7 @@ import org.scijava.widget.WidgetModel;
 
 /**
  * Render a {@link HistogramBundle} in Swing.
- * 
+ *
  * @author Barry DeZonia
  */
 @Plugin(type = InputWidget.class)
@@ -124,12 +124,12 @@ public class SwingHistogramWidget extends SwingInputWidget<HistogramBundle>
 		}
 		final JFreeChart chart = createChart(title, series);
 		if (bund.getMinBin() != -1) {
-			chart.getXYPlot().addDomainMarker(
-				new ValueMarker(bund.getMinBin(), Color.black, new BasicStroke(1)));
+			chart.getXYPlot().addDomainMarker(new ValueMarker(bund.getMinBin(),
+				Color.black, new BasicStroke(1)));
 		}
 		if (bund.getMaxBin() != -1) {
-			chart.getXYPlot().addDomainMarker(
-				new ValueMarker(bund.getMaxBin(), Color.black, new BasicStroke(1)));
+			chart.getXYPlot().addDomainMarker(new ValueMarker(bund.getMaxBin(),
+				Color.black, new BasicStroke(1)));
 		}
 		if (displaySlopeLine(bund)) {
 			chart.getXYPlot().addAnnotation(slopeLine());
@@ -137,16 +137,15 @@ public class SwingHistogramWidget extends SwingInputWidget<HistogramBundle>
 		return chart;
 	}
 
-	private JFreeChart
-		createChart(final String title, final List<XYSeries> series)
+	private JFreeChart createChart(final String title,
+		final List<XYSeries> series)
 	{
 		final XYSeriesCollection data = new XYSeriesCollection();
 		for (XYSeries xys : series) {
 			data.addSeries(xys);
 		}
-		final JFreeChart chart =
-			ChartFactory.createXYBarChart(title, null, false, null, data,
-				PlotOrientation.VERTICAL, false, true, false);
+		final JFreeChart chart = ChartFactory.createXYBarChart(title, null, false,
+			null, data, PlotOrientation.VERTICAL, false, true, false);
 		setTheme(chart);
 		// chart.getXYPlot().setForegroundAlpha(0.50f);
 		return chart;
@@ -172,9 +171,8 @@ public class SwingHistogramWidget extends SwingInputWidget<HistogramBundle>
 	}
 
 	private final void setBackgroundDefault(final JFreeChart chart) {
-		final BasicStroke gridStroke =
-			new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
-				1.0f, new float[] { 2.0f, 1.0f }, 0.0f);
+		final BasicStroke gridStroke = new BasicStroke(1.0f, BasicStroke.CAP_ROUND,
+			BasicStroke.JOIN_ROUND, 1.0f, new float[] { 2.0f, 1.0f }, 0.0f);
 		final XYPlot plot = (XYPlot) chart.getPlot();
 		plot.setRangeGridlineStroke(gridStroke);
 		plot.setDomainGridlineStroke(gridStroke);
@@ -210,7 +208,8 @@ public class SwingHistogramWidget extends SwingInputWidget<HistogramBundle>
 			private double x1, y1, x2, y2;
 
 			@Override
-			public void removeChangeListener(final AnnotationChangeListener listener)
+			public void removeChangeListener(
+				final AnnotationChangeListener listener)
 			{
 				// ignore
 			}
@@ -286,7 +285,7 @@ public class SwingHistogramWidget extends SwingInputWidget<HistogramBundle>
 			/*
 			 * OLD code for calcing line coords from slope/intercept data. Note that
 			 * it is not stretched to the correct aspect ratio here yet.
-			 * 
+			 *
 			@SuppressWarnings("synthetic-access")
 			@Override
 			public void draw(Graphics2D g2, XYPlot plot, Rectangle2D dataArea,

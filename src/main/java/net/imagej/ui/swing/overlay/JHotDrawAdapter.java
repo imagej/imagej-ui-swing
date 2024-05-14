@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -51,7 +51,7 @@ import org.scijava.util.RealCoords;
  * merely by implementing this interface, it is encouraged to instead extend
  * {@link AbstractJHotDrawAdapter}, for convenience.
  * </p>
- * 
+ *
  * @author Lee Kamentsky
  * @author Curtis Rueden
  */
@@ -61,7 +61,7 @@ public interface JHotDrawAdapter<F extends Figure> extends ImageJPlugin,
 
 	/**
 	 * Determines whether the adapter is designed to work with the given tool.
-	 * 
+	 *
 	 * @param tool The tool in question.
 	 * @return True iff the adapter is compatible with the given tool.
 	 */
@@ -70,7 +70,7 @@ public interface JHotDrawAdapter<F extends Figure> extends ImageJPlugin,
 	/**
 	 * Determines whether the adapter can handle a particular overlay, or overlay
 	 * / figure combination.
-	 * 
+	 *
 	 * @param overlay - an overlay that might be editable
 	 * @param figure - a figure that will be either updated by the overlay or will
 	 *          update the overlay. The figure can be null: this indicates that
@@ -81,7 +81,7 @@ public interface JHotDrawAdapter<F extends Figure> extends ImageJPlugin,
 
 	/**
 	 * Creates a new overlay.
-	 * 
+	 *
 	 * @return an Overlay of the associated type in the default initial state
 	 */
 	Overlay createNewOverlay();
@@ -91,7 +91,7 @@ public interface JHotDrawAdapter<F extends Figure> extends ImageJPlugin,
 
 	/**
 	 * Update the overlay to match the appearance of the figure
-	 * 
+	 *
 	 * @param figure the figure that holds the current correct appearance
 	 * @param view view of the overlay that needs to be changed to bring it
 	 *          in-sync with the figure.
@@ -100,7 +100,7 @@ public interface JHotDrawAdapter<F extends Figure> extends ImageJPlugin,
 
 	/**
 	 * Update the appearance of the figure to match the overlay
-	 * 
+	 *
 	 * @param view view of the overlay to be represented by the figure
 	 * @param figure the figure that is to be made to look like the overlay
 	 */

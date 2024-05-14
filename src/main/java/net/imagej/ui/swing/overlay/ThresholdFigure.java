@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -51,7 +51,7 @@ import org.scijava.ui.awt.AWTColors;
 
 /**
  * Implementation of JHotDraw Figure that can display a {@link ThresholdOverlay}
- * 
+ *
  * @author Barry DeZonia
  */
 public class ThresholdFigure extends AbstractAttributedFigure implements
@@ -65,7 +65,7 @@ public class ThresholdFigure extends AbstractAttributedFigure implements
 	private final ThresholdOverlay overlay;
 	private final Rectangle2D.Double rect;
 	private double[] tmpPos;
-	
+
 	public ThresholdFigure(ImageDisplay display, Dataset dataset,
 		ThresholdOverlay overlay)
 	{
@@ -79,7 +79,7 @@ public class ThresholdFigure extends AbstractAttributedFigure implements
 		set(AttributeKeys.FILL_COLOR, Color.DARK_GRAY); // always have a color set
 		overlay.setFigure(this);
 	}
-	
+
 	@Override
 	public boolean contains(Point2D.Double pt) {
 		int d = dataset.numDimensions();
@@ -127,12 +127,12 @@ public class ThresholdFigure extends AbstractAttributedFigure implements
 	public Double getEndPoint() {
 		return new Double(dataset.max(0), dataset.max(1));
 	}
-	
+
 	@Override
 	public Rectangle2D.Double getDrawingArea() {
 		return new Rectangle2D.Double(0, 0, dataset.max(0), dataset.max(1));
 	}
-	
+
 	@Override
 	public void setBounds(Double anchor, Double lead) {
 		// do nothing

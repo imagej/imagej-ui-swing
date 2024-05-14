@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -96,7 +96,7 @@ import org.scijava.log.LogService;
 
 /**
  * TODO
- * 
+ *
  * @author Johannes Schindelin
  */
 @SuppressWarnings("serial")
@@ -130,17 +130,18 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		final UploaderService uploaderService, final FilesCollection files)
 	{
 		super("ImageJ Updater");
-		//setPreferredSize(new Dimension((easyMode) ? 700 : 900, 560));
+		// setPreferredSize(new Dimension((easyMode) ? 700 : 900, 560));
 
 		this.log = log;
 		this.uploaderService = uploaderService;
 		this.files = files;
 
 		// make sure that sezpoz finds the classes when triggered from the EDT
-		final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+		final ClassLoader contextClassLoader = Thread.currentThread()
+			.getContextClassLoader();
 		SwingTools.invokeOnEDT(() -> {
-			if (contextClassLoader != null)
-				Thread.currentThread().setContextClassLoader(contextClassLoader);
+			if (contextClassLoader != null) Thread.currentThread()
+				.setContextClassLoader(contextClassLoader);
 		});
 
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -188,8 +189,8 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		viewOptions = new ViewOptions();
 		viewOptions.addActionListener(e -> updateFilesTable());
 
-		viewOptionsPanel =
-			SwingTools.labelComponentRigid("View Options:", viewOptions);
+		viewOptionsPanel = SwingTools.labelComponentRigid("View Options:",
+			viewOptions);
 		c.gridy = 2;
 		gb.setConstraints(viewOptionsPanel, c);
 		leftPanel.add(viewOptionsPanel);
@@ -200,9 +201,8 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		leftPanel.add(box);
 
 		// Create labels to annotate table
-		chooseLabel =
-			SwingTools.label("Please choose what you want to install/uninstall:",
-				null);
+		chooseLabel = SwingTools.label(
+			"Please choose what you want to install/uninstall:", null);
 		c.gridy = 4;
 		gb.setConstraints(chooseLabel, c);
 		leftPanel.add(chooseLabel);
@@ -282,8 +282,8 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		fileDetails = new FileDetails(this);
 		fileDetails.setBackground(table.getBackground());
 		JTabbedPane tabbedPane = new JTabbedPane();
-		tabbedPane.addTab("Details", null, SwingTools.scrollPane(fileDetails, -1, -1, null),
-				"Individual file information");
+		tabbedPane.addTab("Details", null, SwingTools.scrollPane(fileDetails, -1,
+			-1, null), "Individual file information");
 
 		c.gridy = 6;
 		c.weightx = 1;
@@ -327,54 +327,58 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		bottomPanel.add(Utils.hSpace());
 		bottomPanel.add(new FileActionButton(new Uninstall()));
 		bottomPanel.add(Utils.hSpace());
-		showChanges =
-				SwingTools.button("Diff",
-					"Show the differences to the uploaded version", e -> new Thread() {
+		showChanges = SwingTools.button("Diff",
+			"Show the differences to the uploaded version", e -> new Thread()
+			{
+
+				@Override
+				public void run() {
+					for (final FileObject file : table.getSelectedFiles())
+						try {
+							final DiffFile diff = new DiffFile(files, file, Mode.LIST_FILES);
+							diff.setLocationRelativeTo(UpdaterFrame.this);
+							diff.setVisible(true);
+						}
+						catch (MalformedURLException e) {
+							files.log.error(e);
+							UpdaterUserInterface.get().error(
+								"There was a problem obtaining the remote version of " + file
+									.getLocalFilename(true));
+						}
+				}
+			}.start(), bottomPanel);
+		bottomPanel.add(Box.createHorizontalGlue());
+		// Button to start actions
+		applyOrUpload = SwingTools.button("Apply Changes",
+			"Start installing/uninstalling/uploading files", e -> {
+				if (files.hasUploadOrRemove()) {
+					new Thread() {
 
 						@Override
 						public void run() {
-							for (final FileObject file : table.getSelectedFiles()) try {
-								final DiffFile diff = new DiffFile(files, file, Mode.LIST_FILES);
-								diff.setLocationRelativeTo(UpdaterFrame.this);
-								diff.setVisible(true);
-							} catch (MalformedURLException e) {
-								files.log.error(e);
-								UpdaterUserInterface.get().error("There was a problem obtaining the remote version of " + file.getLocalFilename(true));
+							try {
+								upload();
+							}
+							catch (final InstantiationException e) {
+								log.error(e);
+								error("Could not upload (possibly unknown protocol)");
 							}
 						}
-					}.start(), bottomPanel);
-		bottomPanel.add(Box.createHorizontalGlue());
-		// Button to start actions
-		applyOrUpload =
-			SwingTools.button("Apply Changes", "Start installing/uninstalling/uploading files",
-				e -> {
-					if (files.hasUploadOrRemove()) {
-						new Thread() {
-
-							@Override
-							public void run() {
-								try {
-									upload();
-								}
-								catch (final InstantiationException e) {
-									log.error(e);
-									error("Could not upload (possibly unknown protocol)");
-								}
-							}
-						}.start();
-					}
-					else if (files.hasChanges()) {
-						applyChanges();
-					}
-				}, bottomPanel);
+					}.start();
+				}
+				else if (files.hasChanges()) {
+					applyChanges();
+				}
+			}, bottomPanel);
 		enableApplyOrUpload();
 
 		bottomPanel.add(Utils.hSpace());
-		cancel = SwingTools.button("Close", "Exit Updater [Esc]", e -> quit(), bottomPanel);
+		cancel = SwingTools.button("Close", "Exit Updater [Esc]", e -> quit(),
+			bottomPanel);
 		// ======== End: BOTTOM PANEL ========
 
-		getContentPane().setLayout(
-			new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+		getContentPane().setLayout(new BoxLayout(getContentPane(),
+			BoxLayout.Y_AXIS));
 		getContentPane().add(topPanel);
 		getContentPane().add(summaryPanel);
 		getContentPane().add(bottomPanel);
@@ -392,9 +396,11 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		if (!SwingUtilities.isEventDispatchThread()) {
 			try {
 				SwingUtilities.invokeAndWait(() -> setVisible(visible));
-			} catch (final InterruptedException e) {
+			}
+			catch (final InterruptedException e) {
 				// ignore
-			} catch (final InvocationTargetException e) {
+			}
+			catch (final InvocationTargetException e) {
 				log.error(e);
 			}
 			return;
@@ -418,11 +424,9 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 	}
 
 	/**
-	 * Sets the context class loader if necessary.
-	 *
-	 * If the current class cannot be found by the current Thread's context
-	 * class loader, we should tell the Thread about the class loader that
-	 * loaded this class.
+	 * Sets the context class loader if necessary. If the current class cannot be
+	 * found by the current Thread's context class loader, we should tell the
+	 * Thread about the class loader that loaded this class.
 	 */
 	private void setClassLoaderIfNecessary() {
 		ClassLoader thisLoader = getClass().getClassLoader();
@@ -494,8 +498,8 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 
 		final Collection<String> names = files.getUpdateSiteNames(false);
 		if (names.size() > 1) for (final String name : names)
-			viewOptions.addCustomOption("View files of the '" + name + "' site",
-				files.forUpdateSite(name));
+			viewOptions.addCustomOption("View files of the '" + name + "' site", files
+				.forUpdateSite(name));
 	}
 
 	public void setViewOption(final ViewOptions.Option option) {
@@ -519,8 +523,8 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 			// Directly update the table for display
 			table.setFiles(view);
 			for (int i = 0; i < table.getRowCount(); i++)
-				if (selected.contains(table.getFile(i))) table.addRowSelectionInterval(i,
-					i);
+				if (selected.contains(table.getFile(i))) table.addRowSelectionInterval(
+					i, i);
 		});
 	}
 
@@ -558,8 +562,8 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 
 	protected void showOrHide() {
 		// make sure that *some* files are shown in advanced mode
-		if (!easyMode && table.getRowCount() == 0 &&
-			viewOptions.getSelectedItem() == ViewOptions.Option.UPDATEABLE)
+		if (!easyMode && table.getRowCount() == 0 && viewOptions
+			.getSelectedItem() == ViewOptions.Option.UPDATEABLE)
 		{
 			viewOptions.setSelectedItem(ViewOptions.Option.ALL);
 			final List<SortKey> keys = new ArrayList<>();
@@ -590,8 +594,8 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 	}
 
 	public void install() {
-		final Installer installer =
-			new Installer(files, getProgress("Installing..."));
+		final Installer installer = new Installer(files, getProgress(
+			"Installing..."));
 		try {
 			installer.start();
 			updateFilesTable();
@@ -636,17 +640,18 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		fileDetails.reset();
 		for (final FileObject file : table.getSelectedFiles())
 			fileDetails.showFileDetails(file);
-		if (fileDetails.getDocument().getLength() > 0 &&
-			table.areAllSelectedFilesUploadable()) fileDetails
-			.setEditableForDevelopers();
+		if (fileDetails.getDocument().getLength() > 0 && table
+			.areAllSelectedFilesUploadable()) fileDetails.setEditableForDevelopers();
 
 		for (final FileActionButton button : fileActions)
 			button.enableIfValid();
 
-		if (showChanges != null) showChanges.setEnabled(table.getSelectedFiles().iterator().hasNext());
+		if (showChanges != null) showChanges.setEnabled(table.getSelectedFiles()
+			.iterator().hasNext());
 
 		enableApplyOrUpload();
-		cancel.setText(files.hasChanges() || files.hasUpdateSitesChanges() ? "Cancel" : "Close");
+		cancel.setText(files.hasChanges() || files.hasUpdateSitesChanges()
+			? "Cancel" : "Close");
 
 		int install = 0, uninstall = 0, upload = 0;
 		long bytesToDownload = 0, bytesToUpload = 0;
@@ -674,12 +679,11 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 			bytesToUpload += file.filesize;
 		}
 		String text = "";
-		if (install > 0) text +=
-			" Install/update: " + install + (implicated > 0 ? "+" + implicated : "") +
-				" (" + sizeToString(bytesToDownload) + ")";
+		if (install > 0) text += " Install/update: " + install + (implicated > 0
+			? "+" + implicated : "") + " (" + sizeToString(bytesToDownload) + ")";
 		if (uninstall > 0) text += " uninstall: " + uninstall;
-		if (files.hasUploadableSites() && upload > 0) text +=
-			" upload: " + upload + " (" + sizeToString(bytesToUpload) + ")";
+		if (files.hasUploadableSites() && upload > 0) text += " upload: " + upload +
+			" (" + sizeToString(bytesToUpload) + ")";
 		fileSummary.setText(text);
 
 	}
@@ -706,7 +710,8 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 	// checkWritable() is guaranteed to be called after Checksummer ran
 	public void checkWritable() {
 		if (UpdaterUtil.isProtectedLocation(files.prefix(""))) {
-			error("<html><p width=400>Windows' security model for the directory '" + files.prefix("") + "' is incompatible with the ImageJ updater.</p>" +
+			error("<html><p width=400>Windows' security model for the directory '" +
+				files.prefix("") + "' is incompatible with the ImageJ updater.</p>" +
 				"<p>Please install ImageJ into a user-writable directory, e.g. onto the Desktop.</p></html>");
 			return;
 		}
@@ -739,8 +744,8 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 	}
 
 	protected void upload() throws InstantiationException {
-		final ResolveDependencies resolver =
-			new ResolveDependencies(this, files, true);
+		final ResolveDependencies resolver = new ResolveDependencies(this, files,
+			true);
 		if (!resolver.resolve()) return;
 
 		final String errors = files.checkConsistency();
@@ -749,8 +754,8 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 			return;
 		}
 
-		final List<String> possibleSites =
-			new ArrayList<>(files.getSiteNamesToUpload());
+		final List<String> possibleSites = new ArrayList<>(files
+			.getSiteNamesToUpload());
 		if (possibleSites.size() == 0) {
 			error("Huh? No upload site?");
 			return;
@@ -758,12 +763,12 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		String updateSiteName;
 		if (possibleSites.size() == 1) updateSiteName = possibleSites.get(0);
 		else {
-			updateSiteName =
-				SwingTools.getChoice(this, possibleSites,
-					"Which site do you want to upload to?", "Update site");
+			updateSiteName = SwingTools.getChoice(this, possibleSites,
+				"Which site do you want to upload to?", "Update site");
 			if (updateSiteName == null) return;
 		}
-		final FilesUploader uploader = new FilesUploader(uploaderService, files, updateSiteName, getProgress(null));
+		final FilesUploader uploader = new FilesUploader(uploaderService, files,
+			updateSiteName, getProgress(null));
 
 		Progress progress = null;
 		try {
@@ -797,12 +802,11 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		}
 	}
 
-	protected boolean initializeUpdateSite(final String url,
-		final String sshHost, final String uploadDirectory)
-		throws InstantiationException
+	protected boolean initializeUpdateSite(final String url, final String sshHost,
+		final String uploadDirectory) throws InstantiationException
 	{
-		final FilesUploader uploader =
-			FilesUploader.initialUploader(uploaderService, url, sshHost, uploadDirectory, getProgress(null));
+		final FilesUploader uploader = FilesUploader.initialUploader(
+			uploaderService, url, sshHost, uploadDirectory, getProgress(null));
 		Progress progress = null;
 		try {
 			if (!uploader.login()) return false;
@@ -838,14 +842,16 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 	}
 
 	JButton easyButton() {
-		return SwingTools.button("Easy Mode", "Toggle between simplified and advanced view", e -> toggleEasyMode(),
-				null);
+		return SwingTools.button("Easy Mode",
+			"Toggle between simplified and advanced view", e -> toggleEasyMode(),
+			null);
 	}
 
 	JButton manageButton() {
-		 return SwingTools.button("Manage Update Sites",
-					"Manage subscriptions of update sites for updating and uploading",
-					e -> new SitesDialog(UpdaterFrame.this, UpdaterFrame.this.files).setVisible(true), null);
+		return SwingTools.button("Manage Update Sites",
+			"Manage subscriptions of update sites for updating and uploading",
+			e -> new SitesDialog(UpdaterFrame.this, UpdaterFrame.this.files)
+				.setVisible(true), null);
 	}
 
 	private class CollapsibleLeftRightSplitPane extends JSplitPane {
@@ -855,7 +861,9 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		int lastVisibleDividerLocation;
 		private Dimension rightComponentPreferredSize;
 
-		CollapsibleLeftRightSplitPane(final Component leftComponent, final Component rightComponent) {
+		CollapsibleLeftRightSplitPane(final Component leftComponent,
+			final Component rightComponent)
+		{
 			super(HORIZONTAL_SPLIT, leftComponent, rightComponent);
 			defDividerSize = getDividerSize();
 			setDividerLocation(DEF_DIVIDER_LOCATION);
@@ -866,22 +874,24 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 		void setResizable(final boolean resizable) {
 			if (resizable) {
 				setDividerSize(defDividerSize);
-			} else {
+			}
+			else {
 				setDividerSize(0);
 			}
 			setEnabled(resizable);
-			//((BasicSplitPaneUI) getUI()).getDivider().setEnabled(resizable);
+			// ((BasicSplitPaneUI) getUI()).getDivider().setEnabled(resizable);
 		}
 
 		void setRightPaneVisible(final boolean visible) {
 			if (visible) {
 				setDividerLocation(lastVisibleDividerLocation);
 				getRightComponent().setPreferredSize(rightComponentPreferredSize);
-			} else {
+			}
+			else {
 				lastVisibleDividerLocation = getDividerLocation();
 				rightComponentPreferredSize = getRightComponent().getPreferredSize();
 				setDividerLocation(1d);
-				getRightComponent().setPreferredSize(new Dimension(0,0));
+				getRightComponent().setPreferredSize(new Dimension(0, 0));
 			}
 			getRightComponent().setVisible(visible);
 			setResizable(visible);
@@ -905,17 +915,19 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 
 		static GridBagConstraints gbConstraints() {
 			return new GridBagConstraints(//
-					0, 0, // x, y
-					9, 1, // rows, cols
-					0, 0, // weightx, weighty
-					GridBagConstraints.NORTHWEST, // anchor
-					GridBagConstraints.HORIZONTAL, // fill
-					new Insets(0, 0, 0, 0), // insets
-					0, 0 // ipadx, ipady
+				0, 0, // x, y
+				9, 1, // rows, cols
+				0, 0, // weightx, weighty
+				GridBagConstraints.NORTHWEST, // anchor
+				GridBagConstraints.HORIZONTAL, // fill
+				new Insets(0, 0, 0, 0), // insets
+				0, 0 // ipadx, ipady
 			);
 		}
 
-		static void equalizeDimensions(final JComponent source, final JComponent target) {
+		static void equalizeDimensions(final JComponent source,
+			final JComponent target)
+		{
 			source.setMinimumSize(target.getMinimumSize());
 			source.setPreferredSize(target.getPreferredSize());
 			source.setMaximumSize(target.getMaximumSize());

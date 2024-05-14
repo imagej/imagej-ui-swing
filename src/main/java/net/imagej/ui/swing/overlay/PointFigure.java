@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -48,7 +48,7 @@ import org.scijava.util.ColorRGB;
 
 /**
  * Implementation of a point as a JHotDraw figure.
- * 
+ *
  * @author Johannes Schindelin
  * @author Barry DeZonia
  */
@@ -175,8 +175,8 @@ public class PointFigure extends AbstractAttributedFigure {
 	}
 
 	@Override
-	public void
-		setBounds(final Point2D.Double anchor, final Point2D.Double lead)
+	public void setBounds(final Point2D.Double anchor,
+		final Point2D.Double lead)
 	{
 		double dx = anchor.x - bounds.x;
 		double dy = anchor.y - bounds.y;
@@ -185,7 +185,7 @@ public class PointFigure extends AbstractAttributedFigure {
 
 	/**
 	 * Moves the Figure to a new location.
-	 * 
+	 *
 	 * @param tx the transformation matrix.
 	 */
 	@Override
@@ -287,6 +287,5 @@ public class PointFigure extends AbstractAttributedFigure {
 			g.setColor(origC);
 		}
 	}
-
 
 }

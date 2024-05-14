@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -54,8 +54,9 @@ import net.imagej.updater.Conflicts.Conflict;
 import net.imagej.updater.Conflicts.Resolution;
 
 /**
- * This dialog lists conflicts and let's the user choose how to resolve (or ignore) them.
- * 
+ * This dialog lists conflicts and let's the user choose how to resolve (or
+ * ignore) them.
+ *
  * @author Johannes Schindelin
  */
 @SuppressWarnings("serial")
@@ -96,7 +97,8 @@ public abstract class ConflictDialog extends JDialog implements ActionListener {
 		final JPanel buttons = new JPanel();
 		ok = SwingTools.button("OK", "Apply resolutions [Enter]", this, buttons);
 		cancel = SwingTools.button("Cancel", "Dismiss [Esc]", this, buttons);
-		buttons.setMaximumSize(buttons.getPreferredSize()); // do not allow vertical resizing
+		buttons.setMaximumSize(buttons.getPreferredSize()); // do not allow vertical
+																												// resizing
 		rootPanel.add(buttons);
 
 		// do not show, right now
@@ -114,8 +116,7 @@ public abstract class ConflictDialog extends JDialog implements ActionListener {
 			@Override
 			public void windowClosing(final WindowEvent e) {
 				updateConflictList();
-				if (conflictList.size() > 0)
-					wasCanceled = true;
+				if (conflictList.size() > 0) wasCanceled = true;
 			}
 		});
 	}
@@ -161,7 +162,8 @@ public abstract class ConflictDialog extends JDialog implements ActionListener {
 
 		for (final Conflict conflict : conflictList) {
 			maybeAddSeparator();
-			newText(conflict.getSeverity().toString() + ": ", conflict.isError() ? red : normal);
+			newText(conflict.getSeverity().toString() + ": ", conflict.isError() ? red
+				: normal);
 			final String filename = conflict.getFilename();
 			if (filename != null) addText(filename, bold);
 			addText("\n" + conflict.getConflict());

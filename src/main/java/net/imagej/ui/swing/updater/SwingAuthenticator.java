@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -43,7 +43,7 @@ import net.miginfocom.swing.MigLayout;
 
 /**
  * TODO
- * 
+ *
  * @author Johannes Schindelin
  */
 public class SwingAuthenticator extends Authenticator {
@@ -53,7 +53,8 @@ public class SwingAuthenticator extends Authenticator {
 		final JPanel panel = new JPanel();
 		panel.setLayout(new MigLayout("wrap 2"));
 
-		panel.add(new JLabel(getRequestingHost() + " asks for authentication:"), "span 2");
+		panel.add(new JLabel(getRequestingHost() + " asks for authentication:"),
+			"span 2");
 		panel.add(new JLabel("    " + getRequestingPrompt()), "span 2");
 
 		panel.add(new JLabel("User:"));
@@ -71,11 +72,13 @@ public class SwingAuthenticator extends Authenticator {
 		final byte[] bytes;
 		try {
 			bytes = string.getBytes("UTF-8");
-		} catch (UnsupportedEncodingException e) {
+		}
+		catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
 		final char[] chars = new char[bytes.length];
-		for (int i = 0; i < bytes.length; i++) chars[i] = (char)(bytes[i] & 0xff);
+		for (int i = 0; i < bytes.length; i++)
+			chars[i] = (char) (bytes[i] & 0xff);
 		return new PasswordAuthentication(user.getText(), chars);
 	}
 

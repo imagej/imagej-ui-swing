@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -47,7 +47,7 @@ import org.scijava.ui.awt.AWTImageTools;
 
 /**
  * A widget for displaying a {@link ColorTable} as a bar.
- * 
+ *
  * @author Curtis Rueden
  * @author Grant Harris
  */
@@ -81,7 +81,7 @@ public final class SwingColorBar extends JComponent {
 
 	/** Sets the {@link ColorTable} displayed by this color bar. */
 	public void setColorTable(final ColorTable colorTable) {
-		
+
 		if (bar == null || bar.getWidth() != colorTable.getLength()) {
 			// create compatible image
 			bar = AWTImageTools.createImage(colorTable.getLength(), 1);
@@ -94,7 +94,7 @@ public final class SwingColorBar extends JComponent {
 			gfx.setColor(new Color(argb, false));
 			gfx.drawLine(i, 0, i, 1);
 		}
-		gfx.dispose();		
+		gfx.dispose();
 	}
 
 	// -- JComponent methods --
@@ -124,11 +124,11 @@ public final class SwingColorBar extends JComponent {
 	// -- Main method --
 
 	public static void main(final String[] args) {
-		final ColorTable[] luts =
-			{ ColorTables.FIRE, ColorTables.ICE, ColorTables.SPECTRUM,
-				ColorTables.RED, ColorTables.GREEN, ColorTables.BLUE, ColorTables.CYAN,
-				ColorTables.MAGENTA, ColorTables.YELLOW, ColorTables.GRAYS,
-				ColorTables.REDGREEN, ColorTables.RGB332 };
+		final ColorTable[] luts = { ColorTables.FIRE, ColorTables.ICE,
+			ColorTables.SPECTRUM, ColorTables.RED, ColorTables.GREEN,
+			ColorTables.BLUE, ColorTables.CYAN, ColorTables.MAGENTA,
+			ColorTables.YELLOW, ColorTables.GRAYS, ColorTables.REDGREEN,
+			ColorTables.RGB332 };
 
 		final JFrame frame = new JFrame();
 		frame.setTitle("LUTs");

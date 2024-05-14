@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -66,7 +66,7 @@ import net.imagej.updater.UpdateSite;
 
 /**
  * This class's role is to be in charge of how the Table should be displayed.
- * 
+ *
  * @author Johannes Schindelin
  */
 @SuppressWarnings("serial")
@@ -127,9 +127,10 @@ public class FileTable extends JTable {
 		setModel(fileTableModel);
 		getModel().addTableModelListener(this);
 		setColumnWidths();
-		TableRowSorter<FileTableModel> sorter =
-			new TableRowSorter<>(fileTableModel);
-		sorter.setComparator(ACTION_COLUMN, (o1, o2) -> o1.toString().compareTo(o2.toString()));
+		TableRowSorter<FileTableModel> sorter = new TableRowSorter<>(
+			fileTableModel);
+		sorter.setComparator(ACTION_COLUMN, (o1, o2) -> o1.toString().compareTo(o2
+			.toString()));
 		setRowSorter(sorter);
 
 		setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
@@ -139,9 +140,8 @@ public class FileTable extends JTable {
 				final Object value, final boolean isSelected, final boolean hasFocus,
 				final int row, final int column)
 			{
-				final Component comp =
-					super.getTableCellRendererComponent(table, value, isSelected,
-						hasFocus, row, column);
+				final Component comp = super.getTableCellRendererComponent(table, value,
+					isSelected, hasFocus, row, column);
 				setStyle(comp, row, column);
 				return comp;
 			}
@@ -155,8 +155,8 @@ public class FileTable extends JTable {
 	 * It also warns loudly when the file is obsolete, but locally
 	 * modified.
 	 */
-	protected void
-		setStyle(final Component comp, final int row, final int column)
+	protected void setStyle(final Component comp, final int row,
+		final int column)
 	{
 		if (plain == null) {
 			plain = comp.getFont();
@@ -166,7 +166,8 @@ public class FileTable extends JTable {
 		if (file == null) return;
 		comp.setFont(file.actionSpecified() || file.isLocallyModified() ? bold
 			: plain);
-		if (file.getStatus() == Status.OBSOLETE_MODIFIED) comp.setForeground(Color.RED);
+		if (file.getStatus() == Status.OBSOLETE_MODIFIED) comp.setForeground(
+			Color.RED);
 	}
 
 	private void setColumnWidths() {
@@ -174,7 +175,8 @@ public class FileTable extends JTable {
 		final TableColumn actionColumn = getColumnModel().getColumn(ACTION_COLUMN);
 		final TableColumn siteColumn = getColumnModel().getColumn(SITE_COLUMN);
 		final FontMetrics fm = getFontMetrics(getFont());
-		nameColumn.setPreferredWidth(fm.stringWidth("jars/imagej-plugins-commands"));
+		nameColumn.setPreferredWidth(fm.stringWidth(
+			"jars/imagej-plugins-commands"));
 		nameColumn.setMinWidth(fm.stringWidth("jars/bij.jar"));
 		nameColumn.setResizable(true);
 		actionColumn.setPreferredWidth(fm.stringWidth("Locally modified "));
@@ -199,7 +201,8 @@ public class FileTable extends JTable {
 
 		// As we follow FileTableModel, 1st column is filename
 		if (col == NAME_COLUMN) return super.getCellEditor(row, col);
-		final Set<GroupAction> actions = files.getValidActions(Collections.singleton(file));
+		final Set<GroupAction> actions = files.getValidActions(Collections
+			.singleton(file));
 		return new DefaultCellEditor(new JComboBox<>(actions.toArray()));
 	}
 
@@ -239,9 +242,8 @@ public class FileTable extends JTable {
 
 	public Iterable<FileObject> getSelectedFiles(final int fallbackRow) {
 		int[] rows = getSelectedRows();
-		if (fallbackRow >= 0 && getFile(fallbackRow) != null &&
-			(rows.length == 0 || indexOf(rows, fallbackRow) < 0)) rows =
-			new int[] { fallbackRow };
+		if (fallbackRow >= 0 && getFile(fallbackRow) != null && (rows.length == 0 ||
+			indexOf(rows, fallbackRow) < 0)) rows = new int[] { fallbackRow };
 		final FileObject[] result = new FileObject[rows.length];
 		for (int i = 0; i < rows.length; i++)
 			result[i] = getFile(rows[i]);
@@ -274,16 +276,15 @@ public class FileTable extends JTable {
 			error("No upload site available");
 			return false;
 		}
-		if (list.size() == 1 &&
-			list.get(0).equals(FilesCollection.DEFAULT_UPDATE_SITE))
+		if (list.size() == 1 && list.get(0).equals(
+			FilesCollection.DEFAULT_UPDATE_SITE))
 		{
 			file.updateSite = FilesCollection.DEFAULT_UPDATE_SITE;
 			return true;
 		}
-		final String updateSite =
-			SwingTools.getChoice(updaterFrame, list,
-				"To which upload site do you want to upload " + file.filename + "?",
-				"Upload site");
+		final String updateSite = SwingTools.getChoice(updaterFrame, list,
+			"To which upload site do you want to upload " + file.filename + "?",
+			"Upload site");
 		if (updateSite == null) return false;
 		file.updateSite = updateSite;
 		return true;
@@ -358,12 +359,12 @@ public class FileTable extends JTable {
 			if (row < 0 || row >= files.size()) return null;
 			final FileObject file = rowToFile.get(row);
 			switch (column) {
-			case NAME_COLUMN:
-				return file.getFilename(true);
-			case ACTION_COLUMN:
-				return file.getAction();
-			case SITE_COLUMN:
-				return file.updateSite;
+				case NAME_COLUMN:
+					return file.getFilename(true);
+				case ACTION_COLUMN:
+					return file.getAction();
+				case SITE_COLUMN:
+					return file.updateSite;
 			}
 			throw new RuntimeException("Unhandled column: " + column);
 		}
@@ -374,7 +375,8 @@ public class FileTable extends JTable {
 		}
 
 		@Override
-		public void setValueAt(final Object value, final int row, final int column)
+		public void setValueAt(final Object value, final int row,
+			final int column)
 		{
 			if (column == ACTION_COLUMN) {
 				final GroupAction action = (GroupAction) value;

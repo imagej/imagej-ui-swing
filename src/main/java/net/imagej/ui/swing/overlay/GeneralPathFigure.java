@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -54,9 +54,8 @@ import org.jhotdraw.geom.BezierPath;
 
 /**
  * A composite figure, made up of possibly-overlapping {@link BezierFigure}s.
- * 
  * The described figures are <b>always</b> winding rule even/odd.
- * 
+ *
  * @author Johannes Schindelin
  */
 @SuppressWarnings("hiding")
@@ -67,10 +66,13 @@ public class GeneralPathFigure extends AbstractAttributedFigure {
 
 	public GeneralPathFigure(final BezierFigure... list) {
 		figures = new ArrayList<BezierFigure>() {
+
 			@Override
 			public boolean add(final BezierFigure figure) {
-				figure.restoreAttributesTo(GeneralPathFigure.this.getAttributesRestoreData());
+				figure.restoreAttributesTo(GeneralPathFigure.this
+					.getAttributesRestoreData());
 				figure.addFigureListener(new FigureListener() {
+
 					@Override
 					public void areaInvalidated(FigureEvent e) {
 						invalidate();
@@ -80,7 +82,8 @@ public class GeneralPathFigure extends AbstractAttributedFigure {
 					@Override
 					public void attributeChanged(FigureEvent e) {
 						invalidate();
-						fireAttributeChanged(e.getAttribute(), e.getOldValue(), e.getNewValue());
+						fireAttributeChanged(e.getAttribute(), e.getOldValue(), e
+							.getNewValue());
 					}
 
 					@Override
@@ -228,9 +231,8 @@ public class GeneralPathFigure extends AbstractAttributedFigure {
 	}
 
 	/**
-	 * Sets an attribute of the figure.
-	 * AttributeKey name and semantics are defined by the class implementing
-	 * the figure interface.
+	 * Sets an attribute of the figure. AttributeKey name and semantics are
+	 * defined by the class implementing the figure interface.
 	 */
 	@Override
 	public <T> void set(AttributeKey<T> key, T newValue) {
@@ -240,7 +242,7 @@ public class GeneralPathFigure extends AbstractAttributedFigure {
 		}
 	}
 
-    /* -- public methods -- */
+	/* -- public methods -- */
 
 	@SuppressWarnings("null")
 	public synchronized void setGeneralPath(final GeneralPath path) {
@@ -252,24 +254,25 @@ public class GeneralPathFigure extends AbstractAttributedFigure {
 		for (; !iterator.isDone(); iterator.next()) {
 			int type = iterator.currentSegment(segment);
 			switch (type) {
-			case PathIterator.SEG_MOVETO:
-				if (bezierPath != null) add(bezierPath, false);
-				bezierPath = new BezierPath();
-				bezierPath.moveTo(segment[0], segment[1]);
-				break;
-			case PathIterator.SEG_LINETO:
-				bezierPath.lineTo(segment[0], segment[1]);
-				break;
-			case PathIterator.SEG_QUADTO:
-				bezierPath.quadTo(segment[0], segment[1], segment[2], segment[3]);
-				break;
-			case PathIterator.SEG_CUBICTO:
-				bezierPath.curveTo(segment[0], segment[1], segment[2], segment[3], segment[4], segment[5]);
-				break;
-			case PathIterator.SEG_CLOSE:
-				add(bezierPath, true);
-				bezierPath = null;
-				break;
+				case PathIterator.SEG_MOVETO:
+					if (bezierPath != null) add(bezierPath, false);
+					bezierPath = new BezierPath();
+					bezierPath.moveTo(segment[0], segment[1]);
+					break;
+				case PathIterator.SEG_LINETO:
+					bezierPath.lineTo(segment[0], segment[1]);
+					break;
+				case PathIterator.SEG_QUADTO:
+					bezierPath.quadTo(segment[0], segment[1], segment[2], segment[3]);
+					break;
+				case PathIterator.SEG_CUBICTO:
+					bezierPath.curveTo(segment[0], segment[1], segment[2], segment[3],
+						segment[4], segment[5]);
+					break;
+				case PathIterator.SEG_CLOSE:
+					add(bezierPath, true);
+					bezierPath = null;
+					break;
 			}
 		}
 		if (bezierPath != null) add(bezierPath, false);

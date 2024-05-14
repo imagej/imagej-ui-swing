@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -62,7 +62,7 @@ import javax.swing.event.DocumentListener;
 
 /**
  * Helper functions to instantiated Swing components.
- * 
+ *
  * @author Johannes Schindelin
  */
 @SuppressWarnings("serial")
@@ -88,8 +88,8 @@ public class SwingTools {
 	{
 		final JScrollPane scroll = new JScrollPane(component);
 		scroll.getViewport().setBackground(component.getBackground());
-		if (width > -1 && height > -1)
-			scroll.setPreferredSize(new Dimension(width, height));
+		if (width > -1 && height > -1) scroll.setPreferredSize(new Dimension(width,
+			height));
 		if (addTo != null) addTo.add(scroll);
 		return scroll;
 	}
@@ -202,8 +202,8 @@ public class SwingTools {
 		final JComponent container, final ActionListener listener, final int key,
 		final int modifiers)
 	{
-		container.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
-			KeyStroke.getKeyStroke(key, modifiers), source);
+		container.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke
+			.getKeyStroke(key, modifiers), source);
 		if (container.getActionMap().get(source) != null) return;
 		container.getActionMap().put(source, new AbstractAction() {
 
@@ -220,34 +220,34 @@ public class SwingTools {
 		final String question)
 	{
 		return JOptionPane.showConfirmDialog(owner, question, title,
-			JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION;
+			JOptionPane.OK_CANCEL_OPTION,
+			JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION;
 	}
 
 	public static boolean showYesNoQuestion(final Component owner,
 		final String title, final String question)
 	{
 		return JOptionPane.showConfirmDialog(owner, question, title,
-			JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION;
+			JOptionPane.YES_NO_OPTION,
+			JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION;
 	}
 
-	public static void showMessageBox(final Component owner,
-		final String message, final int type)
+	public static void showMessageBox(final Component owner, final String message,
+		final int type)
 	{
 		SwingTools.invokeOnEDT(() -> {
-			final String title =
-				type == JOptionPane.ERROR_MESSAGE ? "Error"
-					: type == JOptionPane.WARNING_MESSAGE ? "Warning" : "Information";
+			final String title = type == JOptionPane.ERROR_MESSAGE ? "Error"
+				: type == JOptionPane.WARNING_MESSAGE ? "Warning" : "Information";
 			JOptionPane.showMessageDialog(owner, message, title, type);
 		});
 	}
 
-	public static String getChoice(final Component owner,
-		final List<String> list, final String question, final String title)
+	public static String getChoice(final Component owner, final List<String> list,
+		final String question, final String title)
 	{
 		final String[] array = list.toArray(new String[list.size()]);
-		final JOptionPane pane =
-			new JOptionPane(question, JOptionPane.QUESTION_MESSAGE,
-				JOptionPane.OK_CANCEL_OPTION, null, array);
+		final JOptionPane pane = new JOptionPane(question,
+			JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, array);
 		pane.createDialog(owner, title).setVisible(true);
 		return (String) pane.getValue();
 	}
@@ -279,7 +279,8 @@ public class SwingTools {
 	public static int defaultFontSize() {
 		try {
 			return UIManager.getDefaults().getFont("TextPane.font").getSize();
-		} catch (final NullPointerException ignored) {
+		}
+		catch (final NullPointerException ignored) {
 			return 12;
 		}
 	}
@@ -288,9 +289,11 @@ public class SwingTools {
 		if (SwingUtilities.isEventDispatchThread()) job.run();
 		else try {
 			SwingUtilities.invokeAndWait(job);
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			return;
-		} catch (InvocationTargetException e) {
+		}
+		catch (InvocationTargetException e) {
 			throw new RuntimeException(e);
 		}
 	}

@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -51,7 +51,7 @@ import net.imagej.updater.util.UpdateCanceledException;
 
 /**
  * TODO
- * 
+ *
  * @author Johannes Schindelin
  */
 @SuppressWarnings("serial")
@@ -95,21 +95,21 @@ public class ProgressDialog extends JDialog implements Progress {
 		root.add(buttons);
 
 		details = new Details();
-		detailsScrollPane =
-			new JScrollPane(details,
-				ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		detailsScrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+		detailsScrollPane = new JScrollPane(details,
+			ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+			ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		detailsScrollPane.getVerticalScrollBar().addAdjustmentListener(
+			new AdjustmentListener()
+			{
 
-			@Override
-			public void adjustmentValueChanged(AdjustmentEvent e) {
-				final int value = e.getValue();
-				final Adjustable adjustable = e.getAdjustable();
-				final int maximum = adjustable.getMaximum();
-				if (value != maximum)
-					adjustable.setValue(maximum);
-			}
-		});
+				@Override
+				public void adjustmentValueChanged(AdjustmentEvent e) {
+					final int value = e.getValue();
+					final Adjustable adjustable = e.getAdjustable();
+					final int maximum = adjustable.getMaximum();
+					if (value != maximum) adjustable.setValue(maximum);
+				}
+			});
 		detailsScrollPane.setVisible(false);
 		root.add(detailsScrollPane);
 
@@ -203,7 +203,8 @@ public class ProgressDialog extends JDialog implements Progress {
 	public void itemDone(final Object item) {
 		checkIfCanceled();
 		if (itemUpdatesTooFast() && !detailsScrollPane.isVisible()) return;
-		SwingTools.invokeOnEDT(() -> latestDetail.setValue(latestDetail.getMaximum()));
+		SwingTools.invokeOnEDT(() -> latestDetail.setValue(latestDetail
+			.getMaximum()));
 	}
 
 	@Override

@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -60,16 +60,16 @@ import org.scijava.util.LineOutputStream;
 import org.scijava.util.ProcessUtils;
 
 /**
- * A scroll pane that colorizes diff output.
- * 
- * It offers a {@link PrintStream} for use with
- * {@link ProcessUtils#exec(java.io.File, PrintStream, PrintStream, String...)}. It
- * can also show links that might update the view by calling an
+ * A scroll pane that colorizes diff output. It offers a {@link PrintStream} for
+ * use with
+ * {@link ProcessUtils#exec(java.io.File, PrintStream, PrintStream, String...)}.
+ * It can also show links that might update the view by calling an
  * {@link ActionListener}. Otherwise, this class is pretty dumb.
- * 
+ *
  * @author Johannes Schindelin
  */
 public class DiffView extends JScrollPane {
+
 	private static final long serialVersionUID = 1L;
 
 	protected static final String ACTION_ATTRIBUTE = "ACTION";
@@ -112,38 +112,37 @@ public class DiffView extends JScrollPane {
 		getVerticalScrollBar().setUnitIncrement(10);
 
 		textPane.addMouseListener(new MouseAdapter() {
+
 			@Override
 			public void mouseClicked(MouseEvent event) {
 				ActionListener action = getAction(event);
-				if (action != null)
-					action.actionPerformed(new ActionEvent(DiffView.this, 0, "action"));
+				if (action != null) action.actionPerformed(new ActionEvent(
+					DiffView.this, 0, "action"));
 			}
 		});
 	}
 
 	private ActionListener getAction(final MouseEvent event) {
-		Element e = document.getCharacterElement(textPane.viewToModel(event.getPoint()));
-		ActionListener action = (ActionListener)e.getAttributes().getAttribute(ACTION_ATTRIBUTE);
+		Element e = document.getCharacterElement(textPane.viewToModel(event
+			.getPoint()));
+		ActionListener action = (ActionListener) e.getAttributes().getAttribute(
+			ACTION_ATTRIBUTE);
 		return action;
 	}
 
 	/**
 	 * Create an attribute set for stylish text.
-	 * 
-	 * @param color
-	 *            the color
-	 * @param italic
-	 *            whether the text should be slanted
-	 * @param bold
-	 *            whether the text should be bold
-	 * @param fontName
-	 *            the name of the font to use
-	 * @param fontSize
-	 *            the font size to use
+	 *
+	 * @param color the color
+	 * @param italic whether the text should be slanted
+	 * @param bold whether the text should be bold
+	 * @param fontName the name of the font to use
+	 * @param fontSize the font size to use
 	 * @return the attribute set
 	 */
 	public static SimpleAttributeSet getStyle(Color color, boolean italic,
-			boolean bold, String fontName, int fontSize) {
+		boolean bold, String fontName, int fontSize)
+	{
 		SimpleAttributeSet style = new SimpleAttributeSet();
 		if (color != null) StyleConstants.setForeground(style, color);
 		StyleConstants.setItalic(style, italic);
@@ -155,11 +154,9 @@ public class DiffView extends JScrollPane {
 
 	/**
 	 * Add stylish text.
-	 * 
-	 * @param text
-	 *            the text to add
-	 * @param set
-	 *            the formatting attributes
+	 *
+	 * @param text the text to add
+	 * @param set the formatting attributes
 	 */
 	public void styled(String text, AttributeSet set) {
 		styled(document.getLength(), text, set);
@@ -167,18 +164,16 @@ public class DiffView extends JScrollPane {
 
 	/**
 	 * Insert some stylish text.
-	 * 
-	 * @param position
-	 *            the position where to insert the text
-	 * @param text
-	 *            the text to insert
-	 * @param set
-	 *            the formatting attributes
+	 *
+	 * @param position the position where to insert the text
+	 * @param text the text to insert
+	 * @param set the formatting attributes
 	 */
 	public void styled(int position, String text, AttributeSet set) {
 		try {
 			document.insertString(position, text, set);
-		} catch (BadLocationException e) {
+		}
+		catch (BadLocationException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
@@ -186,9 +181,8 @@ public class DiffView extends JScrollPane {
 
 	/**
 	 * Add some plain text.
-	 * 
-	 * @param text
-	 *            the text to add
+	 *
+	 * @param text the text to add
 	 */
 	public void normal(String text) {
 		styled(text, normal);
@@ -196,9 +190,8 @@ public class DiffView extends JScrollPane {
 
 	/**
 	 * Add some warnings.
-	 * 
-	 * @param warning
-	 *            the text to add
+	 *
+	 * @param warning the text to add
 	 */
 	public void warn(String warning) {
 		red("Warning: ");
@@ -207,9 +200,8 @@ public class DiffView extends JScrollPane {
 
 	/**
 	 * Add some red text.
-	 * 
-	 * @param text
-	 *            the text to add
+	 *
+	 * @param text the text to add
 	 */
 	public void red(String text) {
 		styled(text, red);
@@ -217,9 +209,8 @@ public class DiffView extends JScrollPane {
 
 	/**
 	 * Add some green text.
-	 * 
-	 * @param text
-	 *            the text to add
+	 *
+	 * @param text the text to add
 	 */
 	public void green(String text) {
 		styled(text, green);
@@ -227,9 +218,8 @@ public class DiffView extends JScrollPane {
 
 	/**
 	 * Insert some red text.
-	 * 
-	 * @param text
-	 *            the text to insert
+	 *
+	 * @param text the text to insert
 	 */
 	public void red(int position, String text) {
 		styled(position, text, red);
@@ -237,9 +227,8 @@ public class DiffView extends JScrollPane {
 
 	/**
 	 * Insert some green text.
-	 * 
-	 * @param text
-	 *            the text to insert
+	 *
+	 * @param text the text to insert
 	 */
 	public void green(int position, String text) {
 		styled(position, text, green);
@@ -247,9 +236,8 @@ public class DiffView extends JScrollPane {
 
 	/**
 	 * Generate an attribute set for links.
-	 * 
-	 * @param action
-	 *            the action to perform
+	 *
+	 * @param action the action to perform
 	 * @return the attribute set
 	 */
 	public static SimpleAttributeSet getActionStyle(ActionListener action) {
@@ -264,11 +252,9 @@ public class DiffView extends JScrollPane {
 
 	/**
 	 * Add a link.
-	 * 
-	 * @param text
-	 *            the label of the link
-	 * @param action
-	 *            the action to perform when the link is clicked
+	 *
+	 * @param text the label of the link
+	 * @param action the action to perform when the link is clicked
 	 */
 	public void link(String text, ActionListener action) {
 		final JButton button = new JButton(text);
@@ -279,7 +265,7 @@ public class DiffView extends JScrollPane {
 
 	/**
 	 * Get the number of added lines.
-	 * 
+	 *
 	 * @return how many lines were added in total
 	 */
 	public int getAdds() {
@@ -288,7 +274,7 @@ public class DiffView extends JScrollPane {
 
 	/**
 	 * Get the number of removed lines.
-	 * 
+	 *
 	 * @return how many lines were removed in total
 	 */
 	public int getRemoves() {
@@ -297,7 +283,7 @@ public class DiffView extends JScrollPane {
 
 	/**
 	 * Get the number of added or removed lines.
-	 * 
+	 *
 	 * @return how many lines were added or removed in total
 	 */
 	public int getChanges() {
@@ -306,7 +292,7 @@ public class DiffView extends JScrollPane {
 
 	/**
 	 * Colorize one line of output.
-	 * 
+	 *
 	 * @param line the line
 	 */
 	public void println(String line) {
@@ -314,8 +300,8 @@ public class DiffView extends JScrollPane {
 			styled(line, bold);
 			inHeader = false;
 		}
-		else if (line.startsWith(" "))
-			styled(line, inHeader && line.startsWith("    ") ? bigBold : normal);
+		else if (line.startsWith(" ")) styled(line, inHeader && line.startsWith(
+			"    ") ? bigBold : normal);
 		else if (line.startsWith("+")) {
 			adds++;
 			styled(line, green);
@@ -325,8 +311,7 @@ public class DiffView extends JScrollPane {
 			styled(line, red);
 		}
 		else {
-			if (line.startsWith("commit"))
-				inHeader = true;
+			if (line.startsWith("commit")) inHeader = true;
 			styled(line, italic);
 		}
 		styled("\n", normal);
@@ -334,17 +319,19 @@ public class DiffView extends JScrollPane {
 
 	/**
 	 * Construct a {@link PrintStream} adapter to this view.
-	 * 
+	 *
 	 * @return the print stream
 	 */
 	public PrintStream getPrintStream() {
 		final OutputStream out = new LineOutputStream() {
+
 			@Override
 			public void println(String line) {
 				DiffView.this.println(line);
 			}
 		};
 		return new PrintStream(out) {
+
 			@Override
 			public void println(String line) {
 				DiffView.this.println(line);
@@ -354,7 +341,7 @@ public class DiffView extends JScrollPane {
 
 	/**
 	 * Access the underlying document.
-	 * 
+	 *
 	 * @return the document
 	 */
 	protected Document getDocument() {
@@ -363,20 +350,24 @@ public class DiffView extends JScrollPane {
 
 	/**
 	 * A main method for testing.
-	 * 
+	 *
 	 * @param args the command line
 	 */
 	public static void main(String[] args) {
 		final DiffView diff = new DiffView();
 		final Thread thread = new Thread() {
+
 			@Override
 			public void run() {
 				try {
-					final String git = System.getProperty("imagej.updater.git.command", "git");
-					ProcessUtils.exec(null, diff.getPrintStream(), diff.getPrintStream(), git, "show");
-				} catch (RuntimeException e) {
-					if (!(e.getCause() instanceof InterruptedException))
-						e.printStackTrace();
+					final String git = System.getProperty("imagej.updater.git.command",
+						"git");
+					ProcessUtils.exec(null, diff.getPrintStream(), diff.getPrintStream(),
+						git, "show");
+				}
+				catch (RuntimeException e) {
+					if (!(e.getCause() instanceof InterruptedException)) e
+						.printStackTrace();
 				}
 			}
 		};
@@ -386,6 +377,7 @@ public class DiffView extends JScrollPane {
 		frame.setSize(640, 480);
 		frame.getContentPane().add(diff);
 		frame.addWindowListener(new WindowAdapter() {
+
 			@Override
 			public void windowClosing(WindowEvent e) {
 				thread.interrupt();

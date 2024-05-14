@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -54,7 +54,7 @@ import org.scijava.tool.Tool;
 /**
  * The JHotDraw service manages the bidirectional linkage between ImageJ
  * {@link Overlay}s and JHotDraw {@link Figure}s.
- * 
+ *
  * @author Lee Kamentsky
  * @author Curtis Rueden
  */
@@ -79,7 +79,7 @@ public class JHotDrawService extends AbstractService implements ImageJService {
 
 	/**
 	 * Gets the adapter associated with the given tool.
-	 * 
+	 *
 	 * @param tool The tool for which a compatible adapter is needed.
 	 * @return the highest-priority adapter that supports the tool
 	 */
@@ -92,7 +92,7 @@ public class JHotDrawService extends AbstractService implements ImageJService {
 
 	/**
 	 * Gets the first available adapter for the given overlay.
-	 * 
+	 *
 	 * @param overlay the overlay to adapt
 	 * @return the highest-priority adapter that supports the overlay
 	 */
@@ -102,7 +102,7 @@ public class JHotDrawService extends AbstractService implements ImageJService {
 
 	/**
 	 * Gets the first available adapter for the given overlay.
-	 * 
+	 *
 	 * @param overlay the overlay to adapt
 	 * @param figure the figure to be associated with the overlay
 	 * @return the highest-priority adapter that supports the overlay adapted to
@@ -119,7 +119,7 @@ public class JHotDrawService extends AbstractService implements ImageJService {
 
 	/**
 	 * Gets all adapters capable of handling a given overlay.
-	 * 
+	 *
 	 * @param overlay the overlay to adapt
 	 * @return a collection of all adapters capable of handling the overlay
 	 */
@@ -129,7 +129,7 @@ public class JHotDrawService extends AbstractService implements ImageJService {
 
 	/**
 	 * Gets all adapters capable of handling a given overlay/figure combination.
-	 * 
+	 *
 	 * @param overlay the overlay to adapt
 	 * @param figure the figure to be associated with the overlay
 	 * @return collection of valid adapters
@@ -137,8 +137,7 @@ public class JHotDrawService extends AbstractService implements ImageJService {
 	public ArrayList<JHotDrawAdapter<?>> getAdapters(final Overlay overlay,
 		final Figure figure)
 	{
-		final ArrayList<JHotDrawAdapter<?>> result =
-			new ArrayList<>();
+		final ArrayList<JHotDrawAdapter<?>> result = new ArrayList<>();
 		for (final JHotDrawAdapter<?> adapter : adapters()) {
 			if (adapter.supports(overlay, figure)) result.add(adapter);
 		}
@@ -175,8 +174,8 @@ public class JHotDrawService extends AbstractService implements ImageJService {
 		if (adapters == null) {
 			// ask the plugin service for the list of available JHotDraw adapters
 			@SuppressWarnings({ "rawtypes", "unchecked" })
-			final List<JHotDrawAdapter<?>> instances =
-				(List) pluginService.createInstancesOfType(JHotDrawAdapter.class);
+			final List<JHotDrawAdapter<?>> instances = (List) pluginService
+				.createInstancesOfType(JHotDrawAdapter.class);
 			adapters = instances;
 			log.info("Found " + adapters.size() + " JHotDraw adapters.");
 		}

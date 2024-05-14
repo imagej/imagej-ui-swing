@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -90,7 +90,7 @@ import org.scijava.ui.swing.StaticSwingUtils;
 
 /**
  * The dialog in which the user can choose which update sites to follow.
- * 
+ *
  * @author Johannes Schindelin
  */
 @SuppressWarnings("serial")
@@ -108,8 +108,7 @@ public class SitesDialog extends JDialog implements ActionListener {
 	private boolean searchDescription, searchURL;
 	private TableRowSorter<DataModel> sorter;
 
-	public SitesDialog(final UpdaterFrame owner, final FilesCollection files)
-	{
+	public SitesDialog(final UpdaterFrame owner, final FilesCollection files) {
 		super(owner, "Manage Update Sites");
 		updaterFrame = owner;
 		this.files = files;
@@ -130,7 +129,8 @@ public class SitesDialog extends JDialog implements ActionListener {
 
 			@Override
 			public boolean isCellEditable(final int row, final int column) {
-				return column >= 0 && column < getColumnCount() && row >= 0 && row < getRowCount();
+				return column >= 0 && column < getColumnCount() && row >= 0 &&
+					row < getRowCount();
 			}
 
 			@Override
@@ -138,73 +138,86 @@ public class SitesDialog extends JDialog implements ActionListener {
 				if (column == 0) return super.getCellEditor(row, column);
 				final JTextField field = new JTextField();
 				return new DefaultCellEditor(field) {
+
 					@Override
 					public boolean stopCellEditing() {
 						if (row >= sites.size()) {
-							// In case of stopping after a row has been removed, properly stop editing
+							// In case of stopping after a row has been removed, properly stop
+							// editing
 							return super.stopCellEditing();
 						}
 						String value = field.getText();
-						if ((column == 2 || column == 4) && !value.equals("") && !value.endsWith("/")) {
+						if ((column == 2 || column == 4) && !value.equals("") && !value
+							.endsWith("/"))
+						{
 							value += "/";
 						}
 						if (column == 1) {
-							if (value.equals(getUpdateSiteName(row))) return super.stopCellEditing();
+							if (value.equals(getUpdateSiteName(row)))
+								return super.stopCellEditing();
 							if (files.getUpdateSite(value, true) != null) {
 								error("Update site '" + value + "' exists already!");
 								return false;
 							}
-						} else if (column == 2) {
+						}
+						else if (column == 2) {
 							if ("/".equals(value)) value = "";
 							final UpdateSite site = getUpdateSite(row);
 							if (value.equals(site.getURL())) return super.stopCellEditing();
-							if(!HTTPSUtil.supportsURLProtocol(value)) {
-								if(showYesNoQuestion("Convert HTTPS URL to HTTP?",
-										"Your installation cannot handle secure communication (HTTPS).\n" +
-												"Please download a recent version of this software.\n\n" +
-												"Do you want to use the insecure URL of this update site (HTTP)?")) {
+							if (!HTTPSUtil.supportsURLProtocol(value)) {
+								if (showYesNoQuestion("Convert HTTPS URL to HTTP?",
+									"Your installation cannot handle secure communication (HTTPS).\n" +
+										"Please download a recent version of this software.\n\n" +
+										"Do you want to use the insecure URL of this update site (HTTP)?"))
+								{
 									value = HTTPSUtil.userSiteConvertToHTTP(value);
 									field.setText(value);
-								} else return false;
+								}
+								else return false;
 							}
 							if (validURL(value)) {
 								site.setURL(value);
 								boolean wasActive = site.isActive();
 								activateUpdateSite(site);
 								if (!wasActive && site.isActive()) tableModel.rowChanged(row);
-							} else {
+							}
+							else {
 								if (site.getHost() == null || site.getHost().equals("")) {
-									error("URL does not refer to an update site: " + value + "\n"
-										+ "If you want to initialize that site, you need to provide upload information first.");
+									error("URL does not refer to an update site: " + value +
+										"\n" +
+										"If you want to initialize that site, you need to provide upload information first.");
 									return false;
 								}
 								if (!showYesNoQuestion("Initialize upload site?",
-										"It appears that the URL\n"
-										+ "\t" + value + "\n"
-										+ "is not (yet) valid. "
-										+ "Do you want to initialize it (host: "
-										+ site.getHost() + "; directory: "
-										+ site.getUploadDirectory() + ")?"))
+									"It appears that the URL\n" + "\t" + value + "\n" +
+										"is not (yet) valid. " +
+										"Do you want to initialize it (host: " + site.getHost() +
+										"; directory: " + site.getUploadDirectory() + ")?"))
 									return false;
-								if (!initializeUpdateSite(site.getName(),
-										value, site.getHost(), site.getUploadDirectory()))
-									return false;
+								if (!initializeUpdateSite(site.getName(), value, site.getHost(),
+									site.getUploadDirectory())) return false;
 							}
-						} else if (column == 3) {
+						}
+						else if (column == 3) {
 							final UpdateSite site = getUpdateSite(row);
 							if (value.equals(site.getHost())) return super.stopCellEditing();
 							final int colon = value.indexOf(':');
 							if (colon > 0) {
 								final String protocol = value.substring(0, colon);
-								final UploaderService uploaderService = updaterFrame.getUploaderService();
-								if (null == uploaderService.installUploader(protocol, files, updaterFrame.getProgress(null))) {
+								final UploaderService uploaderService = updaterFrame
+									.getUploaderService();
+								if (null == uploaderService.installUploader(protocol, files,
+									updaterFrame.getProgress(null)))
+								{
 									error("Unknown upload protocol: " + protocol);
 									return false;
 								}
 							}
-						} else if (column == 4) {
+						}
+						else if (column == 4) {
 							final UpdateSite site = getUpdateSite(row);
-							if (value.equals(site.getUploadDirectory())) return super.stopCellEditing();
+							if (value.equals(site.getUploadDirectory()))
+								return super.stopCellEditing();
 						}
 						updaterFrame.enableApplyOrUpload();
 						return super.stopCellEditing();
@@ -213,7 +226,8 @@ public class SitesDialog extends JDialog implements ActionListener {
 			}
 
 			@Override
-			public void setValueAt(final Object value, final int row, final int column)
+			public void setValueAt(final Object value, final int row,
+				final int column)
 			{
 				if (row < sites.size()) {
 					final UpdateSite site = getUpdateSite(row);
@@ -222,38 +236,41 @@ public class SitesDialog extends JDialog implements ActionListener {
 							if (column == 0 || column == 2) {
 								activateUpdateSite(site);
 							}
-						} else {
+						}
+						else {
 							deactivateUpdateSite(site);
 						}
-					} else {
-						final String string = (String)value;
+					}
+					else {
+						final String string = (String) value;
 						// if the name changed, or if we auto-fill the name from the URL
 						switch (column) {
-						case 1:
-							final String name = site.getName();
-							if (name.equals(string)) return;
-							files.renameUpdateSite(name, string);
-							break;
-						case 2:
-							if (site.getURL().equals(string)) return;
-							boolean active = site.isActive();
-							if (active) deactivateUpdateSite(site);
-							site.setURL(string);
-							if (active && validURL(string)) activateUpdateSite(site);
-							break;
-						case 3:
-							if (string.equals(site.getHost())) return;
-							site.setHost(string);
-							break;
-						case 4:
-							if (string.equals(site.getUploadDirectory())) return;
-							site.setUploadDirectory(string);
-							break;
-						case 5:
-							// do nothing: description column
-							break;
-						default:
-							updaterFrame.log.error("Whoa! Column " + column + " is not handled!");
+							case 1:
+								final String name = site.getName();
+								if (name.equals(string)) return;
+								files.renameUpdateSite(name, string);
+								break;
+							case 2:
+								if (site.getURL().equals(string)) return;
+								boolean active = site.isActive();
+								if (active) deactivateUpdateSite(site);
+								site.setURL(string);
+								if (active && validURL(string)) activateUpdateSite(site);
+								break;
+							case 3:
+								if (string.equals(site.getHost())) return;
+								site.setHost(string);
+								break;
+							case 4:
+								if (string.equals(site.getUploadDirectory())) return;
+								site.setUploadDirectory(string);
+								break;
+							case 5:
+								// do nothing: description column
+								break;
+							default:
+								updaterFrame.log.error("Whoa! Column " + column +
+									" is not handled!");
 						}
 					}
 				}
@@ -261,16 +278,19 @@ public class SitesDialog extends JDialog implements ActionListener {
 			}
 
 			@Override
-			public Component prepareRenderer(TableCellRenderer renderer,int row, int column) {
+			public Component prepareRenderer(TableCellRenderer renderer, int row,
+				int column)
+			{
 				Component component = super.prepareRenderer(renderer, row, column);
 				if (component instanceof JComponent) {
 					final UpdateSite site = getUpdateSite(row);
 					if (site != null) {
 						JComponent jcomponent = (JComponent) component;
-						jcomponent.setToolTipText(wrapToolTip(site.getDescription(), site.getMaintainer()));
+						jcomponent.setToolTipText(wrapToolTip(site.getDescription(), site
+							.getMaintainer()));
 					}
 				}
-			    return component;
+				return component;
 			}
 		};
 		table.setColumnSelectionAllowed(false);
@@ -301,9 +321,11 @@ public class SitesDialog extends JDialog implements ActionListener {
 		});
 
 		// Add all components to dialog
-		final JPanel labeledSearchField = SwingTools.labelComponentRigid(" Search:", searchTerm);
-		scrollpane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		final JPanel labeledSearchField = SwingTools.labelComponentRigid(" Search:",
+			searchTerm);
+		scrollpane = new JScrollPane(table,
+			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+			JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		final JPanel buttons = new JPanel();
 		final GridBagConstraints c = new GridBagConstraints();
 		c.gridx = 0;
@@ -326,24 +348,31 @@ public class SitesDialog extends JDialog implements ActionListener {
 
 		// Adjust table size, column widths and scrollbars
 		tableModel.setColumnWidths();
-		scrollpane.setPreferredSize(new Dimension(tableModel.tableWidth, 12 * table.getRowHeight()));
+		scrollpane.setPreferredSize(new Dimension(tableModel.tableWidth, 12 * table
+			.getRowHeight()));
 		contentPane.addComponentListener(new ComponentAdapter() {
+
 			@Override
 			public void componentResized(final ComponentEvent e) {
 				if (table.getPreferredSize().width < getWidth()) {
 					// unlikely to happen given current column widths
 					table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-				} else {
+				}
+				else {
 					table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 				}
 			}
 		});
 
-		addNewSite = SwingTools.button("Add Unlisted Site", "Add a new entry for a site not listed", this, buttons);
-		remove = SwingTools.button("Remove", "Remove highlighted site from list", this, buttons);
+		addNewSite = SwingTools.button("Add Unlisted Site",
+			"Add a new entry for a site not listed", this, buttons);
+		remove = SwingTools.button("Remove", "Remove highlighted site from list",
+			this, buttons);
 		remove.setEnabled(false);
-		checkForUpdates = SwingTools.button("Validate URLs", "Check whether update sites are using outdated URLs", this, buttons);
-		close = SwingTools.button("Apply and Close", "Confirm activations and dismiss [ESC]", this, buttons);
+		checkForUpdates = SwingTools.button("Validate URLs",
+			"Check whether update sites are using outdated URLs", this, buttons);
+		close = SwingTools.button("Apply and Close",
+			"Confirm activations and dismiss [ESC]", this, buttons);
 
 		getRootPane().setDefaultButton(close);
 		escapeCancels(this);
@@ -354,24 +383,28 @@ public class SitesDialog extends JDialog implements ActionListener {
 
 	private JButton searchOptionsButton() {
 		final JPopupMenu popup = new JPopupMenu();
-		final JCheckBoxMenuItem jcbmi0 = new JCheckBoxMenuItem("Search Site Names", true);
+		final JCheckBoxMenuItem jcbmi0 = new JCheckBoxMenuItem("Search Site Names",
+			true);
 		jcbmi0.setToolTipText("Site names are always searched");
 		jcbmi0.setEnabled(false); // dummy checkbox: Site names are always searched
 		popup.add(jcbmi0);
-		final JCheckBoxMenuItem jcbmi1 = new JCheckBoxMenuItem("Search Site URLs", isSearchURL());
+		final JCheckBoxMenuItem jcbmi1 = new JCheckBoxMenuItem("Search Site URLs",
+			isSearchURL());
 		jcbmi1.addItemListener(e -> {
 			setSearchURL(jcbmi1.isSelected());
 			filterTable();
 		});
 		popup.add(jcbmi1);
-		final JCheckBoxMenuItem jcbmi2 = new JCheckBoxMenuItem("Search Site Descriptions", isSearchDescription());
+		final JCheckBoxMenuItem jcbmi2 = new JCheckBoxMenuItem(
+			"Search Site Descriptions", isSearchDescription());
 		jcbmi2.addItemListener(e -> {
 			setSearchDescription(jcbmi2.isSelected());
 			filterTable();
 		});
 		popup.add(jcbmi2);
 		final JButton options = optionsButton(searchTerm);
-		options.addActionListener(e -> popup.show(options, options.getWidth() / 2, options.getHeight() / 2));
+		options.addActionListener(e -> popup.show(options, options.getWidth() / 2,
+			options.getHeight() / 2));
 		return options;
 	}
 
@@ -380,11 +413,13 @@ public class SitesDialog extends JDialog implements ActionListener {
 		b.setToolTipText("Search options");
 		final float factor = .5f;
 		final Insets insets = b.getMargin();
-		if (insets != null)
-			b.setMargin(new Insets((int) (insets.top * factor), (int) (insets.left * factor),
-					(int) (insets.bottom * factor), (int) (insets.right * factor)));
-		b.setPreferredSize(new Dimension(b.getPreferredSize().width, (int) main.getPreferredSize().getHeight()));
-		b.setMaximumSize(new Dimension(b.getMaximumSize().width, (int) main.getPreferredSize().getHeight()));
+		if (insets != null) b.setMargin(new Insets((int) (insets.top * factor),
+			(int) (insets.left * factor), (int) (insets.bottom * factor),
+			(int) (insets.right * factor)));
+		b.setPreferredSize(new Dimension(b.getPreferredSize().width, (int) main
+			.getPreferredSize().getHeight()));
+		b.setMaximumSize(new Dimension(b.getMaximumSize().width, (int) main
+			.getPreferredSize().getHeight()));
 		return b;
 	}
 
@@ -412,9 +447,10 @@ public class SitesDialog extends JDialog implements ActionListener {
 		final String query = Pattern.quote(searchTerm.getText());
 		SwingTools.invokeOnEDT(() -> {
 			try {
-				sorter.setRowFilter(RowFilter.regexFilter("(?i)" + query,
-						cols.stream().mapToInt(i -> i).toArray()));
-			} catch (final java.util.regex.PatternSyntaxException e) {
+				sorter.setRowFilter(RowFilter.regexFilter("(?i)" + query, cols.stream()
+					.mapToInt(i -> i).toArray()));
+			}
+			catch (final java.util.regex.PatternSyntaxException e) {
 				// do nothing if expression doesn't parse
 				return;
 			}
@@ -428,14 +464,16 @@ public class SitesDialog extends JDialog implements ActionListener {
 		if (s != null) sb.append(s.replace("\n", " "));
 		s = site.getMaintainer();
 		if (s != null) sb.append(" Maintainer:").append(s);
-		return  sb.toString();
+		return sb.toString();
 	}
 
-	private static String wrapToolTip(final String description, final String maintainer) {
+	private static String wrapToolTip(final String description,
+		final String maintainer)
+	{
 		if (description == null) return null;
-		return  "<html><p width='500'>" + description.replaceAll("\n", "<br />")
-			+ (maintainer != null ? "</p><p>Maintainer: " + maintainer + "</p>": "")
-			+ "</p></html>";
+		return "<html><p width='500'>" + description.replaceAll("\n", "<br />") +
+			(maintainer != null ? "</p><p>Maintainer: " + maintainer + "</p>" : "") +
+			"</p></html>";
 	}
 
 	/*
@@ -457,14 +495,14 @@ public class SitesDialog extends JDialog implements ActionListener {
 	}
 
 	private void addNew() {
-		searchTerm.setText(""); // Reset filtering so that displayed rows match row model
+		searchTerm.setText(""); // Reset filtering so that displayed rows match row
+														// model
 		table.requestFocusInWindow();
 		add(new UpdateSite(makeUniqueSiteName("New"), "", "", "", null, null, 0l));
 
-		table.changeSelection( table.getRowCount()-1, 2, false, false);
+		table.changeSelection(table.getRowCount() - 1, 2, false, false);
 
-		if (table.editCellAt(table.getRowCount()-1, 2))
-		{
+		if (table.editCellAt(table.getRowCount() - 1, 2)) {
 			Component editor = table.getEditorComponent();
 			editor.requestFocusInWindow();
 		}
@@ -482,9 +520,10 @@ public class SitesDialog extends JDialog implements ActionListener {
 
 	private String makeUniqueSiteName(final String prefix) {
 		final Set<String> names = new HashSet<>();
-		for (final UpdateSite site : sites) names.add(site.getName());
+		for (final UpdateSite site : sites)
+			names.add(site.getName());
 		if (!names.contains(prefix)) return prefix;
-		for (int i = 2; ; i++) {
+		for (int i = 2;; i++) {
 			if (!names.contains(prefix + "-" + i)) return prefix + "-" + i;
 		}
 	}
@@ -493,9 +532,8 @@ public class SitesDialog extends JDialog implements ActionListener {
 		final UpdateSite site = getUpdateSite(row);
 		final String name = site.getName();
 		if (!showYesNoQuestion("Remove " + name + "?",
-				"Do you really want to remove the site '" + name + "' from the list?\n"
-				+ "URL: " + getUpdateSite(row).getURL()))
-			return;
+			"Do you really want to remove the site '" + name + "' from the list?\n" +
+				"URL: " + getUpdateSite(row).getURL())) return;
 		files.removeUpdateSite(site.getName());
 		sites.remove(row);
 		tableModel.rowChanged(row);
@@ -511,19 +549,17 @@ public class SitesDialog extends JDialog implements ActionListener {
 	private void deactivateUpdateSite(final UpdateSite site) {
 		int count = files.deactivateUpdateSite(site);
 		if (count > 0) {
-			info("" +
-			count + (count == 1 ? " file is" : " files are") +
-			" installed from the site '" +
-			site.getName() +
-			"' and will be updated/uninstalled\n");
+			info("" + count + (count == 1 ? " file is" : " files are") +
+				" installed from the site '" + site.getName() +
+				"' and will be updated/uninstalled\n");
 			updaterFrame.updateFilesTable();
 		}
 	}
 
 	private void updateAvailableUpdateSites() {
 		new Thread(() -> {
-			List<URLChange>
-					changes = AvailableSites.initializeAndAddSites(files, (Logger) null);
+			List<URLChange> changes = AvailableSites.initializeAndAddSites(files,
+				(Logger) null);
 			boolean reviewChanges = ReviewSiteURLsDialog.shouldBeDisplayed(changes);
 			AtomicBoolean changesApproved = new AtomicBoolean(!reviewChanges);
 			try {
@@ -532,22 +568,22 @@ public class SitesDialog extends JDialog implements ActionListener {
 					dialog.setVisible(true);
 					changesApproved.set(dialog.isOkPressed());
 				});
-			} catch (InterruptedException | InvocationTargetException e) {
+			}
+			catch (InterruptedException | InvocationTargetException e) {
 				e.printStackTrace();
 			}
-			if(changesApproved.get()) {
+			if (changesApproved.get()) {
 				searchTerm.setText(""); // Reset filtering
 				AvailableSites.applySitesURLUpdates(files, changes);
 			}
-			tableModel.rowsChanged(0, tableModel.getRowCount()-1);
+			tableModel.rowsChanged(0, tableModel.getRowCount() - 1);
 		}).start();
 
 	}
 
 	@Override
 	public void setVisible(boolean b) {
-		if (b)
-			searchTerm.requestFocusInWindow();
+		if (b) searchTerm.requestFocusInWindow();
 		super.setVisible(b);
 	}
 
@@ -565,15 +601,21 @@ public class SitesDialog extends JDialog implements ActionListener {
 	protected class DataModel extends DefaultTableModel {
 
 		protected int tableWidth;
-		protected String[] headers = { "Active", "Name", "URL", "Host", "Directory on Host", "Description" };
-		private String[] canonicalRows = { "Active", "Fuzzy logic and artificial neural",
-				"sites.imagej.net/Fiji-Legacy/", "webdav:User", "/path", " Large description with maintainer name" };
+		protected String[] headers = { "Active", "Name", "URL", "Host",
+			"Directory on Host", "Description" };
+		private String[] canonicalRows = { "Active",
+			"Fuzzy logic and artificial neural", "sites.imagej.net/Fiji-Legacy/",
+			"webdav:User", "/path", " Large description with maintainer name" };
 
 		public void setColumnWidths() {
-			table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); // otherwise horizontal scrollbar is not displayed
+			table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); // otherwise horizontal
+																												// scrollbar is not
+																												// displayed
 			final TableColumnModel columnModel = table.getColumnModel();
 			final FontMetrics fm = table.getFontMetrics(table.getFont());
-			for (int i = 0; i < tableModel.headers.length && i < getColumnCount(); i++) {
+			for (int i = 0; i < tableModel.headers.length &&
+				i < getColumnCount(); i++)
+			{
 				final TableColumn column = columnModel.getColumn(i);
 				column.setPreferredWidth(fm.stringWidth(canonicalRows[i]));
 				tableWidth += column.getPreferredWidth();
@@ -627,12 +669,12 @@ public class SitesDialog extends JDialog implements ActionListener {
 	}
 
 	protected boolean validURL(String url) {
-		if (!url.endsWith("/"))
-			url += "/";
+		if (!url.endsWith("/")) url += "/";
 		try {
-			return files.util.getLastModified(new URL(url
-					+ UpdaterUtil.XML_COMPRESSED)) != -1;
-		} catch (MalformedURLException e) {
+			return files.util.getLastModified(new URL(url +
+				UpdaterUtil.XML_COMPRESSED)) != -1;
+		}
+		catch (MalformedURLException e) {
 			updaterFrame.log.error(e);
 			return false;
 		}
@@ -641,7 +683,8 @@ public class SitesDialog extends JDialog implements ActionListener {
 	protected boolean activateUpdateSite(final UpdateSite updateSite) {
 		try {
 			files.activateUpdateSite(updateSite, updaterFrame.getProgress(null));
-		} catch (final Exception e) {
+		}
+		catch (final Exception e) {
 			e.printStackTrace();
 			error("Not a valid URL: " + updateSite.getURL());
 			return false;
@@ -650,30 +693,28 @@ public class SitesDialog extends JDialog implements ActionListener {
 		return true;
 	}
 
-	protected boolean initializeUpdateSite(final String siteName,
-			String url, final String host, String uploadDirectory) {
-		if (!url.endsWith("/"))
-			url += "/";
-		if (!uploadDirectory.endsWith("/"))
-			uploadDirectory += "/";
+	protected boolean initializeUpdateSite(final String siteName, String url,
+		final String host, String uploadDirectory)
+	{
+		if (!url.endsWith("/")) url += "/";
+		if (!uploadDirectory.endsWith("/")) uploadDirectory += "/";
 		boolean result;
 		try {
-			result = updaterFrame.initializeUpdateSite(url, host,
-					uploadDirectory) && validURL(url);
-		} catch (final InstantiationException e) {
+			result = updaterFrame.initializeUpdateSite(url, host, uploadDirectory) &&
+				validURL(url);
+		}
+		catch (final InstantiationException e) {
 			updaterFrame.log.error(e);
 			result = false;
 		}
-		if (result)
-			info("Initialized update site '" + siteName + "'");
-		else
-			error("Could not initialize update site '" + siteName + "'");
+		if (result) info("Initialized update site '" + siteName + "'");
+		else error("Could not initialize update site '" + siteName + "'");
 		return result;
 	}
 
 	@Override
 	public void dispose() {
-		table.editCellAt(0,0);
+		table.editCellAt(0, 0);
 		super.dispose();
 		updaterFrame.updateFilesTable();
 		updaterFrame.enableApplyOrUpload();

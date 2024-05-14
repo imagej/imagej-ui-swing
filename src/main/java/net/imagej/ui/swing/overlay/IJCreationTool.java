@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -38,10 +38,12 @@ import org.jhotdraw.draw.tool.CreationTool;
 
 /**
  * A JHotDraw {@link CreationTool} for ImageJ's Swing UI.
- * 
+ *
  * @author Lee Kamentsky
  */
-public class IJCreationTool<F extends Figure> extends CreationTool implements JHotDrawTool {
+public class IJCreationTool<F extends Figure> extends CreationTool implements
+	JHotDrawTool
+{
 
 	private final ImageDisplay display;
 	private final JHotDrawAdapter<F> adapter;
@@ -65,9 +67,9 @@ public class IJCreationTool<F extends Figure> extends CreationTool implements JH
 	@Override
 	protected void creationFinished(final Figure figure) {
 		super.creationFinished(figure);
-		final JHotDrawService jHotDrawService =
-			getDisplay().getContext().getService(JHotDrawService.class);
-		jHotDrawService.linkOverlay((F)figure, getAdapter(), getDisplay());
+		final JHotDrawService jHotDrawService = getDisplay().getContext()
+			.getService(JHotDrawService.class);
+		jHotDrawService.linkOverlay((F) figure, getAdapter(), getDisplay());
 	}
 
 	// -- JHotDrawTool methods --
@@ -94,14 +96,14 @@ public class IJCreationTool<F extends Figure> extends CreationTool implements JH
 		if (!isLeftClick(evt)) return;
 		super.mouseClicked(evt);
 	}
-	
+
 	@Override
 	public void mousePressed(MouseEvent evt) {
 		if (!isLeftClick(evt)) return;
 		super.mousePressed(evt);
 		adapter.mouseDown(getDisplay(), evt.getX(), evt.getY());
 	}
-	
+
 	@Override
 	public void mouseReleased(MouseEvent evt) {
 		if (!isLeftClick(evt)) return;

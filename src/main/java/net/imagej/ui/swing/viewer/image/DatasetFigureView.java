@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -49,11 +49,12 @@ import org.scijava.ui.awt.AWTImageTools;
 /**
  * A figure view that links an ImageJ {@link DatasetView} to a JHotDraw
  * {@link ImageFigure}.
- * 
+ *
  * @author Curtis Rueden
  * @author Lee Kamentsky
  */
-public class DatasetFigureView extends AbstractContextual implements FigureView
+public class DatasetFigureView extends AbstractContextual implements
+	FigureView
 {
 
 	private final DatasetView datasetView;
@@ -92,8 +93,8 @@ public class DatasetFigureView extends AbstractContextual implements FigureView
 		log.debug("Updating image figure: " + this);
 		final Image image = datasetView.getScreenImage().image();
 		final BufferedImage bufImage = AWTImageTools.makeBuffered(image);
-		figure.setBounds(new Rectangle2D.Double(0, 0, bufImage.getWidth(),
-			bufImage.getHeight()));
+		figure.setBounds(new Rectangle2D.Double(0, 0, bufImage.getWidth(), bufImage
+			.getHeight()));
 		figure.setBufferedImage(bufImage);
 	}
 

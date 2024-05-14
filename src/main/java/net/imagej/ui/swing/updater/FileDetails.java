@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -67,7 +67,7 @@ import net.imagej.updater.util.UpdaterUserInterface;
 
 /**
  * TODO
- * 
+ *
  * @author Johannes Schindelin
  */
 @SuppressWarnings("serial")
@@ -86,7 +86,8 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 		italic = getStyle(null, true, false, java.awt.Font.SANS_SERIF, size);
 		bold = getStyle(null, false, true, java.awt.Font.SANS_SERIF, size);
 		normal = getStyle(null, false, false, java.awt.Font.SANS_SERIF, size);
-		title = getStyle(null, false, false, java.awt.Font.SANS_SERIF, (int)1.5 * size);
+		title = getStyle(null, false, false, java.awt.Font.SANS_SERIF, (int) 1.5 *
+			size);
 		hand = new Cursor(Cursor.HAND_CURSOR);
 		defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
 	}
@@ -103,9 +104,11 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 						// UpdaterUserInterface#openURL() has no implementation!?
 						getOrInitPlatformService().open(new URL(url));
 					}
-				} catch (final Exception exception) {
+				}
+				catch (final Exception exception) {
 					updaterFrame.log.error(exception);
-					UpdaterUserInterface.get().error("Could not open " + url + ": " + exception.getMessage());
+					UpdaterUserInterface.get().error("Could not open " + url + ": " +
+						exception.getMessage());
 				}
 			}
 		});
@@ -133,7 +136,8 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 	public void reset() {
 		setEditable(false);
 		setText("");
-		final Comparator<Position> comparator = (p1, p2) -> p1.getOffset() - p2.getOffset();
+		final Comparator<Position> comparator = (p1, p2) -> p1.getOffset() - p2
+			.getOffset();
 		editables = new TreeMap<>(comparator);
 		dummySpace = null;
 	}
@@ -154,7 +158,8 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 	}
 
 	private AttributeSet getLinkAttribute(final String url) {
-		final Style style = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
+		final Style style = StyleContext.getDefaultStyleContext().getStyle(
+			StyleContext.DEFAULT_STYLE);
 		StyleConstants.setForeground(style, Color.BLUE);
 		style.addAttribute(LINK_ATTRIBUTE, url);
 		return style;
@@ -205,14 +210,15 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 	}
 
 	public void description(final String description, final FileObject file) {
-		if (!updaterFrame.files.hasUploadableSites() &&
-			(description == null || description.trim().equals(""))) return;
+		if (!updaterFrame.files.hasUploadableSites() && (description == null ||
+			description.trim().equals(""))) return;
 		blankLine();
-		bold("Description" + (file.descriptionFromPOM ? " (from pom.xml)" : "") + ":\n");
+		bold("Description" + (file.descriptionFromPOM ? " (from pom.xml)" : "") +
+			":\n");
 		final int offset = getCaretPosition();
 		normal(description);
-		if (!file.descriptionFromPOM)
-			addEditableRegion(offset, "Description", file);
+		if (!file.descriptionFromPOM) addEditableRegion(offset, "Description",
+			file);
 	}
 
 	public void executable(final FileObject file) {
@@ -235,8 +241,8 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 
 		blankLine();
 		final String tag = label;
-		if (list.size() > 1 && label.endsWith("y")) label =
-			label.substring(0, label.length() - 1) + "ie";
+		if (list.size() > 1 && label.endsWith("y")) label = label.substring(0, label
+			.length() - 1) + "ie";
 		bold(label + (list.size() > 1 ? "s" : "") + ":\n");
 		final int offset = getCaretPosition();
 		String delimiter = "";
@@ -268,8 +274,8 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 
 	String prettyPrintTimestamp(final long timestamp) {
 		final String t = "" + timestamp + "00000000";
-		return t.substring(6, 8) + " " +
-			months[Integer.parseInt(t.substring(4, 6))] + " " + t.substring(0, 4);
+		return t.substring(6, 8) + " " + months[Integer.parseInt(t.substring(4,
+			6))] + " " + t.substring(0, 4);
 	}
 
 	public void showFileDetails(final FileObject file) {
@@ -298,8 +304,8 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 		list("Link", true, file.getLinks(), "\n", file);
 		list("Dependency", false, file.getDependencies(), ",\n", file);
 		if (file.executable) executable(file);
-		if (file.updateSite != null &&
-			!file.updateSite.equals(FilesCollection.DEFAULT_UPDATE_SITE))
+		if (file.updateSite != null && !file.updateSite.equals(
+			FilesCollection.DEFAULT_UPDATE_SITE))
 		{
 			blankLine();
 			bold("Update site:\n");
@@ -375,8 +381,8 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 			final Position current = getDocument().createPosition(offset);
 			final Position last = editables.headMap(current).lastKey();
 			editable = editables.get(last);
-			if (offset > editable.start.getOffset() &&
-				offset > editable.end.getOffset()) return false;
+			if (offset > editable.start.getOffset() && offset > editable.end
+				.getOffset()) return false;
 		}
 		catch (final NoSuchElementException e) {
 			return false;
@@ -384,8 +390,7 @@ public class FileDetails extends JTextPane implements UndoableEditListener {
 		catch (final BadLocationException e) {
 			return false;
 		}
-		if (!editable.file.isUploadable(updaterFrame.files, true))
-			return false;
+		if (!editable.file.isUploadable(updaterFrame.files, true)) return false;
 
 		final int start = editable.start.getOffset() + 1;
 		final int end = editable.end.getOffset();

@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package net.imagej.ui.swing.updater;
 
 import net.imagej.updater.URLChange;
@@ -53,14 +54,14 @@ import java.util.List;
 import static net.imagej.ui.swing.updater.SitesDialog.escapeCancels;
 
 /**
- * The dialog in which updated URLs of available update sites will be shown
- * and the user can chose to accept these updates.
+ * The dialog in which updated URLs of available update sites will be shown and
+ * the user can chose to accept these updates.
  *
  * @author Deborah Schmidt
  */
 public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 
-	List< URLChange > urlChanges;
+	List<URLChange> urlChanges;
 
 	private UpdatableTableDataModel tableModel;
 	private JTable table;
@@ -71,32 +72,38 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 	JCheckBox stopAsking;
 	private ButtonGroup generalChoiceGroup = new ButtonGroup();
 	private final static int nameCol = 0, urlCol = 1;
-	private final static String appendOld = " (keep URL)", appendNew = " (update URL)";
+	private final static String appendOld = " (keep URL)", appendNew =
+		" (update URL)";
 	private boolean okPressed;
 
 	/**
 	 * @param owner The frame that this dialog will be placed relative to
 	 * @param urlChanges The urlChanges
 	 */
-	public ReviewSiteURLsDialog(final UpdaterFrame owner, final List< URLChange > urlChanges)
+	public ReviewSiteURLsDialog(final UpdaterFrame owner,
+		final List<URLChange> urlChanges)
 	{
-		super(owner, "Changes to Available Update Sites", ModalityType.DOCUMENT_MODAL);
+		super(owner, "Changes to Available Update Sites",
+			ModalityType.DOCUMENT_MODAL);
 
 		this.urlChanges = urlChanges;
 
 		final JPanel contentPane = new JPanel();
 		contentPane.setLayout(new MigLayout("fill, gap 0"));
 
-		this.urlChanges.forEach( change -> change.setApproved(change.isRecommended()));
+		this.urlChanges.forEach(change -> change.setApproved(change
+			.isRecommended()));
 
-		if( this.urlChanges.size() > 0) {
-			//setMinimumSize(new Dimension(900, 0));
+		if (this.urlChanges.size() > 0) {
+			// setMinimumSize(new Dimension(900, 0));
 			contentPane.add(createHeader(), "span, grow");
-			contentPane.add(createUpdateSiteScrollPane(), "newline, span, grow, push");
+			contentPane.add(createUpdateSiteScrollPane(),
+				"newline, span, grow, push");
 			contentPane.add(createButtonsPanel(), "dock south");
 			updateGeneralChoices();
-		} else {
-			//setMinimumSize(new Dimension(0, 0));
+		}
+		else {
+			// setMinimumSize(new Dimension(0, 0));
 			contentPane.add(createOkPanel(), "dock south");
 			contentPane.add(createOkIcon());
 			contentPane.add(createEverythingIsFineMessage());
@@ -109,9 +116,9 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 		setLocationRelativeTo(owner);
 	}
 
-	static boolean shouldBeDisplayed(final List<URLChange> changes ) {
-		for(URLChange change : changes) {
-			if(change.isRecommended() && !change.isApproved()) {
+	static boolean shouldBeDisplayed(final List<URLChange> changes) {
+		for (URLChange change : changes) {
+			if (change.isRecommended() && !change.isApproved()) {
 				return true;
 			}
 		}
@@ -123,17 +130,19 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 	}
 
 	private Component createEverythingIsFineMessage() {
-		JEditorPane text = createHTMLText("<html><h3>Software package sources up to date</h3>" +
+		JEditorPane text = createHTMLText(
+			"<html><h3>Software package sources up to date</h3>" +
 				"No updated URLs found for activated update sites.</html>");
 		text.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 25));
-		//text.setMinimumSize(new Dimension(0,0));
+		// text.setMinimumSize(new Dimension(0,0));
 		return text;
 	}
 
 	private Component createOkPanel() {
 		JPanel panel = new JPanel();
 		ok = new JButton("OK");
-		//panel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.darkGray));
+		// panel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0,
+		// Color.darkGray));
 		panel.add(ok);
 		ok.addActionListener(this);
 		getRootPane().setDefaultButton(ok);
@@ -146,7 +155,7 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 		panel.add(createUpdatesAvailableMessage(), "span, wrap, wmax 600px");
 		panel.add(createAttentionIcon(), "w 100px!");
 		panel.add(createGeneralChoices(), "wrap, w 300px!, bottom, left");
-		if(HTTPSUtil.supportsHTTPS()) {
+		if (HTTPSUtil.supportsHTTPS()) {
 			panel.add(createHTTPSInfo(), "wmax 250px, dock east");
 		}
 		return panel;
@@ -162,42 +171,44 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 	private static Component createOkIcon() {
 		JLabel label = new JLabel("<html><h2>:-)</h2>", SwingConstants.CENTER);
 		label.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-		//label.setFont(new Font(label.getFont().getName(), Font.BOLD, (int) (label.getFont().getSize() * 2.5)));
-		//label.setForeground(new Color(114, 200, 218));
+		// label.setFont(new Font(label.getFont().getName(), Font.BOLD, (int)
+		// (label.getFont().getSize() * 2.5)));
+		// label.setForeground(new Color(114, 200, 218));
 		return label;
 //		return new JLabel(javax.swing.UIManager.getIcon("OptionPane.informationIcon"));
 	}
 
 	private static Component createUpdatesAvailableMessage() {
 		return createHTMLText("<html><h3>Updated software package sources</h3>" +
-				"<p>Please review the following update site URL changes.<br/>" +
-				"If you have never heard of update sites," +
-				" just click <b>OK</b> at the bottom.</p></html>");
+			"<p>Please review the following update site URL changes.<br/>" +
+			"If you have never heard of update sites," +
+			" just click <b>OK</b> at the bottom.</p></html>");
 	}
 
 	private static Component createHTTPSInfo() {
 		// TODO remove note in Updater V2
-		JEditorPane text = createHTMLText("<html><h3>ImageJ is improving<br/>data security!</h3>" +
+		JEditorPane text = createHTMLText(
+			"<html><h3>ImageJ is improving<br/>data security!</h3>" +
 				"From now on ImageJ updates more securely via HTTPS. " +
 				"Therefore addresses of update sites currently in use by your ImageJ installation " +
 				"need to be updated.</html>");
-		//text.setBackground(new Color(250,250,250));
-		//text.setBorder(BorderFactory.createEmptyBorder(25,15,25,25));
-		//String bodyRule = "body { color: #404042; }";
-		//((HTMLDocument)text.getDocument()).getStyleSheet().addRule(bodyRule);
-		//text.setOpaque(true);
+		// text.setBackground(new Color(250,250,250));
+		// text.setBorder(BorderFactory.createEmptyBorder(25,15,25,25));
+		// String bodyRule = "body { color: #404042; }";
+		// ((HTMLDocument)text.getDocument()).getStyleSheet().addRule(bodyRule);
+		// text.setOpaque(true);
 		return text;
 	}
 
 	private static JEditorPane createHTMLText(String text) {
-		JEditorPane component =
-				new JEditorPane(new HTMLEditorKit().getContentType(), text);
+		JEditorPane component = new JEditorPane(new HTMLEditorKit()
+			.getContentType(), text);
 		component.setEditable(false);
 		component.setOpaque(false);
 		Font font = UIManager.getFont("Label.font");
 		String bodyRule = "body { font-family: " + font.getFamily() + "; " +
-				"font-size: " + font.getSize() + "pt; }";
-		((HTMLDocument)component.getDocument()).getStyleSheet().addRule(bodyRule);
+			"font-size: " + font.getSize() + "pt; }";
+		((HTMLDocument) component.getDocument()).getStyleSheet().addRule(bodyRule);
 		return component;
 	}
 
@@ -207,7 +218,8 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 		updateAll = createGeneralChoiceButton("Update all URLs (recommended)");
 		keepAll = createGeneralChoiceButton("Keep the current URLs");
 		manualChoice = createGeneralChoiceButton("Adjust manually:");
-		manualChoice.setFont(manualChoice.getFont().deriveFont(manualChoice.getFont().getStyle() & ~Font.BOLD));
+		manualChoice.setFont(manualChoice.getFont().deriveFont(manualChoice
+			.getFont().getStyle() & ~Font.BOLD));
 		generalChoices.add(updateAll);
 		generalChoices.add(keepAll);
 		generalChoices.add(manualChoice);
@@ -226,8 +238,10 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 		buttons.setLayout(new MigLayout("", "[]push[][]", ""));
 		stopAsking = new JCheckBox("Remember to not update these URLs");
 		buttons.add(stopAsking);
-		cancel = SwingTools.button("Cancel", "Do not update software package sources", this, buttons);
-		submit = SwingTools.button("OK", "Continue with updated software package sources", this, buttons);
+		cancel = SwingTools.button("Cancel",
+			"Do not update software package sources", this, buttons);
+		submit = SwingTools.button("OK",
+			"Continue with updated software package sources", this, buttons);
 		getRootPane().setDefaultButton(submit);
 		return buttons;
 	}
@@ -235,7 +249,7 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 	private Component createUpdateSiteScrollPane() {
 		JScrollPane scrollPane = new JScrollPane(createUpdatableSitesTable());
 		scrollPane.setPreferredSize(new Dimension(tableModel.tableWidth, 150));
-		//scrollPane.setMinimumSize(new Dimension(0,0));
+		// scrollPane.setMinimumSize(new Dimension(0,0));
 		return scrollPane;
 	}
 
@@ -244,10 +258,10 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 		table = new UpdatableSitesTable(tableModel);
 		table.setColumnSelectionAllowed(false);
 		table.setRowSelectionAllowed(false);
-		table.setRowHeight((int) (table.getRowHeight()*1.5));
+		table.setRowHeight((int) (table.getRowHeight() * 1.5));
 		table.setShowVerticalLines(false);
-		((DefaultTableCellRenderer)table.getTableHeader().getDefaultRenderer())
-				.setHorizontalAlignment(JLabel.LEFT);
+		((DefaultTableCellRenderer) table.getTableHeader().getDefaultRenderer())
+			.setHorizontalAlignment(JLabel.LEFT);
 		table.setDefaultRenderer(URLChange.class, new URLRenderer());
 		TableColumn urlColumn = table.getColumnModel().getColumn(urlCol);
 		urlColumn.setCellEditor(new URLComboBoxEditor());
@@ -255,15 +269,17 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 		return table;
 	}
 
-	private static String wrapToolTip(final String description, final String maintainer) {
+	private static String wrapToolTip(final String description,
+		final String maintainer)
+	{
 		if (description == null) return null;
-		return  "<html><p width='400'>" + description.replaceAll("\n", "<br />")
-				+ (maintainer != null ? "</p><p>Maintainer: " + maintainer + "</p>": "")
-				+ "</p></html>";
+		return "<html><p width='400'>" + description.replaceAll("\n", "<br />") +
+			(maintainer != null ? "</p><p>Maintainer: " + maintainer + "</p>" : "") +
+			"</p></html>";
 	}
 
 	private String getUpdateSiteName(int row) {
-		return getUpdateSite( row ).getName();
+		return getUpdateSite(row).getName();
 	}
 
 	private UpdateSite getUpdateSite(int row) {
@@ -277,19 +293,22 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 	private void updateGeneralChoices() {
 		int updated = 0;
 		int kept = 0;
-		for(URLChange change : urlChanges ) {
-			if(change.isApproved()) {
+		for (URLChange change : urlChanges) {
+			if (change.isApproved()) {
 				updated++;
-			} else {
+			}
+			else {
 				kept++;
 			}
 		}
-		if(kept == 0) {
+		if (kept == 0) {
 			updateAll.setSelected(true);
-		}else {
-			if(updated == 0) {
+		}
+		else {
+			if (updated == 0) {
 				keepAll.setSelected(true);
-			} else {
+			}
+			else {
 				manualChoice.setSelected(true);
 			}
 		}
@@ -298,10 +317,10 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 
 	private void submitAndDispose() {
 		okPressed = true;
-		if(stopAsking.isSelected()) {
+		if (stopAsking.isSelected()) {
 			// stop trying to update the URLs
 			urlChanges.forEach(change -> {
-				if(!change.isApproved()) {
+				if (!change.isApproved()) {
 					change.updateSite().setKeepURL(true);
 				}
 			});
@@ -322,21 +341,21 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 	}
 
 	private void updateTable() {
-		tableModel.fireTableRowsUpdated(0, tableModel.getRowCount()-1);
+		tableModel.fireTableRowsUpdated(0, tableModel.getRowCount() - 1);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if(e.getSource().equals(ok)) super.dispose();
-		else if(e.getSource().equals(cancel)) dispose();
-		else if(e.getSource().equals(submit)) submitAndDispose();
-		else if(e.getSource().equals(updateAll)) updateAll();
-		else if(e.getSource().equals(keepAll)) keepAll();
+		if (e.getSource().equals(ok)) super.dispose();
+		else if (e.getSource().equals(cancel)) dispose();
+		else if (e.getSource().equals(submit)) submitAndDispose();
+		else if (e.getSource().equals(updateAll)) updateAll();
+		else if (e.getSource().equals(keepAll)) keepAll();
 	}
 
 	@Override
 	public void dispose() {
-		//reset choices, don't save available updated URLs and continue update
+		// reset choices, don't save available updated URLs and continue update
 		urlChanges.forEach(change -> change.setApproved(false));
 		super.dispose();
 	}
@@ -349,7 +368,8 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 
 		void setColumnWidths() {
 			final TableColumnModel columnModel = table.getColumnModel();
-			for (int i = 0; i < tableModel.widths.length && i < getColumnCount(); i++)
+			for (int i = 0; i < tableModel.widths.length &&
+				i < getColumnCount(); i++)
 			{
 				final TableColumn column = columnModel.getColumn(i);
 				column.setPreferredWidth(tableModel.widths[i]);
@@ -371,7 +391,7 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 
 		@Override
 		public Class<?> getColumnClass(final int column) {
-			if(column != nameCol) return URLChange.class;
+			if (column != nameCol) return URLChange.class;
 			return String.class;
 		}
 
@@ -393,7 +413,7 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 	}
 
 	private String updateChoiceString(URLChange site) {
-		return  "<html><b>" + site.getNewURL() + "</b>" + appendNew;
+		return "<html><b>" + site.getNewURL() + "</b>" + appendNew;
 	}
 
 	private class URLComboBoxEditor extends DefaultCellEditor {
@@ -404,14 +424,22 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 		URLComboBoxEditor() {
 			super(new JComboBox());
 			box.addPopupMenuListener(new PopupMenuListener() {
+
 				@Override
 				public void popupMenuWillBecomeVisible(PopupMenuEvent e) {}
+
 				@Override
-				public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {stopCellEditing();}
+				public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+					stopCellEditing();
+				}
+
 				@Override
-				public void popupMenuCanceled(PopupMenuEvent e) {stopCellEditing();}
+				public void popupMenuCanceled(PopupMenuEvent e) {
+					stopCellEditing();
+				}
 			});
-			box.setFont(box.getFont().deriveFont(box.getFont().getStyle() & ~Font.BOLD));
+			box.setFont(box.getFont().deriveFont(box.getFont().getStyle() &
+				~Font.BOLD));
 		}
 
 		@Override
@@ -420,17 +448,21 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 		}
 
 		@Override
-		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+		public Component getTableCellEditorComponent(JTable table, Object value,
+			boolean isSelected, int row, int column)
+		{
 			URLChange change = getUrlChange(row);
 			box.removeAllItems();
-			box.addItem(keepChoiceString( change ));
-			box.addItem(updateChoiceString( change ));
-			box.setSelectedIndex( change.isApproved() ? 1 : 0);
-			return editor.getTableCellEditorComponent(table, value, isSelected, row, column);
+			box.addItem(keepChoiceString(change));
+			box.addItem(updateChoiceString(change));
+			box.setSelectedIndex(change.isApproved() ? 1 : 0);
+			return editor.getTableCellEditorComponent(table, value, isSelected, row,
+				column);
 		}
 	}
 
 	private class UpdatableSitesTable extends JTable {
+
 		UpdatableSitesTable(UpdatableTableDataModel tableModel) {
 			super(tableModel);
 		}
@@ -446,14 +478,15 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 		}
 
 		@Override
-		public void setValueAt(final Object value, final int row, final int column)
+		public void setValueAt(final Object value, final int row,
+			final int column)
 		{
 			URLChange change = getUrlChange(row);
-			if(column == urlCol) {
-				if(value.equals(keepChoiceString( change ))) {
+			if (column == urlCol) {
+				if (value.equals(keepChoiceString(change))) {
 					change.setApproved(false);
 				}
-				if(value.equals(updateChoiceString( change ))) {
+				if (value.equals(updateChoiceString(change))) {
 					change.setApproved(true);
 				}
 				tableModel.fireTableRowsUpdated(row, row);
@@ -462,13 +495,16 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 		}
 
 		@Override
-		public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+		public Component prepareRenderer(TableCellRenderer renderer, int row,
+			int column)
+		{
 			Component component = super.prepareRenderer(renderer, row, column);
 			if (component instanceof JComponent) {
 				final UpdateSite site = getUpdateSite(row);
 				if (site != null) {
 					JComponent jcomponent = (JComponent) component;
-					jcomponent.setToolTipText(wrapToolTip(site.getDescription(), site.getMaintainer()));
+					jcomponent.setToolTipText(wrapToolTip(site.getDescription(), site
+						.getMaintainer()));
 				}
 			}
 			return component;
@@ -480,10 +516,11 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 		URLPanel panel = new URLPanel();
 
 		@Override
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-		                                               boolean hasFocus, int rowIndex, int vColIndex) {
-			if(value == null) return null;
-			panel.update( (URLChange) value );
+		public Component getTableCellRendererComponent(JTable table, Object value,
+			boolean isSelected, boolean hasFocus, int rowIndex, int vColIndex)
+		{
+			if (value == null) return null;
+			panel.update((URLChange) value);
 			return panel;
 		}
 	}
@@ -497,15 +534,17 @@ public class ReviewSiteURLsDialog extends JDialog implements ActionListener {
 			setOpaque(false);
 			urlLabel = new JLabel();
 			choiceLabel = new JLabel();
-			choiceLabel.setFont(choiceLabel.getFont().deriveFont(choiceLabel.getFont().getStyle() & ~Font.BOLD));
-			choiceLabel.setBorder(BorderFactory.createEmptyBorder(0,0,0,10));
+			choiceLabel.setFont(choiceLabel.getFont().deriveFont(choiceLabel.getFont()
+				.getStyle() & ~Font.BOLD));
+			choiceLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
 			add(urlLabel, "dock west");
 			add(choiceLabel, "dock east");
 		}
 
-		public void update(URLChange change ) {
-			urlLabel.setText( change.isApproved() ? change.getNewURL() : change.updateSite().getURL());
-			choiceLabel.setText( change.isApproved() ? appendNew : appendOld );
+		public void update(URLChange change) {
+			urlLabel.setText(change.isApproved() ? change.getNewURL() : change
+				.updateSite().getURL());
+			choiceLabel.setText(change.isApproved() ? appendNew : appendOld);
 		}
 
 	}
