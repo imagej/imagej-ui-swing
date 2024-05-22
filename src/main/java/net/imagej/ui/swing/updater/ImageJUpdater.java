@@ -363,8 +363,8 @@ public class ImageJUpdater implements UpdaterUI {
 		if (exeName != null && !exeName.trim().isEmpty()) {
 			exeName = exeName.substring(exeName.lastIndexOf(File.separator));
 			exeName = exeName.substring(0, exeName.indexOf("-"));
-			final File appCfg = new File(imagejRoot + File.separator + exeName +
-				".cfg");
+			final File appCfg = new File(imagejRoot + File.separator + "config" +
+				File.separator + "jaunch" + File.separator + exeName + ".cfg");
 			Map<String, String> appProps = appCfg.exists() ? PropertiesHelper.get(
 				appCfg) : new HashMap<>();
 			appProps.put("jvm.app-configured", javaLoc);
@@ -404,8 +404,10 @@ public class ImageJUpdater implements UpdaterUI {
 	 * the appropriate directory.
 	 */
 	private void updateJavaIfNecessary(final File imagejRoot) {
-		final File jdkUrls = new File(imagejRoot.getAbsolutePath() +
-			File.separator + "jdk-urls.txt");
+		final File configDir = new File(imagejRoot.getAbsolutePath() +
+			File.separator + "config" + File.separator + "jaunch");
+		final File jdkUrlConf = new File(configDir.getAbsolutePath() +
+			File.separator + "jdk-urls.cfg");
 		final String modifiedKey = "LAST_MODIFIED";
 		final String jdkUrl = "https://downloads.imagej.net/java/jdk-urls.txt";
 		long lastModifiedRemote;
@@ -422,10 +424,16 @@ public class ImageJUpdater implements UpdaterUI {
 			return;
 		}
 
+		// Make the config dir if it doesn't already exist
+		if (!configDir.exists() && !configDir.mkdirs()) {
+			log.error("Unable to create configuration directory: " + configDir);
+			return;
+		}
+
 		// Check if we've already cached a local version of the JDK list
-		if (jdkUrls.exists()) {
+		if (jdkUrlConf.exists()) {
 			// check when the remote was last modified
-			Map<String, String> jdkVersionProps = PropertiesHelper.get(jdkUrls);
+			Map<String, String> jdkVersionProps = PropertiesHelper.get(jdkUrlConf);
 			if (lastModifiedRemote == 0) { // 0 means "not provided"
 				log.error("No modification date found in jdk-urls.txt");
 				return;
@@ -437,13 +445,13 @@ public class ImageJUpdater implements UpdaterUI {
 			if (lastModifiedLocal == lastModifiedRemote) return;
 
 			// Otherwise delete the conf file and re-download
-			jdkUrls.delete();
+			jdkUrlConf.delete();
 		}
 
 		// Download the new properties file
 		try {
 			Download dl = downloadService.download(locationService.resolve(jdkUrl),
-				locationService.resolve(jdkUrls.toURI()));
+				locationService.resolve(jdkUrlConf.toURI()));
 			dl.task().waitFor();
 		}
 		catch (URISyntaxException e) {
@@ -457,7 +465,7 @@ public class ImageJUpdater implements UpdaterUI {
 		}
 
 		// Inject the last modification date to the JDK list
-		Map<String, String> jdkUrlMap = PropertiesHelper.get(jdkUrls);
+		Map<String, String> jdkUrlMap = PropertiesHelper.get(jdkUrlConf);
 		jdkUrlMap.put(modifiedKey, Long.toString(lastModifiedRemote));
 
 		// Ask the user if they would like to proceed with a Java update
@@ -472,7 +480,7 @@ public class ImageJUpdater implements UpdaterUI {
 			imagejRoot))
 		{
 			// Store the current url list if we updated Java
-			PropertiesHelper.put(jdkUrlMap, jdkUrls);
+			PropertiesHelper.put(jdkUrlMap, jdkUrlConf);
 		}
 	}
 
