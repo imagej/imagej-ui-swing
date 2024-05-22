@@ -42,6 +42,7 @@ import net.imagej.updater.util.*;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
@@ -57,6 +58,8 @@ import org.scijava.log.Logger;
 import org.scijava.plugin.Menu;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.task.Task;
+import org.scijava.task.TaskService;
 import org.scijava.ui.DialogPrompt;
 import org.scijava.ui.UIService;
 import org.scijava.util.AppUtils;
@@ -86,6 +89,9 @@ public class ImageJUpdater implements UpdaterUI {
 
 	@Parameter
 	private DownloadService downloadService;
+
+	@Parameter
+	private TaskService taskService;
 
 	@Parameter
 	private LocationService locationService;
@@ -324,29 +330,53 @@ public class ImageJUpdater implements UpdaterUI {
 
 		String javaLoc = jdkDlLoc.getAbsolutePath();
 		int extensionLength = 0;
+		int entryCount = 0;
 
 		// Extract the JDK
 		if (jdkDlLoc.toString().endsWith("tar.gz")) {
+			extensionLength = 7;
+			// sadly this is the only way to determine how long extraction
 			try (FileInputStream fis = new FileInputStream(jdkDlLoc);
 					GzipCompressorInputStream gzIn = new GzipCompressorInputStream(fis);
 					TarArchiveInputStream tarIn = new TarArchiveInputStream(gzIn))
 			{
-				doExtraction(jdkDir, tarIn);
-				extensionLength = 7;
+				entryCount = countArchiveEntries(tarIn);
 			}
 			catch (IOException e) {
 				log.error(e);
 				return false;
 			}
+			// Do the actual extraction
+			try (FileInputStream fis = new FileInputStream(jdkDlLoc);
+					GzipCompressorInputStream gzIn = new GzipCompressorInputStream(fis);
+					TarArchiveInputStream tarIn = new TarArchiveInputStream(gzIn))
+			{
+				doExtraction(jdkDir, tarIn, entryCount);
+			}
+			catch (ExecutionException | InterruptedException | IOException e) {
+				log.error(e);
+				return false;
+			}
 		}
 		else if (jdkDlLoc.toString().endsWith("zip")) {
+			extensionLength = 4;
+			// sadly this is the only way to determine how long extraction will take
 			try (FileInputStream fis = new FileInputStream(jdkDlLoc);
 					ZipArchiveInputStream zis = new ZipArchiveInputStream(fis))
 			{
-				doExtraction(jdkDir, zis);
-				extensionLength = 4;
+				entryCount = countArchiveEntries(zis);
 			}
 			catch (IOException e) {
+				log.error(e);
+				return false;
+			}
+			// Do the actual extraction
+			try (FileInputStream fis = new FileInputStream(jdkDlLoc);
+					ZipArchiveInputStream zis = new ZipArchiveInputStream(fis))
+			{
+				doExtraction(jdkDir, zis, entryCount);
+			}
+			catch (ExecutionException | InterruptedException | IOException e) {
 				log.error(e);
 				return false;
 			}
@@ -374,27 +404,58 @@ public class ImageJUpdater implements UpdaterUI {
 	}
 
 	/**
-	 * Helper method to extract an archive
+	 * Helper method to count the entries in an archive
 	 */
-	private void doExtraction(final File jdkDir, final ArchiveInputStream tarIn)
+	private int countArchiveEntries(final ArchiveInputStream ais)
 		throws IOException
 	{
+		int entryCount = 0;
 		ArchiveEntry entry;
-		while ((entry = tarIn.getNextEntry()) != null) {
-			if (entry.isDirectory()) {
-				new File(jdkDir, entry.getName()).mkdirs();
-			}
-			else {
-				byte[] buffer = new byte[1024];
-				File outputFile = new File(jdkDir, entry.getName());
-				OutputStream fos = new FileOutputStream(outputFile);
-				int len;
-				while ((len = tarIn.read(buffer)) != -1) {
-					fos.write(buffer, 0, len);
-				}
-				fos.close();
-			}
+		while ((entry = ais.getNextEntry()) != null) {
+			entryCount++;
 		}
+		return entryCount;
+	}
+
+	/**
+	 * Helper method to extract an archive
+	 */
+	private void doExtraction(final File jdkDir, final ArchiveInputStream ais,
+		final int entryCount) throws IOException, ExecutionException,
+		InterruptedException
+	{
+		Task task = taskService.createTask("Extracting JDK");
+		task.setProgressMaximum(entryCount);
+		task.setProgressValue(0);
+		task.start();
+		task.run(() -> {
+			try {
+				int currentEntry = 0;
+				ArchiveEntry entry;
+				while ((entry = ais.getNextEntry()) != null) {
+					if (task != null && task.isCanceled()) break;
+					if (entry.isDirectory()) {
+						new File(jdkDir, entry.getName()).mkdirs();
+					}
+					else {
+						byte[] buffer = new byte[1024];
+						File outputFile = new File(jdkDir, entry.getName());
+						OutputStream fos = new FileOutputStream(outputFile);
+						int len;
+						while ((len = ais.read(buffer)) != -1) {
+							fos.write(buffer, 0, len);
+						}
+						fos.close();
+					}
+					task.setProgressValue(++currentEntry);
+				}
+			}
+			catch (IOException e) {
+				task.setStatusMessage("Java extraction failed!");
+			}
+		});
+		task.waitFor();
+		task.finish();
 	}
 
 	/**
