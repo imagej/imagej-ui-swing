@@ -137,6 +137,7 @@ public class ImageJUpdater implements UpdaterUI {
 						"Please download a recent version of this software.\n");
 			}
 			refreshUpdateSites(files);
+			main.updateFilesTable();
 			String warnings = files.reloadCollectionAndChecksum(progress);
 			main.checkWritable();
 			main.addCustomViewOptions();
