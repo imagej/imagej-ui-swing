@@ -2,7 +2,7 @@
  * #%L
  * ImageJ software for multidimensional image processing and analysis.
  * %%
- * Copyright (C) 2009 - 2023 ImageJ developers.
+ * Copyright (C) 2009 - 2024 ImageJ developers.
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -63,10 +63,7 @@ import javax.swing.*;
 
 /**
  * The Updater. As a command.
- * <p>
- * Incidentally, this class can be used as an out-of-ImageJ entry point to the
- * updater, as it does not *require* a StatusService to run.
- * 
+ *
  * @author Johannes Schindelin
  */
 @Plugin(type = UpdaterUI.class, menu = { @Menu(label = "Help"),
