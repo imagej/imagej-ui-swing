@@ -29,18 +29,16 @@
 
 package net.imagej.ui.swing.updater;
 
+import java.awt.EventQueue;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.List;
 
 import net.imagej.ui.swing.updater.ViewOptions.Option;
@@ -48,8 +46,8 @@ import net.imagej.updater.*;
 import net.imagej.updater.Conflicts.Conflict;
 import net.imagej.updater.util.*;
 
+import org.scijava.Context;
 import org.scijava.app.StatusService;
-import org.scijava.command.CommandService;
 import org.scijava.event.ContextDisposingEvent;
 import org.scijava.event.EventHandler;
 import org.scijava.log.LogService;
@@ -59,8 +57,6 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.util.AppUtils;
 
-import javax.swing.*;
-
 /**
  * The Updater. As a command.
  *
@@ -69,7 +65,11 @@ import javax.swing.*;
 @Plugin(type = UpdaterUI.class, menu = { @Menu(label = "Help"),
 	@Menu(label = "Update...") })
 public class ImageJUpdater implements UpdaterUI {
+
 	private UpdaterFrame main;
+
+	@Parameter(required = false)
+	private Context context;
 
 	@Parameter(required = false)
 	private StatusService statusService;
@@ -82,6 +82,7 @@ public class ImageJUpdater implements UpdaterUI {
 
 	@Override
 	public void run() {
+		new LauncherMigrator(context).checkLaunchStatus();
 
 		if (errorIfDebian()) return;
 
@@ -91,14 +92,12 @@ public class ImageJUpdater implements UpdaterUI {
 
 		if (errorIfNetworkInaccessible(log)) return;
 
-		String imagejDirProperty = System.getProperty("imagej.dir");
-		final File imagejRoot = imagejDirProperty != null ? new File(imagejDirProperty) :
-			AppUtils.getBaseDirectory("ij.dir", FilesCollection.class, "updater");
-		final FilesCollection files = new FilesCollection(log, imagejRoot);
+		final File appDir = getAppDirectory();
+		final FilesCollection files = new FilesCollection(log, appDir);
 
 		UpdaterUserInterface.set(new SwingUserInterface(log, statusService));
 
-		if (new File(imagejRoot, "update").exists()) {
+		if (new File(appDir, "update").exists()) {
 			if (!UpdaterUserInterface.get().promptYesNo("It is suggested that you restart ImageJ, then continue the update.\n"
 					+ "Alternately, you can attempt to continue the upgrade without\n"
 					+ "restarting, but ImageJ might crash.\n\n"
@@ -187,6 +186,12 @@ public class ImageJUpdater implements UpdaterUI {
 		main.updateFilesTable();
 	}
 
+	static File getAppDirectory() {
+		String imagejDirProperty = System.getProperty("imagej.dir");
+		return imagejDirProperty != null ? new File(imagejDirProperty) :
+			AppUtils.getBaseDirectory("ij.dir", FilesCollection.class, "updater");
+	}
+
 	private void refreshUpdateSites(FilesCollection files)
 			throws InterruptedException, InvocationTargetException
 	{
@@ -194,7 +199,7 @@ public class ImageJUpdater implements UpdaterUI {
 				changes = AvailableSites.initializeAndAddSites(files, (Logger) log);
 		if(ReviewSiteURLsDialog.shouldBeDisplayed(changes)) {
 			ReviewSiteURLsDialog dialog = new ReviewSiteURLsDialog(main, changes);
-			SwingUtilities.invokeAndWait(() -> dialog.setVisible(true));
+			EventQueue.invokeAndWait(() -> dialog.setVisible(true));
 			if(dialog.isOkPressed())
 				AvailableSites.applySitesURLUpdates(files, changes);
 		}

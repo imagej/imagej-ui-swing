@@ -160,6 +160,7 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 
+		<app-launcher.version>1.0.0</app-launcher.version>
 		<jhotdraw.version>7.6.0</jhotdraw.version>
 	</properties>
 
@@ -189,6 +190,11 @@
 		</dependency>
 
 		<!-- SciJava dependencies -->
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>app-launcher</artifactId>
+			<version>${app-launcher.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-common</artifactId>
