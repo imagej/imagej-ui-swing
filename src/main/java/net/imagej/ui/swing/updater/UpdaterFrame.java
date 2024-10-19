@@ -357,7 +357,7 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 									upload();
 								}
 								catch (final InstantiationException e) {
-									log.error(e);
+									if (log != null) log.error(e);
 									error("Could not upload (possibly unknown protocol)");
 								}
 							}
@@ -395,7 +395,7 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 			} catch (final InterruptedException e) {
 				// ignore
 			} catch (final InvocationTargetException e) {
-				log.error(e);
+				if (log != null) log.error(e);
 			}
 			return;
 		}
@@ -606,7 +606,7 @@ public class UpdaterFrame extends JFrame implements TableModelListener,
 			installer.done();
 		}
 		catch (final Exception e) {
-			log.error(e);
+			if (log != null) log.error(e);
 			// TODO: remove "update/" directory
 			error("Installer failed: " + e);
 			installer.done();

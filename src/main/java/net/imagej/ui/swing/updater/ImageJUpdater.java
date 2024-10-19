@@ -71,16 +71,16 @@ import javax.swing.*;
 public class ImageJUpdater implements UpdaterUI {
 	private UpdaterFrame main;
 
-	@Parameter
+	@Parameter(required = false)
 	private StatusService statusService;
 
-	@Parameter
+	@Parameter(required = false)
 	private LogService log;
 
-	@Parameter
+	@Parameter(required = false)
 	private UploaderService uploaderService;
 
-	@Parameter
+	@Parameter(required = false)
 	private CommandService commandService;
 
 	private final static String UPDATER_UPDATING_THREAD_NAME = "Updating the Updater itself!";
