@@ -293,8 +293,8 @@ class LauncherMigrator {
 				java.awt.Image.SCALE_SMOOTH));
 		}
 		String yes = "<html><center>Update to Future!<br>※\\(^o^)/※</center>";
-		String no = "<html><center>Keep stable for now<br>⊹╰(⌣ʟ⌣)╯⊹</center>";
-		String never = "<html><center>Stable, and never ask again<br>୧༼ಠ益ಠ༽୨</center>";
+		String no = "<html><center>Keep stable for now<br>⊹╰(~ʟ~)╯⊹</center>";
+		String never = "<html><center>Stable, and never ask again<br>୧/0益0\\୨</center>";
 		Object[] options = {yes, no, never};
 		Window parent = getApplicationWindow();
 		int rval = JOptionPane.showOptionDialog(parent, message,
