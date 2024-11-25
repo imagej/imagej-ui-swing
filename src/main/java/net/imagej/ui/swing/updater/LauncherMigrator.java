@@ -266,14 +266,15 @@ class LauncherMigrator {
 			"<tr class=\"odd\"><td>Stability</td>           <td>More</td>                            <td>Less</td></tr>" +
 			"<tr              ><td>Java version</td>        <td>OpenJDK 8</td>                       <td>OpenJDK 21</td></tr>" +
 			"<tr class=\"odd\"><td>Launcher</td>            <td>ImageJ Launcher (deprecated)</td>    <td>Jaunch</td></tr>" +
-			"<tr              ><td>Core update site(s)</td> <td>ImageJ+Fiji+Java-8</td>              <td>sites.imagej.net/Fiji</td></tr>" +
-			"<tr class=\"odd\"><td>Apple silicon?</td>      <td>Emulated/x86 mode</td>               <td>Native!</td></tr>" +
-			"<tr              ><td>Receives updates?</td>   <td>Security only</td>                   <td>Latest features</td></tr>" +
-			"<tr class=\"odd\"><td>Minimum Windows</td>     <td>Windows XP</td>                      <td>Windows 10</td></tr>" +
-			"<tr              ><td>Minimum macOS</td>       <td>Mac OS X 10.8 'Mountain Lion'</td>   <td>macOS 11 'Big Sur'</td></tr>" +
-			"<tr class=\"odd\"><td>Minimum Ubuntu</td>      <td>Ubuntu 12.04 'Precise Pangolin'</td> <td>Ubuntu 22.04 'Jammy Jellyfish'</td></tr>" +
-			"<tr              ><td>Java 3D version</td>     <td>1.6.0-scijava-2 (buggier)</td>       <td>1.7.x (less buggy)</td></tr>" +
-			"<tr class=\"odd\"><td>ImgLib2 version</td>     <td>6.1.0 (released 2023-03-07)</td>     <td>7.1.2 (released 2024-09-03)</td></tr>" +
+			"<tr              ><td>Executable</td>          <td>ImageJ-*(.exe)</td>                  <td>fiji-*-*(.exe)</td></tr>" +
+			"<tr class=\"odd\"><td>Core update site(s)</td> <td>ImageJ+Fiji+Java-8</td>              <td>sites.imagej.net/Fiji</td></tr>" +
+			"<tr              ><td>Apple silicon?</td>      <td>Emulated/x86 mode</td>               <td>Native!</td></tr>" +
+			"<tr class=\"odd\"><td>Receives updates?</td>   <td>Security only</td>                   <td>Latest features</td></tr>" +
+			"<tr              ><td>Minimum Windows</td>     <td>Windows XP</td>                      <td>Windows 10</td></tr>" +
+			"<tr class=\"odd\"><td>Minimum macOS</td>       <td>Mac OS X 10.8 'Mountain Lion'</td>   <td>macOS 11 'Big Sur'</td></tr>" +
+			"<tr              ><td>Minimum Ubuntu</td>      <td>Ubuntu 12.04 'Precise Pangolin'</td> <td>Ubuntu 22.04 'Jammy Jellyfish'</td></tr>" +
+			"<tr class=\"odd\"><td>Java 3D version</td>     <td>1.6.0-scijava-2 (buggier)</td>       <td>1.7.x (less buggy)</td></tr>" +
+			"<tr              ><td>ImgLib2 version</td>     <td>6.1.0 (released 2023-03-07)</td>     <td>7.1.2 (released 2024-09-03)</td></tr>" +
 			"</table></center><br>" +
 			"In short: updating to Future will let you <i>continue receiving updates</i>, " +
 			"but because it is still<br>new and less well tested, it also " +
