@@ -273,8 +273,6 @@ class LauncherMigrator {
 			"<tr              ><td>Minimum Windows</td>     <td>Windows XP</td>                      <td>Windows 10</td></tr>" +
 			"<tr class=\"odd\"><td>Minimum macOS</td>       <td>Mac OS X 10.8 'Mountain Lion'</td>   <td>macOS 11 'Big Sur'</td></tr>" +
 			"<tr              ><td>Minimum Ubuntu</td>      <td>Ubuntu 12.04 'Precise Pangolin'</td> <td>Ubuntu 22.04 'Jammy Jellyfish'</td></tr>" +
-			"<tr class=\"odd\"><td>Java 3D version</td>     <td>1.6.0-scijava-2 (buggier)</td>       <td>1.7.x (less buggy)</td></tr>" +
-			"<tr              ><td>ImgLib2 version</td>     <td>6.1.0 (released 2023-03-07)</td>     <td>7.1.2 (released 2024-09-03)</td></tr>" +
 			"</table></center><br>" +
 			"In short: updating to Future will let you <i>continue receiving updates</i>, " +
 			"but because it is still<br>new and less well tested, it also " +
