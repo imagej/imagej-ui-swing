@@ -259,10 +259,10 @@ class LauncherMigrator {
 			" Heads up: " + appTitle + " is receiving some major updates under the hood! " +
 			"<span class=\"shiny\">&#x2728;</span></center>" +
 			"<br><p>You are currently running the <b>stable</b> version of " + appTitle +
-			", but you now have the option to switch<br>to the <b>future</b> version. " +
+			", but you now have the option to switch<br>to the <b>latest</b> version. " +
 			"To help you decide, here is a table summarizing the differences:</p>" +
 			"<br><center><table>" +
-			"<tr><th>Feature</th>                           <th>" + appTitle + " stable</th>         <th>" + appTitle + " Future</th></tr>" +
+			"<tr><th>Feature</th>                           <th>" + appTitle + " Stable</th>         <th>" + appTitle + " Latest</th></tr>" +
 			"<tr class=\"odd\"><td>Stability</td>           <td>More</td>                            <td>Less</td></tr>" +
 			"<tr              ><td>Java version</td>        <td>OpenJDK 8</td>                       <td>OpenJDK 21</td></tr>" +
 			"<tr class=\"odd\"><td>Launcher</td>            <td>ImageJ Launcher (deprecated)</td>    <td>Jaunch</td></tr>" +
@@ -274,7 +274,7 @@ class LauncherMigrator {
 			"<tr class=\"odd\"><td>Minimum macOS</td>       <td>Mac OS X 10.8 'Mountain Lion'</td>   <td>macOS 11 'Big Sur'</td></tr>" +
 			"<tr              ><td>Minimum Ubuntu</td>      <td>Ubuntu 12.04 'Precise Pangolin'</td> <td>Ubuntu 22.04 'Jammy Jellyfish'</td></tr>" +
 			"</table></center><br>" +
-			"In short: updating to Future will let you <i>continue receiving updates</i>, " +
+			"In short: updating to Latest will let you <i>continue receiving updates</i>, " +
 			"but because it is still<br>new and less well tested, it also " +
 			"<b><i>might break your " + appTitle + " installation or favorite plugins</i></b>.<br>" +
 			"<br>How would you like to proceed?";
@@ -290,7 +290,7 @@ class LauncherMigrator {
 				maxWidth, icon.getIconHeight() * maxWidth / w,
 				java.awt.Image.SCALE_SMOOTH));
 		}
-		String yes = "<html><center>Update to Future!<br>※\\(^o^)/※</center>";
+		String yes = "<html><center>Update to Latest!<br>※\\(^o^)/※</center>";
 		String no = "<html><center>Keep stable for now<br>⊹╰(~ʟ~)╯⊹</center>";
 		String never = "<html><center>Stable, and never ask again<br>୧/0益0\\୨</center>";
 		Object[] options = {yes, no, never};
