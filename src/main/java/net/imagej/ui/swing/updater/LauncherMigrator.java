@@ -533,15 +533,25 @@ class LauncherMigrator {
 	private static List<String> collectProcessOutput(Process p)
 		throws IOException, InterruptedException
 	{
+		List<String> outputLines = new ArrayList<>();
+		Thread outputReader = new Thread(() -> {
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					outputLines.add(line);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
+
+		outputReader.start();
 		boolean completed = p.waitFor(5, TimeUnit.SECONDS);
 		if (!completed) {
 			p.destroyForcibly();
 			throw new IOException("Process took too long to complete.");
 		}
-		p.exitValue();
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-			return reader.lines().collect(Collectors.toList());
-		}
+		return outputLines;
 	}
 
 	/** Annoying code to discern the AWT/Swing main application frame, if any. */
