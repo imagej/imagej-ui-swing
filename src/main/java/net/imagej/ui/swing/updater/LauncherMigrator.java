@@ -534,11 +534,11 @@ class LauncherMigrator {
 		throws IOException, InterruptedException
 	{
 		boolean completed = p.waitFor(5, TimeUnit.SECONDS);
-		p.exitValue();
 		if (!completed) {
 			p.destroyForcibly();
 			throw new IOException("Process took too long to complete.");
 		}
+		p.exitValue();
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
 			return reader.lines().collect(Collectors.toList());
 		}
