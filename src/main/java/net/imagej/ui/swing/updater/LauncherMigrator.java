@@ -394,6 +394,7 @@ class LauncherMigrator {
 				return;
 			}
 			// New process seems to be up and running; we are done. Whew!
+			appService.getContext().dispose();
 			System.exit(0);
 		}
 		catch (IOException | InterruptedException exc) {
