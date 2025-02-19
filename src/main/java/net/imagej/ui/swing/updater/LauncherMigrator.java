@@ -43,7 +43,6 @@ import org.scijava.widget.UIComponent;
 
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
-import javax.swing.UIManager;
 import java.awt.Window;
 import java.io.BufferedReader;
 import java.io.File;
@@ -60,7 +59,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Absurdly complex logic for helping users transition
