@@ -392,12 +392,95 @@ class LauncherMigrator {
 				return;
 			}
 			// New process seems to be up and running; we are done. Whew!
+			startExeRenameProcess(appDir.toPath());
 			appService.getContext().dispose();
 			System.exit(0);
 		}
 		catch (IOException | InterruptedException exc) {
 			askForBugReport(log, appTitle, appSlug, exc);
 		}
+	}
+
+	/**
+	 * Helper method to rename the current exe to a backup version, to discourage
+	 * accidental use of a launcher that is incompatible with Java 21, for example
+	 */
+	private static void startExeRenameProcess(Path appDir) throws IOException {
+		Path originalExe;
+		if (OS_WIN) {
+			if (ARCH.equals("x32")) {
+				originalExe = appDir.resolve("ImageJ-win32.exe");
+			} else {
+				originalExe = appDir.resolve("ImageJ-win64.exe");
+			}
+		} else if (OS_LINUX) {
+			originalExe = appDir.resolve("ImageJ-linux64");
+		} else if (OS_MACOS) {
+			originalExe = appDir.resolve("Contents").resolve("MacOS").resolve("ImageJ-macosx");
+		} else {
+			throw new RuntimeException("Unknown operating system");
+		}
+
+		Path renamedExe = Paths.get(originalExe + ".backup");
+		// Copy the previous executable to a backup .backup version
+		Files.copy(originalExe, renamedExe);
+
+		// We can't actually remove the previous executable while this process is
+		// running, since it was used to launch this JVM. So we need to start a
+		// sub-process that will continually try to delete the file until it
+		// succeeds.
+		final int checkIntervalMs = 1000;
+		final int numTries = 20;
+		ProcessBuilder pb;
+		String pathToDelete = originalExe.toFile().getAbsolutePath();
+
+		if (OS_WIN) {
+			// Windows implementation using PowerShell
+			pb = new ProcessBuilder(
+					"powershell.exe",
+					"-Command",
+					"$tries = 0; " +
+					"while ((Test-Path '" + pathToDelete + "') -and ($tries -lt " + numTries + ")) { " +
+					"try { " +
+					"   Remove-Item -Path '" + pathToDelete + "' -Force -ErrorAction Stop; " +
+					"   Write-Host 'File deleted successfully.'; " +
+					"   break;" +
+					"} catch { " +
+					"   $tries++; " +
+					"   Write-Host \"Attempt $tries of " + numTries + " failed...\"; " +
+					"   if ($tries -eq " + numTries + ") { Write-Host 'Max attempts reached. Exiting.'; break; } " +
+					"   Start-Sleep -Milliseconds " + checkIntervalMs + " " +
+					"} }"
+			);
+		} else {
+			// Unix/Linux/Mac implementation using bash
+			pb = new ProcessBuilder(
+					"bash",
+					"-c",
+					"tries=0; " +
+					"while [ -f \"" + pathToDelete + "\" ] && [$tries -lt " + numTries + " ]; do " +
+					"   if rm -f \"" + pathToDelete + "\" 2>/dev/null; then " +
+					"      echo \"File deleted successfully.\";" +
+					"      break; " +
+					"   else " +
+					"      tries=$((tries+1)); " +
+					"      echo \"Attempt $tries of " + numTries + " failed...\";" +
+					"      if [ $tries -eq " + numTries + " ]; then " +
+					"         echo \"Max attempts reached. Exiting.\"; " +
+					"         break; " +
+					"      fi; " +
+					"   fi; " +
+					"   sleep " + (checkIntervalMs / 1000.0) + "; " +
+					"done"
+			);
+		}
+
+		// Redirect process output (optional - for debugging)
+//		pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+//		pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+
+		// Start the process
+		Process process = pb.start();
 	}
 
 	/** Implores the user to report a bug relating to new launcher switch-over. */
