@@ -124,7 +124,17 @@ class LauncherMigrator {
 		boolean oldLauncherUsed = System.getProperty("scijava.app.name") == null;
 		if (oldLauncherUsed) switchToNewLauncher();
 		else {
+			// FIXME if we change update shortcuts to be windows-style "warn only"
+			// then it's not a problem to do it beforehand.
+			// If we leave as-is then we need to make sure we're instructing the user
+			// to run Help > Update... a second time after restarting to complete the
+			// installation
 			migrateShortcuts();
+			// FIXME if we are doing the actual site toggling here then they will need
+			// to restart again to update. I'd prefer to do it in the switchToNewLauncher
+			// logic. Also, I am curious if having this logic here would *prevent*
+			// a user from using the new launcher with old update sites, which I think
+			// is not intended/desired?
 			migrateUpdateSite();
 		}
 	}
@@ -167,6 +177,8 @@ class LauncherMigrator {
 		// one of these files is fiji/fiji/scripts/Plugins/Utilities/Create_Desktop_Icon.bsh,
 		// but it's outdated. So what is making these files these days??
 
+		// TODO On MAC, Fiji.app is now a subdir of Fiji.. may want to rename the
+		// top level Fiji.app to Fiji.
 		if (OS_WIN) {
 			// FIXME: Warn user to update any shortcuts!
 		}
