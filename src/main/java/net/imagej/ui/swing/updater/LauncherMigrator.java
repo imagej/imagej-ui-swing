@@ -37,6 +37,7 @@ import org.scijava.launcher.Versions;
 import org.scijava.log.LogService;
 import org.scijava.log.Logger;
 import org.scijava.ui.ApplicationFrame;
+import org.scijava.ui.DialogPrompt;
 import org.scijava.ui.UIService;
 import org.scijava.ui.UserInterface;
 import org.scijava.widget.UIComponent;
@@ -181,6 +182,11 @@ class LauncherMigrator {
 		// top level Fiji.app to Fiji.
 		if (OS_WIN) {
 			// FIXME: Warn user to update any shortcuts!
+			uiService.showDialog(
+					"Please update any Fiji shortcuts to point to the fiji-windows-x64.exe\n" +
+							"(e.g. start menu entries, pinned taskbar launchers, desktop shortcuts, etc...)",
+					"Reminder: update shortcuts!",
+					DialogPrompt.MessageType.WARNING_MESSAGE);
 		}
 
 		//
