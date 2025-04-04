@@ -107,9 +107,7 @@ class LauncherMigrator {
 	 * <ul>
 	 * <li>If launched with the old ImageJ launcher, call
 	 *   {@link #switchToNewLauncher()}.</li>
-	 * <li>If launched with the new Jaunch launcher, call
-	 *   {@link #migrateShortcuts()} and {@link #migrateUpdateSite()}.</li>
-	 * <li>If launched in some other creative way, do nothing.</li>
+	 * <li>Do nothing if launched with Jaunch or in some other creative way.</li>
 	 * </ul>
 	 */
 	void checkLaunchStatus() {
@@ -124,20 +122,9 @@ class LauncherMigrator {
 		// The old launcher does not set the scijava.app.name property.
 		boolean oldLauncherUsed = System.getProperty("scijava.app.name") == null;
 		if (oldLauncherUsed) switchToNewLauncher();
-		else {
-			// FIXME if we change update shortcuts to be windows-style "warn only"
-			// then it's not a problem to do it beforehand.
-			// If we leave as-is then we need to make sure we're instructing the user
-			// to run Help > Update... a second time after restarting to complete the
-			// installation
-			migrateShortcuts();
-			// FIXME if we are doing the actual site toggling here then they will need
-			// to restart again to update. I'd prefer to do it in the switchToNewLauncher
-			// logic. Also, I am curious if having this logic here would *prevent*
-			// a user from using the new launcher with old update sites, which I think
-			// is not intended/desired?
-			migrateUpdateSite();
-		}
+		// NB: it is possible and valid to use Jaunch with the old Fiji update sites
+		// So we do not want to force updating to them just because the new launcher
+		// is being used.
 	}
 
 	/**
