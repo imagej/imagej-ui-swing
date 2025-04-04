@@ -389,19 +389,11 @@ class LauncherMigrator {
 		// All looks good! We can finally relaunch safely with the new launcher.
 		File exeFile = exeFile(appSlug, appDir);
 		try {
-			Process p = new ProcessBuilder(exeFile.getPath()).start();
-			boolean terminated = p.waitFor(500, TimeUnit.MILLISECONDS);
-			if (terminated || !p.isAlive()) {
-				askForBugReport(log, appTitle, appSlug,
-					new RuntimeException("New launcher terminated unexpectedly"));
-				return;
-			}
-			// New process seems to be up and running; we are done. Whew!
-			startExeRenameProcess(appDir.toPath());
+			startExeRenameAndRestart(appDir.toPath(), exeFile.getAbsolutePath());
 			appService.getContext().dispose();
 			System.exit(0);
 		}
-		catch (IOException | InterruptedException exc) {
+		catch (IOException exc) {
 			askForBugReport(log, appTitle, appSlug, exc);
 		}
 	}
@@ -409,24 +401,31 @@ class LauncherMigrator {
 	/**
 	 * Helper method to rename the current exe to a backup version, to discourage
 	 * accidental use of a launcher that is incompatible with Java 21, for example
+	 *
+	 * After deletion, the given exePath is invoked, starting the post-update app
 	 */
-	private static void startExeRenameProcess(Path appDir) throws IOException {
+	private static void startExeRenameAndRestart(Path appDir,
+			String exePath) throws IOException
+	{
 		Path originalExe;
+		Path renamedExe;
 		if (OS_WIN) {
+			String arch = "win64";
 			if (ARCH.equals("x32")) {
-				originalExe = appDir.resolve("ImageJ-win32.exe");
-			} else {
-				originalExe = appDir.resolve("ImageJ-win64.exe");
+				arch = "win32";
 			}
+			originalExe = appDir.resolve("ImageJ-" + arch + ".old.exe");
+			renamedExe = appDir.resolve( "ImageJ-" + arch + ".backup.exe");
 		} else if (OS_LINUX) {
-			originalExe = appDir.resolve("ImageJ-linux64");
+			originalExe = appDir.resolve("ImageJ-linux64.old");
+			renamedExe = appDir.resolve( "ImageJ-linux64.backup");
 		} else if (OS_MACOS) {
-			originalExe = appDir.resolve("Contents").resolve("MacOS").resolve("ImageJ-macosx");
+			originalExe = appDir.resolve("Contents").resolve("MacOS").resolve("ImageJ-macosx.old");
+			renamedExe = appDir.resolve("Contents").resolve("MacOS").resolve("ImageJ-macosx.backup");
 		} else {
 			throw new RuntimeException("Unknown operating system");
 		}
 
-		Path renamedExe = Paths.get(originalExe + ".backup");
 		// Copy the previous executable to a backup .backup version
 		Files.copy(originalExe, renamedExe);
 
@@ -434,10 +433,10 @@ class LauncherMigrator {
 		// running, since it was used to launch this JVM. So we need to start a
 		// sub-process that will continually try to delete the file until it
 		// succeeds.
-		final int checkIntervalMs = 1000;
-		final int numTries = 20;
+		final int checkIntervalMs = 500;
+		final int numTries = 30;
 		ProcessBuilder pb;
-		String pathToDelete = originalExe.toFile().getAbsolutePath();
+		String pathToCheck = originalExe.toFile().getAbsolutePath();
 
 		if (OS_WIN) {
 			// Windows implementation using PowerShell
@@ -445,31 +444,32 @@ class LauncherMigrator {
 					"powershell.exe",
 					"-Command",
 					"$tries = 0; " +
-					"while ((Test-Path '" + pathToDelete + "') -and ($tries -lt " + numTries + ")) { " +
-					"try { " +
-					"   Remove-Item -Path '" + pathToDelete + "' -Force -ErrorAction Stop; " +
-					"   Write-Host 'File deleted successfully.'; " +
-					"   break;" +
-					"} catch { " +
+					"while ((Test-Path '" + pathToCheck + "') -and ($tries -lt " + numTries + ")) { " +
+					"   if (Get-Process -Name \"ImageJ*\" -ErrorAction SilentlyContinue) { " +
+					"       Write-Host \"Attempt $tries of " + numTries + " - File is locked.\"; " +
+					"   } else { " +
+					"       break; " +
+					"   } " +
 					"   $tries++; " +
-					"   Write-Host \"Attempt $tries of " + numTries + " failed...\"; " +
 					"   if ($tries -eq " + numTries + ") { Write-Host 'Max attempts reached. Exiting.'; break; } " +
 					"   Start-Sleep -Milliseconds " + checkIntervalMs + " " +
-					"} }"
+					"}" +
+					exePath
 			);
 		} else {
 			// Unix/Linux/Mac implementation using bash
+			// FIXME On MAC, Fiji.app is now a subdir of Fiji.. also rename the top level Fiji.app to Fiji
 			pb = new ProcessBuilder(
 					"bash",
 					"-c",
 					"tries=0; " +
-					"while [ -f \"" + pathToDelete + "\" ] && [$tries -lt " + numTries + " ]; do " +
-					"   if rm -f \"" + pathToDelete + "\" 2>/dev/null; then " +
-					"      echo \"File deleted successfully.\";" +
+					"while [ -f \"" + pathToCheck + "\" ] && [$tries -lt " + numTries + " ]; do " +
+					"   if ! lsof -f \"" + pathToCheck + "\" >/dev/null; then " +
+					"      echo \"File is not locked.\";" +
 					"      break; " +
 					"   else " +
 					"      tries=$((tries+1)); " +
-					"      echo \"Attempt $tries of " + numTries + " failed...\";" +
+					"      echo \"Attempt $tries of " + numTries + " - File is locked\";" +
 					"      if [ $tries -eq " + numTries + " ]; then " +
 					"         echo \"Max attempts reached. Exiting.\"; " +
 					"         break; " +
@@ -477,7 +477,14 @@ class LauncherMigrator {
 					"   fi; " +
 					"   sleep " + (checkIntervalMs / 1000.0) + "; " +
 					"done"
+					+ exePath
 			);
+		}
+
+		// Write error output to a file if it doesn't exist already
+		File errFile = appDir.resolve("fiji-restart.err").toFile();
+		if (!errFile.exists()) {
+			pb.redirectError(errFile);
 		}
 
 		// Redirect process output (optional - for debugging)
