@@ -128,15 +128,18 @@ class LauncherMigrator {
 	}
 
 	/**
-	 * Updates platform-specific shortcuts to reference the new launcher,
-	 * including {@code .desktop} files on Linux.
+	 * Warns users to update any shortcuts to reference the new launcher.
+	 * Currently, this is recommended to be done manually.
 	 * <p>
 	 * The macOS-specific {@code Contents/Info.plist} is handled separately
 	 * by the Updater, as part of the switch to the new update site; see
 	 * {@link #migrateUpdateSite()}.
 	 * </p>
-	 * <p></p>
-	 * Windows users are advised to update their shortcuts by hand, because:
+	 * <p>
+	 * Linux users need to change any {@code .desktop} files.
+	 * </p>
+	 * <p>
+	 * Windows is particularly complicated, because:
 	 * A) we don't know where the user put their Fiji shortcuts&mdash;they
 	 * could be in the Start menu, on the desktop, or elsewhere and pinned
 	 * to the taskbar; and B) the .lnk file format is an opaque binary
@@ -144,14 +147,17 @@ class LauncherMigrator {
 	 * this transitional migration code that will be obsolete in a few months.
 	 * </p>
 	 * <p>
-	 * Finally, old launchers are renamed with {@code .backup} extension in
+	 * Note that launchers will be renamed with the {@code .backup} extension in
 	 * case there are any missed shortcuts, so that launch fails fast at the
-	 * OS level rather than potentially exploding at the application level.
+	 * OS level rather than potentially exploding at the application level; see
+	 * {@link #startExeRenameAndRestart(Path, String)}
 	 * </p>
 	 */
-	private void migrateShortcuts() {
-		// If no old launchers are present, assume we already did this.
-		// FIXME: Which launcher(s) should we look for? All platforms? Or current only?
+	private void warnAboutShortcuts(File exeFile) {
+
+		// FIXME warn users on all platforms not just windows and use the exe file to
+		// tell them the new executable name
+
 
 		// Fix links within Linux .desktop files.
 		// ~/.local/share/applications
@@ -165,8 +171,6 @@ class LauncherMigrator {
 		// one of these files is fiji/fiji/scripts/Plugins/Utilities/Create_Desktop_Icon.bsh,
 		// but it's outdated. So what is making these files these days??
 
-		// TODO On MAC, Fiji.app is now a subdir of Fiji.. may want to rename the
-		// top level Fiji.app to Fiji.
 		if (OS_WIN) {
 			// FIXME: Warn user to update any shortcuts!
 			uiService.showDialog(
@@ -388,6 +392,7 @@ class LauncherMigrator {
 
 		// All looks good! We can finally relaunch safely with the new launcher.
 		File exeFile = exeFile(appSlug, appDir);
+		warnAboutShortcuts(exeFile);
 		try {
 			startExeRenameAndRestart(appDir.toPath(), exeFile.getAbsolutePath());
 			appService.getContext().dispose();
