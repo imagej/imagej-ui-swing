@@ -153,37 +153,21 @@ class LauncherMigrator {
 	 * Note that launchers will be renamed with the {@code .backup} extension in
 	 * case there are any missed shortcuts, so that launch fails fast at the
 	 * OS level rather than potentially exploding at the application level; see
-	 * {@link #startExeRenameAndRestart(Path, String)}
+	 * {@link #startExeRenameAndRestart(Path, String, Path, Path)}
 	 * </p>
 	 */
-	private void warnAboutShortcuts(File exeFile) {
-
-		// FIXME warn users on all platforms not just windows and use the exe file to
-		// tell them the new executable name
-
-
-		// Fix links within Linux .desktop files.
-		// ~/.local/share/applications
-		// ~/.local/share/applications/wine/Programs
-		// /usr/share/applications
-		// /usr/local/share/applications
-		// /var/lib/flatpak/exports/share/applications
-		// START HERE: Scan all .desktop files? Or only ImageJ2.desktop and Fiji.desktop? Or...?
-		// Completely rewrite them? By calling what code? Can we reuse the code that generated
-		// them in the first place? Where is that code? The only code I could find that generates
-		// one of these files is fiji/fiji/scripts/Plugins/Utilities/Create_Desktop_Icon.bsh,
-		// but it's outdated. So what is making these files these days??
-
-		if (OS_WIN) {
-			// FIXME: Warn user to update any shortcuts!
-			uiService.showDialog(
-					"Please update any Fiji shortcuts to point to the fiji-windows-x64.exe\n" +
-							"(e.g. start menu entries, pinned taskbar launchers, desktop shortcuts, etc...)",
-					"Reminder: update shortcuts!",
-					DialogPrompt.MessageType.WARNING_MESSAGE);
-		}
-
-		//
+	private void warnAboutShortcuts(Path oldExePath, String newExePath) {
+		uiService.showDialog(
+				"As part of this update, the Fiji launcher is being upgraded\n" +
+								"to a completely new version. Therefore any shortcuts referring\n" +
+								"to the old launcher will need to be updated.\n" +
+								"(e.g. start menu entries, taskbar pins, desktop shortcuts, etc...)\n\n" +
+								"Old launcher path:\n" +
+								oldExePath + "\n\n" +
+								"New launcher path:\n" +
+								newExePath,
+				"Reminder: update shortcuts!",
+				DialogPrompt.MessageType.WARNING_MESSAGE);
 	}
 
 		/**
@@ -389,10 +373,33 @@ class LauncherMigrator {
 		// Switch update sites, and then we can finally relaunch safely with the
 		// new launcher.
 		migrateUpdateSites();
-		File exeFile = exeFile(appSlug, appDir);
-		warnAboutShortcuts(exeFile);
+		String exePath = exeFile(appSlug, appDir).getAbsolutePath();
+		Path appPath = appDir.toPath();
+		Path originalExe;
+		Path oldExe;
+		Path backupExe;
+		if (OS_WIN) {
+			String arch = "win64";
+			if (ARCH.equals("x32")) {
+				arch = "win32";
+			}
+			originalExe = appPath.resolve("ImageJ-" + arch + ".exe");
+			oldExe = appPath.resolve("ImageJ-" + arch + ".old.exe");
+			backupExe = appPath.resolve( "ImageJ-" + arch + ".backup.exe");
+		} else if (OS_LINUX) {
+			originalExe = appPath.resolve("ImageJ-linux64");
+			oldExe = appPath.resolve("ImageJ-linux64.old");
+			backupExe = appPath.resolve( "ImageJ-linux64.backup");
+		} else if (OS_MACOS) {
+			originalExe = appPath.resolve("Contents").resolve("MacOS").resolve("ImageJ-macosx");
+			oldExe = appPath.resolve("Contents").resolve("MacOS").resolve("ImageJ-macosx.old");
+			backupExe = appPath.resolve("Contents").resolve("MacOS").resolve("ImageJ-macosx.backup");
+		} else {
+			throw new RuntimeException("Unknown operating system");
+		}
+		warnAboutShortcuts(originalExe, exePath);
 		try {
-			startExeRenameAndRestart(appDir.toPath(), exeFile.getAbsolutePath());
+			startExeRenameAndRestart(appPath, exePath, oldExe, backupExe);
 			appService.getContext().dispose();
 			System.exit(0);
 		}
@@ -517,29 +524,10 @@ class LauncherMigrator {
 	 * After deletion, the given exePath is invoked, starting the post-update app
 	 */
 	private static void startExeRenameAndRestart(Path appDir,
-			String exePath) throws IOException
+			String exePath, Path oldExe, Path backupExe) throws IOException
 	{
-		Path originalExe;
-		Path renamedExe;
-		if (OS_WIN) {
-			String arch = "win64";
-			if (ARCH.equals("x32")) {
-				arch = "win32";
-			}
-			originalExe = appDir.resolve("ImageJ-" + arch + ".old.exe");
-			renamedExe = appDir.resolve( "ImageJ-" + arch + ".backup.exe");
-		} else if (OS_LINUX) {
-			originalExe = appDir.resolve("ImageJ-linux64.old");
-			renamedExe = appDir.resolve( "ImageJ-linux64.backup");
-		} else if (OS_MACOS) {
-			originalExe = appDir.resolve("Contents").resolve("MacOS").resolve("ImageJ-macosx.old");
-			renamedExe = appDir.resolve("Contents").resolve("MacOS").resolve("ImageJ-macosx.backup");
-		} else {
-			throw new RuntimeException("Unknown operating system");
-		}
-
 		// Copy the previous executable to a backup .backup version
-		Files.copy(originalExe, renamedExe);
+		Files.copy(oldExe, backupExe);
 
 		// We can't actually remove the previous executable while this process is
 		// running, since it was used to launch this JVM. So we need to start a
@@ -548,7 +536,7 @@ class LauncherMigrator {
 		final int checkIntervalMs = 500;
 		final int numTries = 30;
 		ProcessBuilder pb;
-		String pathToCheck = originalExe.toFile().getAbsolutePath();
+		String pathToCheck = oldExe.toFile().getAbsolutePath();
 
 		if (OS_WIN) {
 			// Windows implementation using PowerShell
