@@ -82,8 +82,7 @@ public class ImageJUpdater implements UpdaterUI {
 
 	@Override
 	public void run() {
-		// NB: Disable migrator until its remaining FIXMEs are done.
-		//new LauncherMigrator(context).checkLaunchStatus();
+		new LauncherMigrator(context).checkLaunchStatus();
 
 		if (errorIfDebian()) return;
 

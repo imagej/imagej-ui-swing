@@ -121,7 +121,10 @@ class LauncherMigrator {
 		// Check if the old launcher launched the app.
 		// The old launcher does not set the scijava.app.name property.
 		boolean oldLauncherUsed = System.getProperty("scijava.app.name") == null;
-		if (oldLauncherUsed) switchToNewLauncher();
+
+		// TODO remove this opt-in env var check for complete rollout
+		boolean upgradeImageJ = System.getenv("UPGRADE_IMAGEJ") != null;
+		if (oldLauncherUsed && upgradeImageJ) switchToNewLauncher();
 		// NB: it is possible and valid to use Jaunch with the old Fiji update sites
 		// So we do not want to force updating to them just because the new launcher
 		// is being used.
@@ -188,7 +191,7 @@ class LauncherMigrator {
 	 * sufficient Java version, and if so, transitions it to the new core update site.
 	 */
 	private void migrateUpdateSite() {
-		throw new UnsupportedOperationException("migrateUpdateSite unimplemented"); //FIXME
+//		throw new UnsupportedOperationException("migrateUpdateSite unimplemented"); //FIXME
 	}
 
 		/**
