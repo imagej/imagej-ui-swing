@@ -29,7 +29,10 @@
 
 package net.imagej.ui.swing.updater;
 
+import net.imagej.updater.*;
+import net.imagej.updater.util.AvailableSites;
 import net.imagej.updater.util.UpdaterUtil;
+import org.jhotdraw.draw.action.MoveAction;
 import org.scijava.Context;
 import org.scijava.app.AppService;
 import org.scijava.launcher.Java;
@@ -41,9 +44,13 @@ import org.scijava.ui.DialogPrompt;
 import org.scijava.ui.UIService;
 import org.scijava.ui.UserInterface;
 import org.scijava.widget.UIComponent;
+import org.xml.sax.SAXException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
+import javax.swing.text.html.parser.Parser;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerConfigurationException;
 import java.awt.Window;
 import java.io.BufferedReader;
 import java.io.File;
@@ -52,10 +59,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
@@ -93,7 +97,7 @@ class LauncherMigrator {
 
 	private AppService appService;
 	private UIService uiService;
-	private Logger log;
+	private LogService log;
 
 	LauncherMigrator(Context ctx) {
 		if (ctx == null) return;
@@ -135,8 +139,7 @@ class LauncherMigrator {
 	 * Currently, this is recommended to be done manually.
 	 * <p>
 	 * The macOS-specific {@code Contents/Info.plist} is handled separately
-	 * by the Updater, as part of the switch to the new update site; see
-	 * {@link #migrateUpdateSite()}.
+	 * by the Updater, as part of the switch to the new update site.
 	 * </p>
 	 * <p>
 	 * Linux users need to change any {@code .desktop} files.
@@ -184,14 +187,6 @@ class LauncherMigrator {
 		}
 
 		//
-	}
-
-	/**
-	 * Checks whether the application is running with a
-	 * sufficient Java version, and if so, transitions it to the new core update site.
-	 */
-	private void migrateUpdateSite() {
-//		throw new UnsupportedOperationException("migrateUpdateSite unimplemented"); //FIXME
 	}
 
 		/**
@@ -393,7 +388,10 @@ class LauncherMigrator {
 			}
 		}
 
-		// All looks good! We can finally relaunch safely with the new launcher.
+		// All looks good!
+		// Switch update sites, and then we can finally relaunch safely with the
+		// new launcher.
+		migrateUpdateSites();
 		File exeFile = exeFile(appSlug, appDir);
 		warnAboutShortcuts(exeFile);
 		try {
@@ -403,6 +401,115 @@ class LauncherMigrator {
 		}
 		catch (IOException exc) {
 			askForBugReport(log, appTitle, appSlug, exc);
+		}
+	}
+
+	/**
+	 * Disable the old ImageJ/Java-8/Fiji sites (and their mirrors) and turn on
+	 * the new Fiji site.
+	 */
+	private void migrateUpdateSites() {
+		// List of all sites to disable
+		final List<String> siteList = new ArrayList<>();
+		for (String site : new String[]{"Java-8", "ImageJ", "Fiji"}) {
+			for (String suffix : new String[]{"", " (Europe mirror)"}) {
+				siteList.add(site + suffix);
+			}
+		}
+
+		// List of the file object names associated with disabled sites
+		final Set<String> legacyFiles = new HashSet<>();
+
+		final String newFijiSite = "Fiji-future";
+		File ijDir = ImageJUpdater.getAppDirectory();
+		FilesCollection files = new FilesCollection(log, ijDir);
+		try {
+			// Initialize the FilesCollection
+			files.tryLoadingCollection();
+
+			// Add the new Fiji update site
+			files.addUpdateSite(newFijiSite, "https://sites.imagej.net/Fiji/", null,
+					null, 0l);
+
+			// Deactivate the old update site trio
+			for (String siteName : siteList) {
+				UpdateSite site = files.getUpdateSite(siteName, false);
+				if (site != null) {
+					// Record all file names that were associated with this site
+					for (FileObject file : files.forUpdateSite(siteName, true)) {
+						legacyFiles.add(file.getFilename());
+					}
+					// Disable the site
+					files.deactivateUpdateSite(site);
+				}
+			}
+
+			// Persist the changes and refresh the FileCollection
+			files.write();
+			files.reloadCollectionAndChecksum(new ProgressDialog(null, "Updating..."));
+
+			// Stage files for removal from all the sites we disabled
+			for (FileObject file : files.values()) {
+				if (legacyFiles.contains(file.getFilename())) {
+					switch (file.getStatus()) {
+						case LOCAL_ONLY:
+						case OBSOLETE:
+						case OBSOLETE_MODIFIED:
+							// Remove obsolete and now local-only files
+							file.stageForUninstall(files);
+							break;
+					}
+				}
+			}
+
+			// Ensure any file from the new Fiji site is staged appropriately
+			for (FileObject file : files.forUpdateSite(newFijiSite)) {
+				final FileObject.Status status = file.getStatus();
+				switch (status) {
+					case LOCAL_ONLY:
+					case OBSOLETE:
+					case OBSOLETE_MODIFIED:
+						// Remove obsolete and now local-only files
+						file.stageForUninstall(files);
+						break;
+					case INSTALLED:
+						// Nothing to do
+						break;
+					default:
+						// Try to update the file
+						// NB: Must force for files recognized as "modified" to be updated,
+						// which would be any file that IS on the new site but checksums
+						// differently
+						if (!file.stageForUpdate(files, true)) {
+							log.warn("Skipping " + file.filename + " with status " + file.getStatus());
+						}
+				}
+			}
+
+			// Try automatically resolving any conflicts by updating files as needed
+			Conflicts conflicts = new Conflicts(files);
+			for (Conflicts.Conflict c : conflicts.getConflicts(false)) {
+				for (Conflicts.Resolution r : c.getResolutions()) {
+					if (r.getDescription().startsWith("Update")) {
+						r.resolve();
+						break;
+					}
+				}
+			}
+
+			// Double-check that there are no remaining problems
+			final ResolveDependencies resolver = new ResolveDependencies(null, files);
+			if (!resolver.resolve()) {
+				//FIXME abort
+			}
+
+			// Stage the changes in the update folder
+			Installer i = new Installer(files, null);
+			i.start();
+		}
+		catch (IOException | SAXException | ParserConfigurationException |
+				TransformerConfigurationException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
