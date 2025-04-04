@@ -30,9 +30,7 @@
 package net.imagej.ui.swing.updater;
 
 import net.imagej.updater.*;
-import net.imagej.updater.util.AvailableSites;
 import net.imagej.updater.util.UpdaterUtil;
-import org.jhotdraw.draw.action.MoveAction;
 import org.scijava.Context;
 import org.scijava.app.AppService;
 import org.scijava.launcher.Java;
@@ -48,7 +46,6 @@ import org.xml.sax.SAXException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
-import javax.swing.text.html.parser.Parser;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerConfigurationException;
 import java.awt.Window;
