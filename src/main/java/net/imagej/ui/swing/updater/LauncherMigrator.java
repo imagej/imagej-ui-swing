@@ -424,7 +424,7 @@ class LauncherMigrator {
 		// List of the file object names associated with disabled sites
 		final Set<String> legacyFiles = new HashSet<>();
 
-		final String newFijiSite = "Fiji-future";
+		final String newFijiSite = "Fiji-latest";
 		File ijDir = ImageJUpdater.getAppDirectory();
 		FilesCollection files = new FilesCollection(log, ijDir);
 		try {
