@@ -540,45 +540,71 @@ class LauncherMigrator {
 
 		if (OS_WIN) {
 			// Windows implementation using PowerShell
+			String scriptContent = String.join("\n",
+					"$tries = 0; ",
+					"while ((Test-Path '" + pathToCheck + "') -and ($tries -lt " + numTries + ")) { ",
+					"   if (Get-Process -Name \"ImageJ*\" -ErrorAction SilentlyContinue) { ",
+					"       Write-Host \"Attempt $tries of " + numTries + " - File is locked.\"; ",
+					"   } else { ",
+					"       break; ",
+					"   }",
+					"   $tries++;",
+					"   if ($tries -eq " + numTries + ") { Write-Host 'Max attempts reached. Exiting.'; break; }",
+					"   Start-Sleep -Milliseconds " + checkIntervalMs,
+					"}",
+					"Start-Process -FilePath " + exePath,
+					"Start-Sleep -Seconds 5");
+
+			// Write the script to a temporary file
+			Path tempScript = Files.createTempFile("check_lock_", ".ps1");
+			Files.write(tempScript, scriptContent.getBytes());
+
+			// Run the script using ProcessBuilder
+			tempScript = tempScript.toAbsolutePath();
+			System.out.println("script path is: " + tempScript);
 			pb = new ProcessBuilder(
 					"powershell.exe",
 					"-Command",
-					"$tries = 0; " +
-					"while ((Test-Path '" + pathToCheck + "') -and ($tries -lt " + numTries + ")) { " +
-					"   if (Get-Process -Name \"ImageJ*\" -ErrorAction SilentlyContinue) { " +
-					"       Write-Host \"Attempt $tries of " + numTries + " - File is locked.\"; " +
-					"   } else { " +
-					"       break; " +
-					"   } " +
-					"   $tries++; " +
-					"   if ($tries -eq " + numTries + ") { Write-Host 'Max attempts reached. Exiting.'; break; } " +
-					"   Start-Sleep -Milliseconds " + checkIntervalMs + " " +
-					"}" +
-					exePath
+					"& '" + tempScript + "'; " +
+					"Remove-Item -Path '" + tempScript + "' -Force"
 			);
 		} else {
 			// Unix/Linux/Mac implementation using bash
 			// FIXME On MAC, Fiji.app is now a subdir of Fiji.. also rename the top level Fiji.app to Fiji
+			String scriptContent = String.join("\n",
+					"#!/bin/bash",
+					"tries=0",
+					"while [ -f \"" + pathToCheck + "\" ] && [$tries -lt " + numTries + " ]; do",
+					"   if ! lsof -f \"" + pathToCheck + "\" >/dev/null; then",
+					"      echo \"File is not locked.\"",
+					"      break",
+					"   else " +
+					"      tries=$((tries+1))",
+					"      echo \"Attempt $tries of " + numTries + " - File is locked\"",
+					"      if [ $tries -eq " + numTries + " ]; then",
+					"         echo \"Max attempts reached. Exiting.\"",
+					"         break",
+					"      fi",
+					"   fi",
+					"   sleep " + (checkIntervalMs / 1000.0) ,
+					"done",
+					exePath + " &",
+					"sleep 5"
+			);
+
+			// Write the script to a temporary file
+			Path tempScript = Files.createTempFile("check_lock_", ".sh");
+			Files.write(tempScript, scriptContent.getBytes());
+
+			// Make the script executable
+			tempScript.toFile().setExecutable(true);
+
+			// Run the script using ProcessBuilder
+			tempScript = tempScript.toAbsolutePath();
 			pb = new ProcessBuilder(
 					"bash",
 					"-c",
-					"tries=0; " +
-					"while [ -f \"" + pathToCheck + "\" ] && [$tries -lt " + numTries + " ]; do " +
-					"   if ! lsof -f \"" + pathToCheck + "\" >/dev/null; then " +
-					"      echo \"File is not locked.\";" +
-					"      break; " +
-					"   else " +
-					"      tries=$((tries+1)); " +
-					"      echo \"Attempt $tries of " + numTries + " - File is locked\";" +
-					"      if [ $tries -eq " + numTries + " ]; then " +
-					"         echo \"Max attempts reached. Exiting.\"; " +
-					"         break; " +
-					"      fi; " +
-					"   fi; " +
-					"   sleep " + (checkIntervalMs / 1000.0) + "; " +
-					"done"
-					+ exePath
-			);
+					tempScript + " ; rm -f " + tempScript);
 		}
 
 		// Write error output to a file if it doesn't exist already
