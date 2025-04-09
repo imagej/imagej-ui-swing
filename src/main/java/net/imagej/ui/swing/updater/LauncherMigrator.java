@@ -574,8 +574,8 @@ class LauncherMigrator {
 			String scriptContent = String.join("\n",
 					"#!/bin/bash",
 					"tries=0",
-					"while [ -f \"" + pathToCheck + "\" ] && [$tries -lt " + numTries + " ]; do",
-					"   if ! lsof -f \"" + pathToCheck + "\" >/dev/null; then",
+					"while [ -f \"" + pathToCheck + "\" ] && [ $tries -lt " + numTries + " ]; do",
+					"   if ! lsof " + pathToCheck + " >/dev/null; then",
 					"      echo \"File is not locked.\"",
 					"      break",
 					"   else " +
@@ -588,8 +588,7 @@ class LauncherMigrator {
 					"   fi",
 					"   sleep " + (checkIntervalMs / 1000.0) ,
 					"done",
-					exePath + " &",
-					"sleep 5"
+					exePath + " &"
 			);
 
 			// Write the script to a temporary file
