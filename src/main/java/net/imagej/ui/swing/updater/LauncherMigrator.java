@@ -56,6 +56,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
@@ -605,11 +606,15 @@ class LauncherMigrator {
 					tempScript + " ; rm -f " + tempScript);
 		}
 
-		// Write error output to a file if it doesn't exist already
-		File errFile = appDir.resolve("fiji-restart.err").toFile();
-		if (!errFile.exists()) {
-			pb.redirectError(errFile);
+		// Write error output to a timestamped file in a "logs" subdir
+		File logsDir = appDir.resolve("logs").toFile();
+		if (!logsDir.exists()) {
+			logsDir.mkdir();
 		}
+
+		String timestamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
+		File errFile = new File(logsDir, "restart-err-" + timestamp + ".log");
+		pb.redirectError(errFile);
 
 		// Redirect process output (optional - for debugging)
 //		pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
