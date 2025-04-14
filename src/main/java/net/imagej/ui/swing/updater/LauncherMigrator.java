@@ -561,7 +561,6 @@ class LauncherMigrator {
 
 			// Run the script using ProcessBuilder
 			tempScript = tempScript.toAbsolutePath();
-			System.out.println("script path is: " + tempScript);
 			pb = new ProcessBuilder(
 					"powershell.exe",
 					"-Command",
