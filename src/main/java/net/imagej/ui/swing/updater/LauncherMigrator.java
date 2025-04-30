@@ -706,7 +706,7 @@ class LauncherMigrator {
 		// Determine the right executable path for the new launcher.
 		String exe;
 		if (OS_WIN) exe = appPrefix + "-windows-" + ARCH + ".exe";
-		else if (OS_MACOS) exe = "Contents/MacOS/" + appPrefix + "-macos-" + ARCH;
+		else if (OS_MACOS) exe = "Fiji.app/Contents/MacOS/" + appPrefix + "-macos-" + ARCH;
 		else if (OS_LINUX) exe = appPrefix + "-linux-" + ARCH;
 		else throw new UnsupportedOperationException("Unsupported OS: " + OS);
 
