@@ -614,6 +614,7 @@ class LauncherMigrator {
 
 		String timestamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
 		File errFile = new File(logsDir, "restart-err-" + timestamp + ".log");
+		pb.redirectOutput(new File("/dev/null"));
 		pb.redirectError(errFile);
 
 		// Redirect process output (optional - for debugging)
