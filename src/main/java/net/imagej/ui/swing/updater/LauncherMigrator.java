@@ -769,7 +769,7 @@ class LauncherMigrator {
 		});
 
 		outputReader.start();
-		boolean completed = p.waitFor(5, TimeUnit.SECONDS);
+		boolean completed = p.waitFor(15, TimeUnit.SECONDS);
 		if (!completed) {
 			p.destroyForcibly();
 			throw new IOException("Process took too long to complete.");
