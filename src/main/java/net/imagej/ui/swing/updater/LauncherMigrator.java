@@ -570,7 +570,6 @@ class LauncherMigrator {
 			);
 		} else {
 			// Unix/Linux/Mac implementation using bash
-			// FIXME On MAC, Fiji.app is now a subdir of Fiji.. also rename the top level Fiji.app to Fiji
 			String scriptContent = String.join("\n",
 					"#!/bin/bash",
 					"tries=0",
