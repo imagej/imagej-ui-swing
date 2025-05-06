@@ -603,6 +603,9 @@ class LauncherMigrator {
 					"bash",
 					"-c",
 					tempScript + " ; rm -f " + tempScript);
+
+			// Redirect output to /dev/null (needed for Mac, fails on Windows)
+			pb.redirectOutput(new File("/dev/null"));
 		}
 
 		// Write error output to a timestamped file in a "logs" subdir
@@ -613,7 +616,6 @@ class LauncherMigrator {
 
 		String timestamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
 		File errFile = new File(logsDir, "restart-err-" + timestamp + ".log");
-		pb.redirectOutput(new File("/dev/null"));
 		pb.redirectError(errFile);
 
 		// Redirect process output (optional - for debugging)
