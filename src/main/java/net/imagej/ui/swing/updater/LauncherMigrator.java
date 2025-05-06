@@ -568,6 +568,8 @@ class LauncherMigrator {
 					"& '" + tempScript + "'; " +
 					"Remove-Item -Path '" + tempScript + "' -Force"
 			);
+
+			pb.redirectOutput(new File("NUL"));
 		} else {
 			// Unix/Linux/Mac implementation using bash
 			String scriptContent = String.join("\n",
