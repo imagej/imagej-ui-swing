@@ -374,7 +374,6 @@ class LauncherMigrator {
 		// Switch update sites, and then we can finally relaunch safely with the
 		// new launcher.
 		migrateUpdateSites();
-		String exePath = exeFile(appSlug, appDir).getAbsolutePath();
 		Path appPath = appDir.toPath();
 		Path originalExe;
 		Path oldExe;
@@ -398,8 +397,9 @@ class LauncherMigrator {
 		} else {
 			throw new RuntimeException("Unknown operating system");
 		}
-		warnAboutShortcuts(originalExe, exePath);
 		try {
+			String exePath = exeFile(appSlug, appDir).getCanonicalPath();
+			warnAboutShortcuts(originalExe, exePath);
 			startExeRenameAndRestart(appPath, exePath, oldExe, backupExe);
 			appService.getContext().dispose();
 			System.exit(0);
