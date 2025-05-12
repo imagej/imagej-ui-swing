@@ -76,7 +76,6 @@ public class DiffFile extends JFrame {
 	protected Diff diff;
 	protected int diffOffset;
 	protected Thread worker;
-	private final UpdaterUtil util;
 
 	/**
 	 * Initialize the frame.
@@ -91,7 +90,6 @@ public class DiffFile extends JFrame {
 	 * @throws MalformedURLException
 	 */
 	public DiffFile(final FilesCollection files, final FileObject file, final Mode mode) throws MalformedURLException {
-		util = files.util;
 		title = file.getLocalFilename(true) + " differences";
 		log = files.log;
 		filename = file.getLocalFilename(false);
@@ -104,7 +102,7 @@ public class DiffFile extends JFrame {
 		addModeLinks();
 		addGitLogLink(files, file);
 		diffOffset = diffView.getDocument().getLength();
-		diff = new Diff(diffView.getPrintStream(), util);
+		diff = new Diff(diffView.getPrintStream());
 		show(mode);
 
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -279,7 +277,7 @@ public class DiffFile extends JFrame {
 	 */
 	private String getCommit(final URL jarURL) {
 		try {
-			final JarInputStream in = new JarInputStream(util.openStream(jarURL));
+			final JarInputStream in = new JarInputStream(UpdaterUtil.openStream(jarURL));
 			in.close();
 			Manifest manifest = in.getManifest();
 			if (manifest == null)
@@ -307,7 +305,7 @@ public class DiffFile extends JFrame {
 	private String findSourceDirectory(final File gitWorkingDirectory, final URL jarURL) {
 		try {
 			int maxCount = 3;
-			final JarInputStream in = new JarInputStream(util.openStream(jarURL));
+			final JarInputStream in = new JarInputStream(UpdaterUtil.openStream(jarURL));
 			for (;;) {
 				final JarEntry entry = in.getNextJarEntry();
 				if (entry == null) break;

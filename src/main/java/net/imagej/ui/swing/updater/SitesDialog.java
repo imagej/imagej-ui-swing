@@ -630,8 +630,8 @@ public class SitesDialog extends JDialog implements ActionListener {
 		if (!url.endsWith("/"))
 			url += "/";
 		try {
-			return files.util.getLastModified(new URL(url
-					+ UpdaterUtil.XML_COMPRESSED)) != -1;
+			return UpdaterUtil.getLastModified(
+				new URL(url + UpdaterUtil.XML_COMPRESSED)) != -1;
 		} catch (MalformedURLException e) {
 			updaterFrame.log.error(e);
 			return false;

@@ -30,7 +30,7 @@
 package net.imagej.ui.swing.updater;
 
 import net.imagej.updater.*;
-import net.imagej.updater.util.UpdaterUtil;
+import net.imagej.updater.util.Platforms;
 import org.scijava.Context;
 import org.scijava.app.AppService;
 import org.scijava.launcher.Java;
@@ -326,8 +326,7 @@ class LauncherMigrator {
 		extractAndSetProperty("scijava.app.config-file", lines,
 			new File(configDir, appSlug + ".cfg").getPath());
 
-		String platform = UpdaterUtil.getPlatform();
-		// FIXME: I think the macOS platform will be wrong here. It needs -arm64 suffix!
+		String platform = Platforms.current();
 		setPropertyIfNull("scijava.app.java-platform", platform);
 		setPropertyIfNull("scijava.app.java-root",
 			appDir.toPath().resolve("java").resolve(platform).toString());
