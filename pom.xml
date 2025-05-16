@@ -163,6 +163,7 @@
 		<jhotdraw.version>7.6.0</jhotdraw.version>
 
 		<imagej-updater.version>2.0.0</imagej-updater.version>
+		<app-launcher.version>2.2.0</app-launcher.version>
 	</properties>
 
 	<dependencies>
