@@ -65,7 +65,8 @@ import java.util.regex.Pattern;
 
 /**
  * Absurdly complex logic for helping users transition
- * safely from the old ImageJ launcher to the new one.
+ * safely from the old trio of ImageJ/Fiji/Java-8 update sites to the new
+ * Fiji-latest site.
  *
  * @author Curtis Rueden
  */
@@ -79,6 +80,7 @@ class LauncherMigrator {
 		Arrays.asList("amd64", "x86-64", "x86_64", "x64");
 	private static final boolean OS_WIN, OS_MACOS, OS_LINUX;
 	private static final String OS, ARCH;
+	private static final String NEW_FIJI_SITE = "Fiji-latest";
 
 	static {
 		OS = System.getProperty("os.name");
@@ -107,9 +109,9 @@ class LauncherMigrator {
 	/**
 	 * Figures out what's going on with the application's launch situation.
 	 * <ul>
-	 * <li>If launched with the old ImageJ launcher, call
-	 *   {@link #switchToNewLauncher()}.</li>
-	 * <li>Do nothing if launched with Jaunch or in some other creative way.</li>
+	 * <li>If the Fiji-latest site is not active, call
+	 *   {@link #switchToFijiLatest(FilesCollection)}.</li>
+	 * <li>Do nothing if Fiji-latest already active, or launched in some other creative way.</li>
 	 * </ul>
 	 */
 	void checkLaunchStatus() {
@@ -120,16 +122,29 @@ class LauncherMigrator {
 				System.getProperty("fiji.executable") != null;
 		if (!launcherUsed) return; // Program was launched in some creative way.
 
-		// Check if the old launcher launched the app.
-		// The old launcher does not set the scijava.app.name property.
-		boolean oldLauncherUsed = System.getProperty("scijava.app.name") == null;
+		FilesCollection files = new FilesCollection(log, ImageJUpdater.getAppDirectory());
 
-		// TODO remove this opt-in env var check for complete rollout
-		boolean upgradeImageJ = System.getenv("UPGRADE_IMAGEJ") != null;
-		if (oldLauncherUsed && upgradeImageJ) switchToNewLauncher();
-		// NB: it is possible and valid to use Jaunch with the old Fiji update sites
-		// So we do not want to force updating to them just because the new launcher
-		// is being used.
+		// Initialize the FilesCollection
+		try {
+			files.tryLoadingCollection();
+		}
+		catch (SAXException | ParserConfigurationException e) {
+			throw new RuntimeException(e);
+		}
+
+		// If the new single Fiji update site is not active, proceed to upgrade
+		boolean fijiSiteActive = false;
+		// TODO update to account for European mirror (when it exists)
+		for (UpdateSite site : files.getUpdateSites(false)) {
+			if (site.getURL().equals("https://sites.imagej.net/Fiji/")) {
+				fijiSiteActive = true;
+				break;
+			}
+		}
+		if (!fijiSiteActive) {
+			// TODO remove this opt-in env var check for complete rollout
+			if (System.getenv("UPGRADE_IMAGEJ") != null) switchToFijiLatest(files);
+		}
 	}
 
 	/**
@@ -154,7 +169,7 @@ class LauncherMigrator {
 	 * Note that launchers will be renamed with the {@code .backup} extension in
 	 * case there are any missed shortcuts, so that launch fails fast at the
 	 * OS level rather than potentially exploding at the application level; see
-	 * {@link #startExeRenameAndRestart(Path, String, Path, Path)}
+	 * {@link #queueRestart(Path, String, Path)}
 	 * </p>
 	 */
 	private void warnAboutShortcuts(Path oldExePath, String newExePath) {
@@ -172,14 +187,14 @@ class LauncherMigrator {
 	}
 
 		/**
-		 * Checks whether this installation has the new launcher available, and if so,
-		 * clues in the user, informing them about the pros and cons of switching.
+		 * Inform the user about the pros and cons of to the latest update site.
 		 * Then, if they should elect to switch, upgrades the managed Java to the
 		 * recommended one and finally relaunches with the new launcher.
 		 */
-	private void switchToNewLauncher() {
+	private void switchToFijiLatest(FilesCollection files) {
+
 		// Check whether the user has silenced the launcher upgrade prompt.
-		String prefKey = "skipLauncherUpgradePrompt";
+		String prefKey = "skipFijiLatestUpgradePrompt";
 		Preferences prefs = Preferences.userNodeForPackage(getClass());
 		boolean skipPrompt = prefs.getBoolean(prefKey, false);
 		if (skipPrompt) {
@@ -208,11 +223,12 @@ class LauncherMigrator {
 		appDir = appDir.getAbsoluteFile();
 		String appSlug = appTitle.toLowerCase();
 		File configDir = appDir.toPath().resolve("config").resolve("jaunch").toFile();
+		File jarDir = appDir.toPath().resolve("jars").toFile();
 
 		// Test whether the new launcher is likely to work on this system.
 		String nljv;
 		try {
-			nljv = probeJavaVersion(appDir, configDir, appSlug);
+			nljv = probeJavaVersion(appDir, jarDir, appSlug);
 			if (log != null) log.debug("Java from new launcher BEFORE: " + nljv);
 		}
 		catch (IOException exc) {
@@ -229,7 +245,7 @@ class LauncherMigrator {
 		}
 
 		// OK, we've gotten far enough that it's time to ask the
-		// user whether they want to upgrade to the new launcher.
+		// user whether they want to make the switch.
 
 		String message = "<html>" +
 			"<style>" +
@@ -285,13 +301,13 @@ class LauncherMigrator {
 		int rval = JOptionPane.showOptionDialog(parent, message,
 			appTitle, optionType, messageType, icon, options, no);
 		if (rval != 0) {
-			// User did not opt in to the launcher upgrade.
+			// User did not opt in to the upgrade.
 			if (rval == 2) prefs.putBoolean(prefKey, true); // never ask again!
 			return;
 		}
 
-		// Here, the user has agreed to switch to the new launcher. At this point
-		// we need to be very careful. Users on Apple silicon hardware are likely
+		// Here, the user has agreed to switch to the new Fiji update site.
+		// We need to be very careful. Users on Apple silicon hardware are likely
 		// to be running with Rosetta (x86 emulation mode) rather than in native
 		// ARM64 mode. As such, they probably do not have *any* ARM64 version of
 		// Java installed, not even Java 8, much less Java 21+.
@@ -313,6 +329,9 @@ class LauncherMigrator {
 			lines = new ArrayList<>();
 		}
 
+		// Remember if old launcher was used
+		boolean oldLauncherUsed = System.getProperty("scijava.app.name") == null;
+
 		setPropertyIfNull("scijava.app.name", appTitle);
 		setPropertyIfNull("scijava.app.directory", appDir.getPath());
 
@@ -322,7 +341,8 @@ class LauncherMigrator {
 		extractAndSetProperty("scijava.app.java-links", lines,
 			"https://downloads.imagej.net/java/jdk-urls.txt");
 		extractAndSetProperty("scijava.app.java-version-minimum", lines, "8");
-		extractAndSetProperty("scijava.app.java-version-recommended", lines, "21");
+		// NB: do not extract the recommended version here because on the old trio
+		// of update sites this is likely 8
 		extractAndSetProperty("scijava.app.config-file", lines,
 			new File(configDir, appSlug + ".cfg").getPath());
 
@@ -331,15 +351,19 @@ class LauncherMigrator {
 		setPropertyIfNull("scijava.app.java-root",
 			appDir.toPath().resolve("java").resolve(platform).toString());
 
+		// NB: we ALWAYS want to set this explicitly, even if it is already set.
+		// That way we will upgrade regardless of which launcher we're using
+		System.setProperty("scijava.app.java-version-recommended", "21");
+
 		// Now that the properties are set, we can decide whether to upgrade Java.
 		if (nljv == null || Versions.compare(nljv, Java.recommendedVersion()) < 0) {
 			// The new launcher did not find a good-enough Java in our test above,
 			// so we now ask the app-launcher to download and install such a Java.
-			Java.upgrade();
+			Java.upgrade(Java.isHeadless(), false);
 
 			// And now we test whether the new launcher finds the new Java.
 			try {
-				nljv = probeJavaVersion(appDir, configDir, appSlug);
+				nljv = probeJavaVersion(appDir, jarDir, appSlug);
 				if (log != null) log.debug("Java from new launcher AFTER: " + nljv);
 			}
 			catch (IOException | UnsupportedOperationException exc) {
@@ -372,34 +396,45 @@ class LauncherMigrator {
 		// All looks good!
 		// Switch update sites, and then we can finally relaunch safely with the
 		// new launcher.
-		migrateUpdateSites();
+		migrateUpdateSites(files);
+
 		Path appPath = appDir.toPath();
-		Path originalExe;
-		Path oldExe;
-		Path backupExe;
-		if (OS_WIN) {
-			String arch = "win64";
-			if (ARCH.equals("x32")) {
-				arch = "win32";
-			}
-			originalExe = appPath.resolve("ImageJ-" + arch + ".exe");
-			oldExe = appPath.resolve("ImageJ-" + arch + ".old.exe");
-			backupExe = appPath.resolve( "ImageJ-" + arch + ".backup.exe");
-		} else if (OS_LINUX) {
-			originalExe = appPath.resolve("ImageJ-linux64");
-			oldExe = appPath.resolve("ImageJ-linux64.old");
-			backupExe = appPath.resolve( "ImageJ-linux64.backup");
-		} else if (OS_MACOS) {
-			originalExe = appPath.resolve("Contents").resolve("MacOS").resolve("ImageJ-macosx");
-			oldExe = appPath.resolve("Contents").resolve("MacOS").resolve("ImageJ-macosx.old");
-			backupExe = appPath.resolve("Contents").resolve("MacOS").resolve("ImageJ-macosx.backup");
-		} else {
-			throw new RuntimeException("Unknown operating system");
-		}
 		try {
-			String exePath = exeFile(appSlug, appDir).getCanonicalPath();
-			warnAboutShortcuts(originalExe, exePath);
-			startExeRenameAndRestart(appPath, exePath, oldExe, backupExe);
+			File exeFile = exeFile(appSlug, appDir);
+			String exePath = exeFile.getCanonicalPath();
+			Path originalExe;
+			Path oldExe;
+			Path backupExe;
+			if (OS_WIN) {
+				String arch = "win64";
+				if (ARCH.equals("x32")) {
+					arch = "win32";
+				}
+				originalExe = appPath.resolve("ImageJ-" + arch + ".exe");
+				oldExe = appPath.resolve("ImageJ-" + arch + ".old.exe");
+				backupExe = appPath.resolve( "ImageJ-" + arch + ".backup.exe");
+			} else if (OS_LINUX) {
+				originalExe = appPath.resolve("ImageJ-linux64");
+				oldExe = appPath.resolve("ImageJ-linux64.old");
+				backupExe = appPath.resolve( "ImageJ-linux64.backup");
+			} else if (OS_MACOS) {
+				originalExe = appPath.resolve("Contents").resolve("MacOS").resolve("ImageJ-macosx");
+				oldExe = appPath.resolve("Contents").resolve("MacOS").resolve("ImageJ-macosx.old");
+				backupExe = appPath.resolve("Contents").resolve("MacOS").resolve("ImageJ-macosx.backup");
+			} else {
+				throw new RuntimeException("Unknown operating system");
+			}
+
+			// Back up the previous executable to a .backup version
+			Files.copy(oldExe, backupExe);
+
+			if (oldLauncherUsed) {
+				warnAboutShortcuts(originalExe, exePath);
+				queueRestart(appPath, exePath, oldExe);
+			} else {
+				queueRestart(appPath, exePath, exeFile.toPath());
+			}
+
 			appService.getContext().dispose();
 			System.exit(0);
 		}
@@ -412,7 +447,10 @@ class LauncherMigrator {
 	 * Disable the old ImageJ/Java-8/Fiji sites (and their mirrors) and turn on
 	 * the new Fiji site.
 	 */
-	private void migrateUpdateSites() {
+	private void migrateUpdateSites(FilesCollection files) {
+		// TODO detect if the Europe mirrors were enabled and if so enable the
+		// corresponding Fiji-latest mirror
+
 		// List of all sites to disable
 		final List<String> siteList = new ArrayList<>();
 		for (String site : new String[]{"Java-8", "ImageJ", "Fiji"}) {
@@ -424,15 +462,11 @@ class LauncherMigrator {
 		// List of the file object names associated with disabled sites
 		final Set<String> legacyFiles = new HashSet<>();
 
-		final String newFijiSite = "Fiji-latest";
 		File ijDir = ImageJUpdater.getAppDirectory();
-		FilesCollection files = new FilesCollection(log, ijDir);
 		try {
-			// Initialize the FilesCollection
-			files.tryLoadingCollection();
-
+			// TODO this logic may need to change once Fiji-latest is public
 			// Add the new Fiji update site
-			files.addUpdateSite(newFijiSite, "https://sites.imagej.net/Fiji/", null,
+			files.addUpdateSite(NEW_FIJI_SITE, "https://sites.imagej.net/Fiji/", null,
 					null, 0l);
 
 			// Deactivate the old update site trio
@@ -467,7 +501,7 @@ class LauncherMigrator {
 			}
 
 			// Ensure any file from the new Fiji site is staged appropriately
-			for (FileObject file : files.forUpdateSite(newFijiSite)) {
+			for (FileObject file : files.forUpdateSite(NEW_FIJI_SITE)) {
 				final FileObject.Status status = file.getStatus();
 				switch (status) {
 					case LOCAL_ONLY:
@@ -511,24 +545,19 @@ class LauncherMigrator {
 			Installer i = new Installer(files, null);
 			i.start();
 		}
-		catch (IOException | SAXException | ParserConfigurationException |
-				TransformerConfigurationException e) {
+		catch (IOException | SAXException | TransformerConfigurationException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	/**
-	 * Helper method to rename the current exe to a backup version, to discourage
-	 * accidental use of a launcher that is incompatible with Java 21, for example
-	 *
-	 * After deletion, the given exePath is invoked, starting the post-update app
+	 * Create a process to monitor the specified path ({@code checkExe}) until it
+	 * is no longer locked by the system. Then, launch the new executable
+	 * ({@code launchExe}).
 	 */
-	private static void startExeRenameAndRestart(Path appDir,
-			String exePath, Path oldExe, Path backupExe) throws IOException
+	private static void queueRestart(Path appDir,
+			String launchExe, Path checkExe) throws IOException
 	{
-		// Copy the previous executable to a backup .backup version
-		Files.copy(oldExe, backupExe);
-
 		// We can't actually remove the previous executable while this process is
 		// running, since it was used to launch this JVM. So we need to start a
 		// sub-process that will continually try to delete the file until it
@@ -536,14 +565,16 @@ class LauncherMigrator {
 		final int checkIntervalMs = 500;
 		final int numTries = 30;
 		ProcessBuilder pb;
-		String pathToCheck = oldExe.toFile().getAbsolutePath();
+		String pathToCheck = checkExe.toFile().getAbsolutePath();
 
 		if (OS_WIN) {
+			String processToCheck = checkExe.toFile().getName();
+			processToCheck = processToCheck.substring(0, processToCheck.lastIndexOf('-'));
 			// Windows implementation using PowerShell
 			String scriptContent = String.join("\n",
 					"$tries = 0; ",
 					"while ((Test-Path '" + pathToCheck + "') -and ($tries -lt " + numTries + ")) { ",
-					"   if (Get-Process -Name \"ImageJ*\" -ErrorAction SilentlyContinue) { ",
+					"   if (Get-Process -Name \"" + processToCheck + "*\" -ErrorAction SilentlyContinue) { ",
 					"       Write-Host \"Attempt $tries of " + numTries + " - File is locked.\"; ",
 					"   } else { ",
 					"       break; ",
@@ -552,7 +583,7 @@ class LauncherMigrator {
 					"   if ($tries -eq " + numTries + ") { Write-Host 'Max attempts reached. Exiting.'; break; }",
 					"   Start-Sleep -Milliseconds " + checkIntervalMs,
 					"}",
-					"Start-Process -FilePath " + exePath,
+					"Start-Process -FilePath " + launchExe,
 					"Start-Sleep -Seconds 5");
 
 			// Write the script to a temporary file
@@ -588,7 +619,7 @@ class LauncherMigrator {
 					"   fi",
 					"   sleep " + (checkIntervalMs / 1000.0) ,
 					"done",
-					exePath + " &"
+					launchExe + " &"
 			);
 
 			// Write the script to a temporary file
@@ -627,7 +658,7 @@ class LauncherMigrator {
 		Process process = pb.start();
 	}
 
-	/** Implores the user to report a bug relating to new launcher switch-over. */
+	/** Implores the user to report a bug relating to update site switch-over. */
 	private void askForBugReport(
 		Logger log, String appTitle, String appSlug, Exception exc)
 	{
@@ -657,28 +688,27 @@ class LauncherMigrator {
 	 *   If no executable native launcher is available for this system platform.
 	 */
 	private static String probeJavaVersion(
-		File appDir, File configDir, String appPrefix) throws IOException
+		File appDir, File jarDir, String appPrefix) throws IOException
 	{
 		// 1. Find and validate the new launcher and helper files.
 
 		File exeFile = exeFile(appPrefix, appDir);
-		if (!configDir.isDirectory()) {
-			throw new UnsupportedOperationException("Launcher config directory is missing: " + configDir);
-		}
-		File propsClass = new File(configDir, "Props.class");
-		if (!propsClass.isFile()) {
-			throw new UnsupportedOperationException("Launcher helper program is missing: " + propsClass);
+		if (!jarDir.isDirectory()) {
+			throw new UnsupportedOperationException("Launcher jar directory is missing: " + jarDir);
 		}
 
 		// 2. Run it.
-
 		List<String> output;
 		int exitCode;
 		try {
+			File propsOut = File.createTempFile("props", ".txt");
+			propsOut.deleteOnExit();
 			Process p = new ProcessBuilder(exeFile.getPath(),
-				"-Djava.class.path=" + configDir.getPath(), "--main-class", "Props")
+					"-Djava.class.path=" + jarDir.getPath(), "--main-class",
+					" net.imagej.ui.swing.updater.PropsProbe",
+					propsOut.getAbsolutePath())
 				.redirectErrorStream(true).start();
-			output = collectProcessOutput(p);
+			output = collectProcessOutput(p, propsOut);
 			exitCode = p.exitValue();
 		}
 		catch (InterruptedException exc) {
@@ -693,7 +723,6 @@ class LauncherMigrator {
 		// Note: We check the exit code below *after* detecting the lack of Java
 		// installations, because in the above case, that exit code is also non-zero
 		// (20 as of this writing), and we want to return -1, not throw IOException.
-
 		if (exitCode != 0) {
 			throw new IOException("Launcher exited with non-zero value: " + exitCode);
 		}
@@ -755,29 +784,19 @@ class LauncherMigrator {
 		if (value != null) setPropertyIfNull(name, value);
 	}
 
-	/** Annoying code to collect stdout lines from a short-running process. */
-	private static List<String> collectProcessOutput(Process p)
+	/**
+	 * Annoying code to collect lines from a short-running that writes to the
+	 * specified file.
+	 */
+	private static List<String> collectProcessOutput(Process p, File outFile)
 		throws IOException, InterruptedException
 	{
-		List<String> outputLines = new ArrayList<>();
-		Thread outputReader = new Thread(() -> {
-			try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-				String line;
-				while ((line = reader.readLine()) != null) {
-					outputLines.add(line);
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		});
-
-		outputReader.start();
 		boolean completed = p.waitFor(15, TimeUnit.SECONDS);
 		if (!completed) {
 			p.destroyForcibly();
 			throw new IOException("Process took too long to complete.");
 		}
-		return outputLines;
+		return Files.readAllLines(outFile.toPath());
 	}
 
 	/** Annoying code to discern the AWT/Swing main application frame, if any. */
