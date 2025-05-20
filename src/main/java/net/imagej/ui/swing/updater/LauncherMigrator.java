@@ -169,7 +169,7 @@ class LauncherMigrator {
 	 * Note that launchers will be renamed with the {@code .backup} extension in
 	 * case there are any missed shortcuts, so that launch fails fast at the
 	 * OS level rather than potentially exploding at the application level; see
-	 * {@link #startExeRenameAndRestart(Path, String, Path, Path)}
+	 * {@link #queueRestart(Path, String, Path)}
 	 * </p>
 	 */
 	private void warnAboutShortcuts(Path oldExePath, String newExePath) {
@@ -398,34 +398,42 @@ class LauncherMigrator {
 		migrateUpdateSites(files);
 
 		Path appPath = appDir.toPath();
-		Path originalExe;
-		Path oldExe;
-		Path backupExe;
-		if (OS_WIN) {
-			String arch = "win64";
-			if (ARCH.equals("x32")) {
-				arch = "win32";
-			}
-			originalExe = appPath.resolve("ImageJ-" + arch + ".exe");
-			oldExe = appPath.resolve("ImageJ-" + arch + ".old.exe");
-			backupExe = appPath.resolve( "ImageJ-" + arch + ".backup.exe");
-		} else if (OS_LINUX) {
-			originalExe = appPath.resolve("ImageJ-linux64");
-			oldExe = appPath.resolve("ImageJ-linux64.old");
-			backupExe = appPath.resolve( "ImageJ-linux64.backup");
-		} else if (OS_MACOS) {
-			originalExe = appPath.resolve("Contents").resolve("MacOS").resolve("ImageJ-macosx");
-			oldExe = appPath.resolve("Contents").resolve("MacOS").resolve("ImageJ-macosx.old");
-			backupExe = appPath.resolve("Contents").resolve("MacOS").resolve("ImageJ-macosx.backup");
-		} else {
-			throw new RuntimeException("Unknown operating system");
-		}
 		try {
-			String exePath = exeFile(appSlug, appDir).getCanonicalPath();
+			File exeFile = exeFile(appSlug, appDir);
+			String exePath = exeFile.getCanonicalPath();
+			Path originalExe;
+			Path oldExe;
+			Path backupExe;
+			if (OS_WIN) {
+				String arch = "win64";
+				if (ARCH.equals("x32")) {
+					arch = "win32";
+				}
+				originalExe = appPath.resolve("ImageJ-" + arch + ".exe");
+				oldExe = appPath.resolve("ImageJ-" + arch + ".old.exe");
+				backupExe = appPath.resolve( "ImageJ-" + arch + ".backup.exe");
+			} else if (OS_LINUX) {
+				originalExe = appPath.resolve("ImageJ-linux64");
+				oldExe = appPath.resolve("ImageJ-linux64.old");
+				backupExe = appPath.resolve( "ImageJ-linux64.backup");
+			} else if (OS_MACOS) {
+				originalExe = appPath.resolve("Contents").resolve("MacOS").resolve("ImageJ-macosx");
+				oldExe = appPath.resolve("Contents").resolve("MacOS").resolve("ImageJ-macosx.old");
+				backupExe = appPath.resolve("Contents").resolve("MacOS").resolve("ImageJ-macosx.backup");
+			} else {
+				throw new RuntimeException("Unknown operating system");
+			}
+
+			// Back up the previous executable to a .backup version
+			Files.copy(oldExe, backupExe);
+
 			if (oldLauncherUsed) {
 				warnAboutShortcuts(originalExe, exePath);
+				queueRestart(appPath, exePath, oldExe);
+			} else {
+				queueRestart(appPath, exePath, exeFile.toPath());
 			}
-			startExeRenameAndRestart(appPath, exePath, oldExe, backupExe);
+
 			appService.getContext().dispose();
 			System.exit(0);
 		}
@@ -542,17 +550,13 @@ class LauncherMigrator {
 	}
 
 	/**
-	 * Helper method to rename the current exe to a backup version, to discourage
-	 * accidental use of a launcher that is incompatible with Java 21, for example
-	 *
-	 * After deletion, the given exePath is invoked, starting the post-update app
+	 * Create a process to monitor the specified path ({@code checkExe}) until it
+	 * is no longer locked by the system. Then, launch the new executable
+	 * ({@code launchExe}).
 	 */
-	private static void startExeRenameAndRestart(Path appDir,
-			String exePath, Path oldExe, Path backupExe) throws IOException
+	private static void queueRestart(Path appDir,
+			String launchExe, Path checkExe) throws IOException
 	{
-		// Copy the previous executable to a backup .backup version
-		Files.copy(oldExe, backupExe);
-
 		// We can't actually remove the previous executable while this process is
 		// running, since it was used to launch this JVM. So we need to start a
 		// sub-process that will continually try to delete the file until it
@@ -560,7 +564,7 @@ class LauncherMigrator {
 		final int checkIntervalMs = 500;
 		final int numTries = 30;
 		ProcessBuilder pb;
-		String pathToCheck = oldExe.toFile().getAbsolutePath();
+		String pathToCheck = checkExe.toFile().getAbsolutePath();
 
 		if (OS_WIN) {
 			// Windows implementation using PowerShell
@@ -576,7 +580,7 @@ class LauncherMigrator {
 					"   if ($tries -eq " + numTries + ") { Write-Host 'Max attempts reached. Exiting.'; break; }",
 					"   Start-Sleep -Milliseconds " + checkIntervalMs,
 					"}",
-					"Start-Process -FilePath " + exePath,
+					"Start-Process -FilePath " + launchExe,
 					"Start-Sleep -Seconds 5");
 
 			// Write the script to a temporary file
@@ -612,7 +616,7 @@ class LauncherMigrator {
 					"   fi",
 					"   sleep " + (checkIntervalMs / 1000.0) ,
 					"done",
-					exePath + " &"
+					launchExe + " &"
 			);
 
 			// Write the script to a temporary file
