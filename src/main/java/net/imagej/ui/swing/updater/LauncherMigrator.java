@@ -65,7 +65,8 @@ import java.util.regex.Pattern;
 
 /**
  * Absurdly complex logic for helping users transition
- * safely from the old ImageJ launcher to the new one.
+ * safely from the old trio of ImageJ/Fiji/Java-8 update sites to the new
+ * Fiji-latest site.
  *
  * @author Curtis Rueden
  */
@@ -107,9 +108,9 @@ class LauncherMigrator {
 	/**
 	 * Figures out what's going on with the application's launch situation.
 	 * <ul>
-	 * <li>If launched with the old ImageJ launcher, call
-	 *   {@link #switchToNewLauncher()}.</li>
-	 * <li>Do nothing if launched with Jaunch or in some other creative way.</li>
+	 * <li>If the Fiji-latest site is not active, call
+	 *   {@link #switchToFijiLatest(FilesCollection)}.</li>
+	 * <li>Do nothing if Fiji-latest already active, or launched in some other creative way.</li>
 	 * </ul>
 	 */
 	void checkLaunchStatus() {
@@ -172,8 +173,7 @@ class LauncherMigrator {
 	}
 
 		/**
-		 * Checks whether this installation has the new launcher available, and if so,
-		 * clues in the user, informing them about the pros and cons of switching.
+		 * Inform the user about the pros and cons of to the latest update site.
 		 * Then, if they should elect to switch, upgrades the managed Java to the
 		 * recommended one and finally relaunches with the new launcher.
 		 */
@@ -229,7 +229,7 @@ class LauncherMigrator {
 		}
 
 		// OK, we've gotten far enough that it's time to ask the
-		// user whether they want to upgrade to the new launcher.
+		// user whether they want to make the switch.
 
 		String message = "<html>" +
 			"<style>" +
@@ -285,13 +285,13 @@ class LauncherMigrator {
 		int rval = JOptionPane.showOptionDialog(parent, message,
 			appTitle, optionType, messageType, icon, options, no);
 		if (rval != 0) {
-			// User did not opt in to the launcher upgrade.
+			// User did not opt in to the upgrade.
 			if (rval == 2) prefs.putBoolean(prefKey, true); // never ask again!
 			return;
 		}
 
-		// Here, the user has agreed to switch to the new launcher. At this point
-		// we need to be very careful. Users on Apple silicon hardware are likely
+		// Here, the user has agreed to switch to the new Fiji update site.
+		// We need to be very careful. Users on Apple silicon hardware are likely
 		// to be running with Rosetta (x86 emulation mode) rather than in native
 		// ARM64 mode. As such, they probably do not have *any* ARM64 version of
 		// Java installed, not even Java 8, much less Java 21+.
@@ -627,7 +627,7 @@ class LauncherMigrator {
 		Process process = pb.start();
 	}
 
-	/** Implores the user to report a bug relating to new launcher switch-over. */
+	/** Implores the user to report a bug relating to update site switch-over. */
 	private void askForBugReport(
 		Logger log, String appTitle, String appSlug, Exception exc)
 	{
