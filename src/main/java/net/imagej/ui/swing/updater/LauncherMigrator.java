@@ -695,14 +695,16 @@ class LauncherMigrator {
 		}
 
 		// 2. Run it.
-
 		List<String> output;
 		int exitCode;
 		try {
+			File propsOut = File.createTempFile("props", ".txt");
+			propsOut.deleteOnExit();
 			Process p = new ProcessBuilder(exeFile.getPath(),
-				"-Djava.class.path=" + configDir.getPath(), "--main-class", "Props")
+					"-Djava.class.path=" + configDir.getPath(), "--main-class", "Props",
+					propsOut.getAbsolutePath())
 				.redirectErrorStream(true).start();
-			output = collectProcessOutput(p);
+			output = collectProcessOutput(p, propsOut);
 			exitCode = p.exitValue();
 		}
 		catch (InterruptedException exc) {
@@ -779,29 +781,19 @@ class LauncherMigrator {
 		if (value != null) setPropertyIfNull(name, value);
 	}
 
-	/** Annoying code to collect stdout lines from a short-running process. */
-	private static List<String> collectProcessOutput(Process p)
+	/**
+	 * Annoying code to collect lines from a short-running that writes to the
+	 * specified file.
+	 */
+	private static List<String> collectProcessOutput(Process p, File outFile)
 		throws IOException, InterruptedException
 	{
-		List<String> outputLines = new ArrayList<>();
-		Thread outputReader = new Thread(() -> {
-			try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-				String line;
-				while ((line = reader.readLine()) != null) {
-					outputLines.add(line);
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		});
-
-		outputReader.start();
 		boolean completed = p.waitFor(15, TimeUnit.SECONDS);
 		if (!completed) {
 			p.destroyForcibly();
 			throw new IOException("Process took too long to complete.");
 		}
-		return outputLines;
+		return Files.readAllLines(outFile.toPath());
 	}
 
 	/** Annoying code to discern the AWT/Swing main application frame, if any. */
