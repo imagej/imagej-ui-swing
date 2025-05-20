@@ -80,6 +80,7 @@ class LauncherMigrator {
 		Arrays.asList("amd64", "x86-64", "x86_64", "x64");
 	private static final boolean OS_WIN, OS_MACOS, OS_LINUX;
 	private static final String OS, ARCH;
+	private static final String NEW_FIJI_SITE = "Fiji-latest";
 
 	static {
 		OS = System.getProperty("os.name");
@@ -121,16 +122,29 @@ class LauncherMigrator {
 				System.getProperty("fiji.executable") != null;
 		if (!launcherUsed) return; // Program was launched in some creative way.
 
-		// Check if the old launcher launched the app.
-		// The old launcher does not set the scijava.app.name property.
-		boolean oldLauncherUsed = System.getProperty("scijava.app.name") == null;
+		FilesCollection files = new FilesCollection(log, ImageJUpdater.getAppDirectory());
 
-		// TODO remove this opt-in env var check for complete rollout
-		boolean upgradeImageJ = System.getenv("UPGRADE_IMAGEJ") != null;
-		if (oldLauncherUsed && upgradeImageJ) switchToNewLauncher();
-		// NB: it is possible and valid to use Jaunch with the old Fiji update sites
-		// So we do not want to force updating to them just because the new launcher
-		// is being used.
+		// Initialize the FilesCollection
+		try {
+			files.tryLoadingCollection();
+		}
+		catch (SAXException | ParserConfigurationException e) {
+			throw new RuntimeException(e);
+		}
+
+		// If the new single Fiji update site is not active, proceed to upgrade
+		boolean fijiSiteActive = false;
+		// TODO update to account for European mirror (when it exists)
+		for (UpdateSite site : files.getUpdateSites(false)) {
+			if (site.getURL().equals("https://sites.imagej.net/Fiji/")) {
+				fijiSiteActive = true;
+				break;
+			}
+		}
+		if (!fijiSiteActive) {
+			// TODO remove this opt-in env var check for complete rollout
+			if (System.getenv("UPGRADE_IMAGEJ") != null) switchToFijiLatest(files);
+		}
 	}
 
 	/**
@@ -177,9 +191,10 @@ class LauncherMigrator {
 		 * Then, if they should elect to switch, upgrades the managed Java to the
 		 * recommended one and finally relaunches with the new launcher.
 		 */
-	private void switchToNewLauncher() {
+	private void switchToFijiLatest(FilesCollection files) {
+
 		// Check whether the user has silenced the launcher upgrade prompt.
-		String prefKey = "skipLauncherUpgradePrompt";
+		String prefKey = "skipFijiLatestUpgradePrompt";
 		Preferences prefs = Preferences.userNodeForPackage(getClass());
 		boolean skipPrompt = prefs.getBoolean(prefKey, false);
 		if (skipPrompt) {
@@ -313,6 +328,9 @@ class LauncherMigrator {
 			lines = new ArrayList<>();
 		}
 
+		// Remember if old launcher was used
+		boolean oldLauncherUsed = System.getProperty("scijava.app.name") == null;
+
 		setPropertyIfNull("scijava.app.name", appTitle);
 		setPropertyIfNull("scijava.app.directory", appDir.getPath());
 
@@ -335,7 +353,7 @@ class LauncherMigrator {
 		if (nljv == null || Versions.compare(nljv, Java.recommendedVersion()) < 0) {
 			// The new launcher did not find a good-enough Java in our test above,
 			// so we now ask the app-launcher to download and install such a Java.
-			Java.upgrade();
+			Java.upgrade(Java.isHeadless(), false);
 
 			// And now we test whether the new launcher finds the new Java.
 			try {
@@ -372,7 +390,8 @@ class LauncherMigrator {
 		// All looks good!
 		// Switch update sites, and then we can finally relaunch safely with the
 		// new launcher.
-		migrateUpdateSites();
+		migrateUpdateSites(files);
+
 		Path appPath = appDir.toPath();
 		Path originalExe;
 		Path oldExe;
@@ -398,7 +417,9 @@ class LauncherMigrator {
 		}
 		try {
 			String exePath = exeFile(appSlug, appDir).getCanonicalPath();
-			warnAboutShortcuts(originalExe, exePath);
+			if (oldLauncherUsed) {
+				warnAboutShortcuts(originalExe, exePath);
+			}
 			startExeRenameAndRestart(appPath, exePath, oldExe, backupExe);
 			appService.getContext().dispose();
 			System.exit(0);
@@ -412,7 +433,10 @@ class LauncherMigrator {
 	 * Disable the old ImageJ/Java-8/Fiji sites (and their mirrors) and turn on
 	 * the new Fiji site.
 	 */
-	private void migrateUpdateSites() {
+	private void migrateUpdateSites(FilesCollection files) {
+		// TODO detect if the Europe mirrors were enabled and if so enable the
+		// corresponding Fiji-latest mirror
+
 		// List of all sites to disable
 		final List<String> siteList = new ArrayList<>();
 		for (String site : new String[]{"Java-8", "ImageJ", "Fiji"}) {
@@ -424,15 +448,11 @@ class LauncherMigrator {
 		// List of the file object names associated with disabled sites
 		final Set<String> legacyFiles = new HashSet<>();
 
-		final String newFijiSite = "Fiji-latest";
 		File ijDir = ImageJUpdater.getAppDirectory();
-		FilesCollection files = new FilesCollection(log, ijDir);
 		try {
-			// Initialize the FilesCollection
-			files.tryLoadingCollection();
-
+			// TODO this logic may need to change once Fiji-latest is public
 			// Add the new Fiji update site
-			files.addUpdateSite(newFijiSite, "https://sites.imagej.net/Fiji/", null,
+			files.addUpdateSite(NEW_FIJI_SITE, "https://sites.imagej.net/Fiji/", null,
 					null, 0l);
 
 			// Deactivate the old update site trio
@@ -467,7 +487,7 @@ class LauncherMigrator {
 			}
 
 			// Ensure any file from the new Fiji site is staged appropriately
-			for (FileObject file : files.forUpdateSite(newFijiSite)) {
+			for (FileObject file : files.forUpdateSite(NEW_FIJI_SITE)) {
 				final FileObject.Status status = file.getStatus();
 				switch (status) {
 					case LOCAL_ONLY:
@@ -511,8 +531,7 @@ class LauncherMigrator {
 			Installer i = new Installer(files, null);
 			i.start();
 		}
-		catch (IOException | SAXException | ParserConfigurationException |
-				TransformerConfigurationException e) {
+		catch (IOException | SAXException | TransformerConfigurationException e) {
 			throw new RuntimeException(e);
 		}
 	}
