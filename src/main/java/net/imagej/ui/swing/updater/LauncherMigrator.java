@@ -567,11 +567,13 @@ class LauncherMigrator {
 		String pathToCheck = checkExe.toFile().getAbsolutePath();
 
 		if (OS_WIN) {
+			String processToCheck = checkExe.toFile().getName();
+			processToCheck = processToCheck.substring(0, processToCheck.lastIndexOf('-'));
 			// Windows implementation using PowerShell
 			String scriptContent = String.join("\n",
 					"$tries = 0; ",
 					"while ((Test-Path '" + pathToCheck + "') -and ($tries -lt " + numTries + ")) { ",
-					"   if (Get-Process -Name \"ImageJ*\" -ErrorAction SilentlyContinue) { ",
+					"   if (Get-Process -Name \"" + processToCheck + "*\" -ErrorAction SilentlyContinue) { ",
 					"       Write-Host \"Attempt $tries of " + numTries + " - File is locked.\"; ",
 					"   } else { ",
 					"       break; ",
