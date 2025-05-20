@@ -340,7 +340,8 @@ class LauncherMigrator {
 		extractAndSetProperty("scijava.app.java-links", lines,
 			"https://downloads.imagej.net/java/jdk-urls.txt");
 		extractAndSetProperty("scijava.app.java-version-minimum", lines, "8");
-		extractAndSetProperty("scijava.app.java-version-recommended", lines, "21");
+		// NB: do not extract the recommended version here because on the old trio
+		// of update sites this is likely 8
 		extractAndSetProperty("scijava.app.config-file", lines,
 			new File(configDir, appSlug + ".cfg").getPath());
 
@@ -348,6 +349,10 @@ class LauncherMigrator {
 		setPropertyIfNull("scijava.app.java-platform", platform);
 		setPropertyIfNull("scijava.app.java-root",
 			appDir.toPath().resolve("java").resolve(platform).toString());
+
+		// NB: we ALWAYS want to set this explicitly, even if it is already set.
+		// That way we will upgrade regardless of which launcher we're using
+		System.setProperty("scijava.app.java-version-recommended", "21");
 
 		// Now that the properties are set, we can decide whether to upgrade Java.
 		if (nljv == null || Versions.compare(nljv, Java.recommendedVersion()) < 0) {
