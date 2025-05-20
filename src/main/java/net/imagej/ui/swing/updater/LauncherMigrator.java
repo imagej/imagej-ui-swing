@@ -223,11 +223,12 @@ class LauncherMigrator {
 		appDir = appDir.getAbsoluteFile();
 		String appSlug = appTitle.toLowerCase();
 		File configDir = appDir.toPath().resolve("config").resolve("jaunch").toFile();
+		File jarDir = appDir.toPath().resolve("jars").toFile();
 
 		// Test whether the new launcher is likely to work on this system.
 		String nljv;
 		try {
-			nljv = probeJavaVersion(appDir, configDir, appSlug);
+			nljv = probeJavaVersion(appDir, jarDir, appSlug);
 			if (log != null) log.debug("Java from new launcher BEFORE: " + nljv);
 		}
 		catch (IOException exc) {
@@ -362,7 +363,7 @@ class LauncherMigrator {
 
 			// And now we test whether the new launcher finds the new Java.
 			try {
-				nljv = probeJavaVersion(appDir, configDir, appSlug);
+				nljv = probeJavaVersion(appDir, jarDir, appSlug);
 				if (log != null) log.debug("Java from new launcher AFTER: " + nljv);
 			}
 			catch (IOException | UnsupportedOperationException exc) {
@@ -687,17 +688,13 @@ class LauncherMigrator {
 	 *   If no executable native launcher is available for this system platform.
 	 */
 	private static String probeJavaVersion(
-		File appDir, File configDir, String appPrefix) throws IOException
+		File appDir, File jarDir, String appPrefix) throws IOException
 	{
 		// 1. Find and validate the new launcher and helper files.
 
 		File exeFile = exeFile(appPrefix, appDir);
-		if (!configDir.isDirectory()) {
-			throw new UnsupportedOperationException("Launcher config directory is missing: " + configDir);
-		}
-		File propsClass = new File(configDir, "Props.class");
-		if (!propsClass.isFile()) {
-			throw new UnsupportedOperationException("Launcher helper program is missing: " + propsClass);
+		if (!jarDir.isDirectory()) {
+			throw new UnsupportedOperationException("Launcher jar directory is missing: " + jarDir);
 		}
 
 		// 2. Run it.
@@ -707,7 +704,8 @@ class LauncherMigrator {
 			File propsOut = File.createTempFile("props", ".txt");
 			propsOut.deleteOnExit();
 			Process p = new ProcessBuilder(exeFile.getPath(),
-					"-Djava.class.path=" + configDir.getPath(), "--main-class", "Props",
+					"-Djava.class.path=" + jarDir.getPath(), "--main-class",
+					" net.imagej.ui.swing.updater.PropsProbe",
 					propsOut.getAbsolutePath())
 				.redirectErrorStream(true).start();
 			output = collectProcessOutput(p, propsOut);
@@ -725,7 +723,6 @@ class LauncherMigrator {
 		// Note: We check the exit code below *after* detecting the lack of Java
 		// installations, because in the above case, that exit code is also non-zero
 		// (20 as of this writing), and we want to return -1, not throw IOException.
-
 		if (exitCode != 0) {
 			throw new IOException("Launcher exited with non-zero value: " + exitCode);
 		}
