@@ -705,7 +705,7 @@ class LauncherMigrator {
 			propsOut.deleteOnExit();
 			Process p = new ProcessBuilder(exeFile.getPath(),
 					"-Djava.class.path=" + jarDir.getPath(), "--main-class",
-					" net.imagej.ui.swing.updater.PropsProbe",
+					"net.imagej.ui.swing.updater.PropsProbe",
 					propsOut.getAbsolutePath())
 				.redirectErrorStream(true).start();
 			output = collectProcessOutput(p, propsOut);
