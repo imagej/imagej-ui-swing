@@ -41,6 +41,8 @@ import org.scijava.ui.ApplicationFrame;
 import org.scijava.ui.DialogPrompt;
 import org.scijava.ui.UIService;
 import org.scijava.ui.UserInterface;
+import org.scijava.util.FileUtils;
+import org.scijava.util.Types;
 import org.scijava.widget.UIComponent;
 import org.xml.sax.SAXException;
 
@@ -223,12 +225,11 @@ class LauncherMigrator {
 		appDir = appDir.getAbsoluteFile();
 		String appSlug = appTitle.toLowerCase();
 		File configDir = appDir.toPath().resolve("config").resolve("jaunch").toFile();
-		File jarDir = appDir.toPath().resolve("jars").toFile();
 
 		// Test whether the new launcher is likely to work on this system.
 		String nljv;
 		try {
-			nljv = probeJavaVersion(appDir, jarDir, appSlug);
+			nljv = probeJavaVersion(appDir, appSlug);
 			if (log != null) log.debug("Java from new launcher BEFORE: " + nljv);
 		}
 		catch (IOException exc) {
@@ -363,7 +364,7 @@ class LauncherMigrator {
 
 			// And now we test whether the new launcher finds the new Java.
 			try {
-				nljv = probeJavaVersion(appDir, jarDir, appSlug);
+				nljv = probeJavaVersion(appDir, appSlug);
 				if (log != null) log.debug("Java from new launcher AFTER: " + nljv);
 			}
 			catch (IOException | UnsupportedOperationException exc) {
@@ -687,24 +688,23 @@ class LauncherMigrator {
 	 * @throws UnsupportedOperationException
 	 *   If no executable native launcher is available for this system platform.
 	 */
-	private static String probeJavaVersion(
-		File appDir, File jarDir, String appPrefix) throws IOException
+	private static String probeJavaVersion(File appDir, String appPrefix)
+		throws IOException
 	{
 		// 1. Find and validate the new launcher and helper files.
 
 		File exeFile = exeFile(appPrefix, appDir);
-		if (!jarDir.isDirectory()) {
-			throw new UnsupportedOperationException("Launcher jar directory is missing: " + jarDir);
-		}
 
 		// 2. Run it.
 		List<String> output;
 		int exitCode;
 		try {
+			File propsJar = FileUtils.urlToFile(Types.location(PropsProbe.class));
 			File propsOut = File.createTempFile("props", ".txt");
 			propsOut.deleteOnExit();
 			Process p = new ProcessBuilder(exeFile.getPath(),
-					"-Djava.class.path=" + jarDir.getPath(), "--main-class",
+					"-Djava.class.path=" + propsJar.getPath(),
+					"--main-class",
 					"net.imagej.ui.swing.updater.PropsProbe",
 					propsOut.getAbsolutePath())
 				.redirectErrorStream(true).start();
