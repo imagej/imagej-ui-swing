@@ -68,7 +68,7 @@ import java.util.regex.Pattern;
 /**
  * Absurdly complex logic for helping users transition
  * safely from the old trio of ImageJ/Fiji/Java-8 update sites to the new
- * Fiji-latest site.
+ * Fiji-Latest site.
  *
  * @author Curtis Rueden
  */
@@ -82,7 +82,7 @@ class LauncherMigrator {
 		Arrays.asList("amd64", "x86-64", "x86_64", "x64");
 	private static final boolean OS_WIN, OS_MACOS, OS_LINUX;
 	private static final String OS, ARCH;
-	private static final String NEW_FIJI_SITE = "Fiji-latest";
+	private static final String NEW_FIJI_SITE = "Fiji-Latest";
 
 	static {
 		OS = System.getProperty("os.name");
@@ -111,9 +111,9 @@ class LauncherMigrator {
 	/**
 	 * Figures out what's going on with the application's launch situation.
 	 * <ul>
-	 * <li>If the Fiji-latest site is not active, call
+	 * <li>If the Fiji-Latest site is not active, call
 	 *   {@link #switchToFijiLatest(FilesCollection)}.</li>
-	 * <li>Do nothing if Fiji-latest already active, or launched in some other creative way.</li>
+	 * <li>Do nothing if Fiji-Latest already active, or launched in some other creative way.</li>
 	 * </ul>
 	 */
 	void checkLaunchStatus() {
@@ -450,7 +450,7 @@ class LauncherMigrator {
 	 */
 	private void migrateUpdateSites(FilesCollection files) {
 		// TODO detect if the Europe mirrors were enabled and if so enable the
-		// corresponding Fiji-latest mirror
+		// corresponding Fiji-Latest mirror
 
 		// List of all sites to disable
 		final List<String> siteList = new ArrayList<>();
@@ -465,7 +465,7 @@ class LauncherMigrator {
 
 		File ijDir = ImageJUpdater.getAppDirectory();
 		try {
-			// TODO this logic may need to change once Fiji-latest is public
+			// TODO this logic may need to change once Fiji-Latest is public
 			// Add the new Fiji update site
 			files.addUpdateSite(NEW_FIJI_SITE, "https://sites.imagej.net/Fiji/", null,
 					null, 0l);
