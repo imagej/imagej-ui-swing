@@ -429,13 +429,21 @@ class LauncherMigrator {
 			// Back up the previous executable to a .backup version
 			Files.copy(oldExe, backupExe);
 
+			Path checkExe = exeFile.toPath();
 			if (oldLauncherUsed) {
 				warnAboutShortcuts(originalExe, exePath);
-				queueRestart(appPath, exePath, oldExe);
-			} else {
-				queueRestart(appPath, exePath, exeFile.toPath());
+				checkExe = oldExe;
 			}
 
+			uiService.showDialog(
+					"Upgrade to Fiji-Latest complete!\n" +
+							"After closing this message, Fiji will automatically restart\n" +
+							"with the appropriate launcher.\n" +
+							"Please allow a few moments for the restart to complete.\n\n" +
+							"If the restart fails, please check the logs directory for details.\n",
+					"Upgrade complete!",
+					DialogPrompt.MessageType.INFORMATION_MESSAGE);
+			queueRestart(appPath, exePath, checkExe);
 			appService.getContext().dispose();
 			System.exit(0);
 		}
