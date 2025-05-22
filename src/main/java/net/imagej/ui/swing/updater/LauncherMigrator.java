@@ -117,6 +117,11 @@ class LauncherMigrator {
 	 * </ul>
 	 */
 	void checkLaunchStatus() {
+		if (ARCH.equals("x32") || ARCH.equals("arm32") || (OS_WIN && ARCH.equals("arm64"))) {
+			// We cannot upgrade any 32-bit OS's or arm64 Windows right now.
+			return;
+		}
+
 		// Check whether *either* launcher (old or new) launched the app.
 		// Both launchers set one of these telltale properties.
 		boolean launcherUsed =
