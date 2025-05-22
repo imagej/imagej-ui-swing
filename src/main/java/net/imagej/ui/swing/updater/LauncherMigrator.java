@@ -445,7 +445,8 @@ class LauncherMigrator {
 							"After closing this message, Fiji will automatically restart\n" +
 							"with the appropriate launcher.\n" +
 							"Please allow a few moments for the restart to complete.\n\n" +
-							"If the restart fails, please check the logs directory for details.\n",
+							"If the restart fails, please check the logs directory for details." +
+							(oldLauncherUsed ? "\nYou can also try the backup launcher:" + backupExe.toFile().getName() : ""),
 					"Upgrade complete!",
 					DialogPrompt.MessageType.INFORMATION_MESSAGE);
 			queueRestart(appPath, exePath, checkExe);
