@@ -551,7 +551,7 @@ class LauncherMigrator {
 			}
 
 			// Stage the changes in the update folder
-			Installer i = new Installer(files, null);
+			Installer i = new Installer(files, new ProgressDialog(null, "Downloading updates..."));
 			i.start();
 		}
 		catch (IOException | SAXException | TransformerConfigurationException e) {
