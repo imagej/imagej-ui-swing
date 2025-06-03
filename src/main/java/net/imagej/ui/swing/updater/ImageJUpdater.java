@@ -82,8 +82,6 @@ public class ImageJUpdater implements UpdaterUI {
 
 	@Override
 	public void run() {
-		new LauncherMigrator(context).checkLaunchStatus();
-
 		if (errorIfDebian()) return;
 
 		if (log == null) {
@@ -159,6 +157,18 @@ public class ImageJUpdater implements UpdaterUI {
 			return;
 		}
 
+		files.markForUpdate(false);
+		// Attempt to upgrade here
+
+		if (!files.updateable(false).iterator().hasNext()) {
+			// Everything looks up-to-date, so we can try to upgrade.
+			// If anything was out-of-date we wouldn't want to upgrade, in case an update impacts the upgrade process.
+			// NB: locally modified files are accepted. They will be forcibly updated as appropriate.
+			// If desired, check files.updateable(true) for local changes.
+			new LauncherMigrator(context).checkLaunchStatus();
+		}
+
+		// If the user didn't upgrade, we can continue with the update
 		try {
 			final String missingUploaders = main.files.protocolsMissingUploaders(main.getUploaderService(), main.getProgress(null));
 			if (missingUploaders != null) {
@@ -172,7 +182,6 @@ public class ImageJUpdater implements UpdaterUI {
 		main.setVisible(true);
 		main.requestFocus();
 
-		files.markForUpdate(false);
 		main.setViewOption(Option.UPDATEABLE);
 		if (files.hasForcableUpdates()) {
 			main.warn("There are locally modified files!");
