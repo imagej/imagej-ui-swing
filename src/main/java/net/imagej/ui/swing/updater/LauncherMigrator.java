@@ -230,11 +230,22 @@ class LauncherMigrator {
 		appDir = appDir.getAbsoluteFile();
 		String appSlug = appTitle.toLowerCase();
 		File configDir = appDir.toPath().resolve("config").resolve("jaunch").toFile();
+		String platform = Platforms.current();
+		File exeFile = exeFile(appSlug, appDir);
+		if (OS_MACOS) {
+			if (isMacArm64()) {
+				// If we are running in x64 mode under Rosetta on an arm64 host, we force a switch to arm64.
+				// This ensures that we get a Java that will be compatible with double-clicking the launcher after
+				// upgrading.
+				platform = "macos-arm64";
+				exeFile = exeFile(appSlug, appDir, "arm64");
+			}
+		}
 
 		// Test whether the new launcher is likely to work on this system.
 		String nljv;
 		try {
-			nljv = probeJavaVersion(appDir, appSlug);
+			nljv = probeJavaVersion(exeFile);
 			if (log != null) log.debug("Java from new launcher BEFORE: " + nljv);
 		}
 		catch (IOException exc) {
@@ -352,7 +363,6 @@ class LauncherMigrator {
 		extractAndSetProperty("scijava.app.config-file", lines,
 			new File(configDir, appSlug + ".cfg").getPath());
 
-		String platform = Platforms.current();
 		// NB: we should ALWAYS set the platform property. On Intel x64 Macs this property is still shipped as "macosx"
 		// which is a legacy convention. All Java platform downloads should be consistent with what comes back from
 		// the Platforms utility class
@@ -372,7 +382,7 @@ class LauncherMigrator {
 
 			// And now we test whether the new launcher finds the new Java.
 			try {
-				nljv = probeJavaVersion(appDir, appSlug);
+				nljv = probeJavaVersion(exeFile);
 				if (log != null) log.debug("Java from new launcher AFTER: " + nljv);
 			}
 			catch (IOException | UnsupportedOperationException exc) {
@@ -409,7 +419,6 @@ class LauncherMigrator {
 
 		Path appPath = appDir.toPath();
 		try {
-			File exeFile = exeFile(appSlug, appDir);
 			String exePath = exeFile.getCanonicalPath();
 			Path originalExe;
 			Path oldExe;
@@ -437,10 +446,13 @@ class LauncherMigrator {
 			// Back up the previous executable to a .backup version
 			Files.copy(oldExe, backupExe);
 
-			Path checkExe = exeFile.toPath();
+			// NB - re-find the exeFile to account for overriding the exeFile on arm64 Mac
+			Path checkExe;
 			if (oldLauncherUsed) {
 				warnAboutShortcuts(originalExe, exePath);
 				checkExe = oldExe;
+			} else {
+				checkExe = exeFile(appSlug, appDir).toPath();
 			}
 
 			uiService.showDialog(
@@ -705,14 +717,10 @@ class LauncherMigrator {
 	 * @throws UnsupportedOperationException
 	 *   If no executable native launcher is available for this system platform.
 	 */
-	private static String probeJavaVersion(File appDir, String appPrefix)
+	private static String probeJavaVersion(File exeFile)
 		throws IOException
 	{
-		// 1. Find and validate the new launcher and helper files.
-
-		File exeFile = exeFile(appPrefix, appDir);
-
-		// 2. Run it.
+		// 1. Run the indicated launcher
 		List<String> output;
 		int exitCode;
 		try {
@@ -732,7 +740,7 @@ class LauncherMigrator {
 			throw new IOException(exc);
 		}
 
-		// 3. Analyze the output.
+		// 2. Analyze the output.
 
 		String noJavas = "No matching Java installations found.";
 		if (!output.isEmpty() && output.get(0).startsWith(noJavas)) return null;
@@ -751,12 +759,38 @@ class LauncherMigrator {
 			.findFirst().orElse(null);
 	}
 
+	/**
+	 * Helper method to determine if we're running on an Arm64 machine even if launched in x64 compatibility mode. Only
+	 * for use on Mac.
+	 */
+	private static boolean isMacArm64() {
+		try {
+			ProcessBuilder pb = new ProcessBuilder("sysctl", "-n", "hw.optional.arm64");
+			Process p = pb.start();
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+				String line = reader.readLine();
+				if (line != null) {
+					return line.trim().equals("1");
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		return false;
+	}
+
 	private static File exeFile(String appPrefix, File appDir) {
+		return exeFile(appPrefix, appDir, null);
+	}
+
+	private static File exeFile(String appPrefix, File appDir, String archOverride) {
 		// Determine the right executable path for the new launcher.
 		String exe;
-		if (OS_WIN) exe = appPrefix + "-windows-" + ARCH + ".exe";
-		else if (OS_MACOS) exe = "Fiji.app/Contents/MacOS/" + appPrefix + "-macos-" + ARCH;
-		else if (OS_LINUX) exe = appPrefix + "-linux-" + ARCH;
+		String effectiveArch = (archOverride == null || archOverride.isEmpty()) ? ARCH : archOverride;
+
+		if (OS_WIN) exe = appPrefix + "-windows-" + effectiveArch + ".exe";
+		else if (OS_MACOS) exe = "Fiji.app/Contents/MacOS/" + appPrefix + "-macos-" + effectiveArch;
+		else if (OS_LINUX) exe = appPrefix + "-linux-" + effectiveArch;
 		else throw new UnsupportedOperationException("Unsupported OS: " + OS);
 
 		// Do some sanity checks to make sure we can actually run it.
