@@ -353,8 +353,11 @@ class LauncherMigrator {
 			new File(configDir, appSlug + ".cfg").getPath());
 
 		String platform = Platforms.current();
-		setPropertyIfNull("scijava.app.java-platform", platform);
-		setPropertyIfNull("scijava.app.java-root",
+		// NB: we should ALWAYS set the platform property. On Intel x64 Macs this property is still shipped as "macosx"
+		// which is a legacy convention. All Java platform downloads should be consistent with what comes back from
+		// the Platforms utility class
+		System.setProperty("scijava.app.java-platform", platform);
+		System.setProperty("scijava.app.java-root",
 			appDir.toPath().resolve("java").resolve(platform).toString());
 
 		// NB: we ALWAYS want to set this explicitly, even if it is already set.
