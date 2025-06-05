@@ -253,6 +253,7 @@ class LauncherMigrator {
 				platform = "macos64";
 				exeFile = exeFile(appSlug, appDir, "x64");
 			}
+			files.setActivePlatforms(platform);
 		}
 
 		// Test whether the new launcher is likely to work on this system.
