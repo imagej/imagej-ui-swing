@@ -193,11 +193,11 @@ class LauncherMigrator {
 				DialogPrompt.MessageType.WARNING_MESSAGE);
 	}
 
-		/**
-		 * Inform the user about the pros and cons of to the latest update site.
-		 * Then, if they should elect to switch, upgrades the managed Java to the
-		 * recommended one and finally relaunches with the new launcher.
-		 */
+	/**
+	 * Inform the user about the pros and cons of to the latest update site.
+	 * Then, if they should elect to switch, upgrades the managed Java to the
+	 * recommended one and finally relaunches with the new launcher.
+	 */
 	private void switchToFijiLatest(FilesCollection files) {
 
 		// Check whether the user has silenced the launcher upgrade prompt.
