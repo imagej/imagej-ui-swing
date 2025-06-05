@@ -192,6 +192,16 @@ class LauncherMigrator {
 				"Reminder: update shortcuts!",
 				DialogPrompt.MessageType.WARNING_MESSAGE);
 	}
+	private void warnAboutMacFolder() {
+		uiService.showDialog(
+				"As part of this upgrade, the Fiji launcher is now signed for security.\n" +
+						"To accomplish this, we must put the Fiji.app directory in its own dedicated subfolder.\n" +
+						"This means your old .app folder will be automatically renamed to remove the \".app\".\n" +
+						"We apologize for the inconvenience, but believe the improved security and user experience\n" +
+						"is a worthy trade-off.",
+				"Notice: renamed application folder!",
+				DialogPrompt.MessageType.WARNING_MESSAGE);
+	}
 
 	/**
 	 * Inform the user about the pros and cons of to the latest update site.
@@ -457,6 +467,9 @@ class LauncherMigrator {
 			} else {
 				checkExe = exeFile(appSlug, appDir).toPath();
 			}
+			if (OS_MACOS) {
+				warnAboutMacFolder();
+			}
 
 			uiService.showDialog(
 					"Upgrade to Fiji-Latest complete!\n" +
@@ -634,6 +647,18 @@ class LauncherMigrator {
 
 			pb.redirectOutput(new File("NUL"));
 		} else {
+			String renameMacFolder = "";
+			if (OS_MACOS) {
+				// On Mac we need to remove the .app from the Fiji folder as it will be an invalid app with the Contents
+				// subdirectory removed
+				if (appDir.toString().endsWith(".app")) {
+					String appDirString = appDir.toString();
+					String nonAppString = appDirString.substring(0, appDirString.length() - 4);
+					launchExe = launchExe.substring(appDirString.length());
+					launchExe = nonAppString + File.separator + launchExe;
+					renameMacFolder = "mv \"" + appDirString + "\" \"" + nonAppString + "\"\n";
+				}
+			}
 			// Unix/Linux/Mac implementation using bash
 			String scriptContent = String.join("\n",
 					"#!/bin/bash",
@@ -652,7 +677,7 @@ class LauncherMigrator {
 					"   fi",
 					"   sleep " + (checkIntervalMs / 1000.0) ,
 					"done",
-					launchExe + " &"
+					renameMacFolder + launchExe + " &"
 			);
 
 			// Write the script to a temporary file
