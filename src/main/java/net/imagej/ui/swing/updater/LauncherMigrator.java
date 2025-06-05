@@ -239,6 +239,9 @@ class LauncherMigrator {
 				// upgrading.
 				platform = "macos-arm64";
 				exeFile = exeFile(appSlug, appDir, "arm64");
+			} else {
+				platform = "macos64";
+				exeFile = exeFile(appSlug, appDir, "x64");
 			}
 		}
 
