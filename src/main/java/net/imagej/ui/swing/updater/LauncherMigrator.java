@@ -182,13 +182,13 @@ class LauncherMigrator {
 	private void warnAboutShortcuts(Path oldExePath, String newExePath) {
 		uiService.showDialog(
 				"As part of this update, the Fiji launcher is being upgraded\n" +
-								"to a completely new version. Therefore any shortcuts referring\n" +
-								"to the old launcher will need to be updated.\n" +
-								"(e.g. start menu entries, taskbar pins, desktop shortcuts, etc...)\n\n" +
-								"Old launcher path:\n" +
-								oldExePath + "\n\n" +
-								"New launcher path:\n" +
-								newExePath,
+						"to a completely new version. Therefore any shortcuts referring\n" +
+						"to the old launcher will need to be updated.\n" +
+						"(e.g. start menu entries, taskbar pins, desktop shortcuts, etc...)\n\n" +
+						"Old launcher path:\n" +
+						oldExePath + "\n\n" +
+						"New launcher path:\n" +
+						newExePath,
 				"Reminder: update shortcuts!",
 				DialogPrompt.MessageType.WARNING_MESSAGE);
 	}
