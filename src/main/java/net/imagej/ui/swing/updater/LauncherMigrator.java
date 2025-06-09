@@ -755,14 +755,15 @@ class LauncherMigrator {
 		try {
 			File propsJar = FileUtils.urlToFile(Types.location(PropsProbe.class));
 			File propsOut = File.createTempFile("props", ".txt");
+			File propsErr = File.createTempFile("props", ".err");
 			propsOut.deleteOnExit();
 			Process p = new ProcessBuilder(exeFile.getPath(),
 					"-Djava.class.path=" + propsJar.getPath(),
 					"--main-class",
 					"net.imagej.ui.swing.updater.PropsProbe",
 					propsOut.getAbsolutePath())
-				.redirectErrorStream(true).start();
-			output = collectProcessOutput(p, propsOut);
+				.redirectError(propsErr).start();
+			output = collectProcessOutput(p, propsOut, propsErr);
 			exitCode = p.exitValue();
 		}
 		catch (InterruptedException exc) {
@@ -866,9 +867,9 @@ class LauncherMigrator {
 
 	/**
 	 * Annoying code to collect lines from a short-running that writes to the
-	 * specified file.
+	 * specified files.
 	 */
-	private static List<String> collectProcessOutput(Process p, File outFile)
+	private static List<String> collectProcessOutput(Process p, File outFile, File errFile)
 		throws IOException, InterruptedException
 	{
 		boolean completed = p.waitFor(15, TimeUnit.SECONDS);
@@ -876,7 +877,12 @@ class LauncherMigrator {
 			p.destroyForcibly();
 			throw new IOException("Process took too long to complete.");
 		}
-		return Files.readAllLines(outFile.toPath());
+		List<String> lines = Files.readAllLines(outFile.toPath());
+		if (lines.isEmpty()) {
+			// Presumably if no output we should check the error file.
+			lines = Files.readAllLines(errFile.toPath());
+		}
+		return lines;
 	}
 
 	/** Annoying code to discern the AWT/Swing main application frame, if any. */
