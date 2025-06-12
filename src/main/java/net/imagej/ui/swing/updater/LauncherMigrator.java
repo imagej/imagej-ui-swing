@@ -82,7 +82,8 @@ class LauncherMigrator {
 		Arrays.asList("amd64", "x86-64", "x86_64", "x64");
 	private static final boolean OS_WIN, OS_MACOS, OS_LINUX;
 	private static final String OS, ARCH;
-	private static final String NEW_FIJI_SITE = "Fiji-Latest";
+	private static final String FIJI_LATEST_URL = "https://sites.imagej.net/Fiji/";
+	private static final String FIJI_LATEST_EURO_URL = "https://downloads.micron.ox.ac.uk/fiji_update/mirrors/sites-fiji/";
 
 	static {
 		OS = System.getProperty("os.name");
@@ -141,9 +142,9 @@ class LauncherMigrator {
 
 		// If the new single Fiji update site is not active, proceed to upgrade
 		boolean fijiSiteActive = false;
-		// TODO update to account for European mirror (when it exists)
 		for (UpdateSite site : files.getUpdateSites(false)) {
-			if (site.getURL().equals("https://sites.imagej.net/Fiji/")) {
+			if (site.getURL().equals(FIJI_LATEST_URL) ||
+					site.getURL().equals(FIJI_LATEST_EURO_URL)) {
 				fijiSiteActive = true;
 				break;
 			}
@@ -495,10 +496,18 @@ class LauncherMigrator {
 	 * the new Fiji site.
 	 */
 	private void migrateUpdateSites(FilesCollection files) {
-		// TODO detect if the Europe mirrors were enabled and if so enable the
-		// corresponding Fiji-Latest mirror
+		final String fijiSiteName ;
+		final String fijiSiteUrl;
+		if (files.getUpdateSite("Java-8 (Europe mirror)", false) != null) {
+			// If a Europe mirror site is turned on, assume we want to migrate to the Europe mirror of Fiji-latest too
+			fijiSiteName = "Fiji-Latest (Europe mirror)";
+			fijiSiteUrl = FIJI_LATEST_EURO_URL;
+		} else {
+			fijiSiteName = "Fiji-Latest";
+			fijiSiteUrl = FIJI_LATEST_URL;
+		}
 
-		// List of all sites to disable
+		// Turn off all the core sites and their mirrors
 		final List<String> siteList = new ArrayList<>();
 		for (String site : new String[]{"Java-8", "ImageJ", "Fiji"}) {
 			for (String suffix : new String[]{"", " (Europe mirror)"}) {
@@ -511,10 +520,8 @@ class LauncherMigrator {
 
 		File ijDir = ImageJUpdater.getAppDirectory();
 		try {
-			// TODO this logic may need to change once Fiji-Latest is public
-			// Add the new Fiji update site
-			files.addUpdateSite(NEW_FIJI_SITE, "https://sites.imagej.net/Fiji/", null,
-					null, 0l);
+			// Add/turn on the new Fiji update site
+			files.addUpdateSite(fijiSiteName, fijiSiteUrl, null, null, 0l);
 
 			// Deactivate the old update site trio
 			for (String siteName : siteList) {
@@ -548,7 +555,7 @@ class LauncherMigrator {
 			}
 
 			// Ensure any file from the new Fiji site is staged appropriately
-			for (FileObject file : files.forUpdateSite(NEW_FIJI_SITE)) {
+			for (FileObject file : files.forUpdateSite(fijiSiteName)) {
 				final FileObject.Status status = file.getStatus();
 				switch (status) {
 					case LOCAL_ONLY:
