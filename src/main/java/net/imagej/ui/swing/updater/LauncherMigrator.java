@@ -722,13 +722,12 @@ class LauncherMigrator {
 		Logger log, String appTitle, String appSlug, Exception exc)
 	{
 		if (log == null) return;
-		log.error("Argh! " + appTitle + "'s fancy new launcher is not " +
-			"working on your system! It might be a bug in the new launcher, " +
-			"or your operating system may be too old to support it. Would you " +
-			"please visit https://forum.image.sc/ and report this problem? " +
-			"Click 'New Topic', choose 'Usage & Issues' category, and use tag '" +
-			appSlug + "'. Please copy+paste the technical information below " +
-			"into your report. Thank you!\n\n" +
+		log.error("Argh! " + appTitle + "'s fancy new launcher is not working on your system!\n" +
+			"It might be a bug in the new launcher, or your operating system may be too old to support it.\n" +
+			(OS_LINUX ? "On Linux you may also need to upgrade your glibc version.\n" : "") +
+			"Would you please visit https://forum.image.sc/ and report this problem?\n" +
+			"Click 'New Topic', choose 'Usage & Issues' category, and use tag '" + appSlug + "'.\n" +
+			" Please copy+paste the technical information below into your report. Thank you!\n\n" +
 			"* os.name=" + System.getProperty("os.name") + "\n" +
 			"* os.arch=" + System.getProperty("os.arch") + "\n" +
 			"* os.version=" + System.getProperty("os.version") + "\n", exc);
