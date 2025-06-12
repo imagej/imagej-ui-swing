@@ -82,7 +82,8 @@ class LauncherMigrator {
 		Arrays.asList("amd64", "x86-64", "x86_64", "x64");
 	private static final boolean OS_WIN, OS_MACOS, OS_LINUX;
 	private static final String OS, ARCH;
-	private static final String NEW_FIJI_SITE = "Fiji-Latest";
+	private static final String FIJI_LATEST_URL = "https://sites.imagej.net/Fiji/";
+	private static final String FIJI_LATEST_EURO_URL = "https://downloads.micron.ox.ac.uk/fiji_update/mirrors/sites-fiji/";
 
 	static {
 		OS = System.getProperty("os.name");
@@ -141,9 +142,9 @@ class LauncherMigrator {
 
 		// If the new single Fiji update site is not active, proceed to upgrade
 		boolean fijiSiteActive = false;
-		// TODO update to account for European mirror (when it exists)
 		for (UpdateSite site : files.getUpdateSites(false)) {
-			if (site.getURL().equals("https://sites.imagej.net/Fiji/")) {
+			if (site.getURL().equals(FIJI_LATEST_URL) ||
+					site.getURL().equals(FIJI_LATEST_EURO_URL)) {
 				fijiSiteActive = true;
 				break;
 			}
@@ -182,22 +183,32 @@ class LauncherMigrator {
 	private void warnAboutShortcuts(Path oldExePath, String newExePath) {
 		uiService.showDialog(
 				"As part of this update, the Fiji launcher is being upgraded\n" +
-								"to a completely new version. Therefore any shortcuts referring\n" +
-								"to the old launcher will need to be updated.\n" +
-								"(e.g. start menu entries, taskbar pins, desktop shortcuts, etc...)\n\n" +
-								"Old launcher path:\n" +
-								oldExePath + "\n\n" +
-								"New launcher path:\n" +
-								newExePath,
+						"to a completely new version. Therefore any shortcuts referring\n" +
+						"to the old launcher will need to be updated.\n" +
+						"(e.g. start menu entries, taskbar pins, desktop shortcuts, etc...)\n\n" +
+						"Old launcher path:\n" +
+						oldExePath + "\n\n" +
+						"New launcher path:\n" +
+						newExePath,
 				"Reminder: update shortcuts!",
 				DialogPrompt.MessageType.WARNING_MESSAGE);
 	}
+	private void warnAboutMacFolder() {
+		uiService.showDialog(
+				"As part of this upgrade, the Fiji launcher is now signed for security.\n" +
+						"To accomplish this, we must put the Fiji.app directory in its own dedicated subfolder.\n" +
+						"This means your old .app folder will be automatically renamed to remove the \".app\".\n" +
+						"We apologize for the inconvenience, but believe the improved security and user experience\n" +
+						"is a worthy trade-off.",
+				"Notice: renamed application folder!",
+				DialogPrompt.MessageType.WARNING_MESSAGE);
+	}
 
-		/**
-		 * Inform the user about the pros and cons of to the latest update site.
-		 * Then, if they should elect to switch, upgrades the managed Java to the
-		 * recommended one and finally relaunches with the new launcher.
-		 */
+	/**
+	 * Inform the user about the pros and cons of to the latest update site.
+	 * Then, if they should elect to switch, upgrades the managed Java to the
+	 * recommended one and finally relaunches with the new launcher.
+	 */
 	private void switchToFijiLatest(FilesCollection files) {
 
 		// Check whether the user has silenced the launcher upgrade prompt.
@@ -230,11 +241,26 @@ class LauncherMigrator {
 		appDir = appDir.getAbsoluteFile();
 		String appSlug = appTitle.toLowerCase();
 		File configDir = appDir.toPath().resolve("config").resolve("jaunch").toFile();
+		String platform = Platforms.current();
+		File exeFile = exeFile(appSlug, appDir);
+		if (OS_MACOS) {
+			if (isMacArm64()) {
+				// If we are running in x64 mode under Rosetta on an arm64 host, we force a switch to arm64.
+				// This ensures that we get a Java that will be compatible with double-clicking the launcher after
+				// upgrading.
+				platform = "macos-arm64";
+				exeFile = exeFile(appSlug, appDir, "arm64");
+			} else {
+				platform = "macos64";
+				exeFile = exeFile(appSlug, appDir, "x64");
+			}
+			files.setActivePlatforms(platform);
+		}
 
 		// Test whether the new launcher is likely to work on this system.
 		String nljv;
 		try {
-			nljv = probeJavaVersion(appDir, appSlug);
+			nljv = probeJavaVersion(exeFile);
 			if (log != null) log.debug("Java from new launcher BEFORE: " + nljv);
 		}
 		catch (IOException exc) {
@@ -352,9 +378,11 @@ class LauncherMigrator {
 		extractAndSetProperty("scijava.app.config-file", lines,
 			new File(configDir, appSlug + ".cfg").getPath());
 
-		String platform = Platforms.current();
-		setPropertyIfNull("scijava.app.java-platform", platform);
-		setPropertyIfNull("scijava.app.java-root",
+		// NB: we should ALWAYS set the platform property. On Intel x64 Macs this property is still shipped as "macosx"
+		// which is a legacy convention. All Java platform downloads should be consistent with what comes back from
+		// the Platforms utility class
+		System.setProperty("scijava.app.java-platform", platform);
+		System.setProperty("scijava.app.java-root",
 			appDir.toPath().resolve("java").resolve(platform).toString());
 
 		// NB: we ALWAYS want to set this explicitly, even if it is already set.
@@ -369,7 +397,7 @@ class LauncherMigrator {
 
 			// And now we test whether the new launcher finds the new Java.
 			try {
-				nljv = probeJavaVersion(appDir, appSlug);
+				nljv = probeJavaVersion(exeFile);
 				if (log != null) log.debug("Java from new launcher AFTER: " + nljv);
 			}
 			catch (IOException | UnsupportedOperationException exc) {
@@ -406,7 +434,6 @@ class LauncherMigrator {
 
 		Path appPath = appDir.toPath();
 		try {
-			File exeFile = exeFile(appSlug, appDir);
 			String exePath = exeFile.getCanonicalPath();
 			Path originalExe;
 			Path oldExe;
@@ -434,10 +461,16 @@ class LauncherMigrator {
 			// Back up the previous executable to a .backup version
 			Files.copy(oldExe, backupExe);
 
-			Path checkExe = exeFile.toPath();
+			// NB - re-find the exeFile to account for overriding the exeFile on arm64 Mac
+			Path checkExe;
 			if (oldLauncherUsed) {
 				warnAboutShortcuts(originalExe, exePath);
 				checkExe = oldExe;
+			} else {
+				checkExe = exeFile(appSlug, appDir).toPath();
+			}
+			if (OS_MACOS) {
+				warnAboutMacFolder();
 			}
 
 			uiService.showDialog(
@@ -463,10 +496,18 @@ class LauncherMigrator {
 	 * the new Fiji site.
 	 */
 	private void migrateUpdateSites(FilesCollection files) {
-		// TODO detect if the Europe mirrors were enabled and if so enable the
-		// corresponding Fiji-Latest mirror
+		final String fijiSiteName ;
+		final String fijiSiteUrl;
+		if (files.getUpdateSite("Java-8 (Europe mirror)", false) != null) {
+			// If a Europe mirror site is turned on, assume we want to migrate to the Europe mirror of Fiji-latest too
+			fijiSiteName = "Fiji-Latest (Europe mirror)";
+			fijiSiteUrl = FIJI_LATEST_EURO_URL;
+		} else {
+			fijiSiteName = "Fiji-Latest";
+			fijiSiteUrl = FIJI_LATEST_URL;
+		}
 
-		// List of all sites to disable
+		// Turn off all the core sites and their mirrors
 		final List<String> siteList = new ArrayList<>();
 		for (String site : new String[]{"Java-8", "ImageJ", "Fiji"}) {
 			for (String suffix : new String[]{"", " (Europe mirror)"}) {
@@ -479,10 +520,8 @@ class LauncherMigrator {
 
 		File ijDir = ImageJUpdater.getAppDirectory();
 		try {
-			// TODO this logic may need to change once Fiji-Latest is public
-			// Add the new Fiji update site
-			files.addUpdateSite(NEW_FIJI_SITE, "https://sites.imagej.net/Fiji/", null,
-					null, 0l);
+			// Add/turn on the new Fiji update site
+			files.addUpdateSite(fijiSiteName, fijiSiteUrl, null, null, 0l);
 
 			// Deactivate the old update site trio
 			for (String siteName : siteList) {
@@ -516,7 +555,7 @@ class LauncherMigrator {
 			}
 
 			// Ensure any file from the new Fiji site is staged appropriately
-			for (FileObject file : files.forUpdateSite(NEW_FIJI_SITE)) {
+			for (FileObject file : files.forUpdateSite(fijiSiteName)) {
 				final FileObject.Status status = file.getStatus();
 				switch (status) {
 					case LOCAL_ONLY:
@@ -616,6 +655,18 @@ class LauncherMigrator {
 
 			pb.redirectOutput(new File("NUL"));
 		} else {
+			String renameMacFolder = "";
+			if (OS_MACOS) {
+				// On Mac we need to remove the .app from the Fiji folder as it will be an invalid app with the Contents
+				// subdirectory removed
+				if (appDir.toString().endsWith(".app")) {
+					String appDirString = appDir.toString();
+					String nonAppString = appDirString.substring(0, appDirString.length() - 4);
+					launchExe = launchExe.substring(appDirString.length());
+					launchExe = nonAppString + File.separator + launchExe;
+					renameMacFolder = "mv \"" + appDirString + "\" \"" + nonAppString + "\"\n";
+				}
+			}
 			// Unix/Linux/Mac implementation using bash
 			String scriptContent = String.join("\n",
 					"#!/bin/bash",
@@ -634,7 +685,7 @@ class LauncherMigrator {
 					"   fi",
 					"   sleep " + (checkIntervalMs / 1000.0) ,
 					"done",
-					launchExe + " &"
+					renameMacFolder + launchExe + " &"
 			);
 
 			// Write the script to a temporary file
@@ -678,13 +729,12 @@ class LauncherMigrator {
 		Logger log, String appTitle, String appSlug, Exception exc)
 	{
 		if (log == null) return;
-		log.error("Argh! " + appTitle + "'s fancy new launcher is not " +
-			"working on your system! It might be a bug in the new launcher, " +
-			"or your operating system may be too old to support it. Would you " +
-			"please visit https://forum.image.sc/ and report this problem? " +
-			"Click 'New Topic', choose 'Usage & Issues' category, and use tag '" +
-			appSlug + "'. Please copy+paste the technical information below " +
-			"into your report. Thank you!\n\n" +
+		log.error("Argh! " + appTitle + "'s fancy new launcher is not working on your system!\n" +
+			"It might be a bug in the new launcher, or your operating system may be too old to support it.\n" +
+			(OS_LINUX ? "On Linux you may also need to upgrade your glibc version.\n" : "") +
+			"Would you please visit https://forum.image.sc/ and report this problem?\n" +
+			"Click 'New Topic', choose 'Usage & Issues' category, and use tag '" + appSlug + "'.\n" +
+			" Please copy+paste the technical information below into your report. Thank you!\n\n" +
 			"* os.name=" + System.getProperty("os.name") + "\n" +
 			"* os.arch=" + System.getProperty("os.arch") + "\n" +
 			"* os.version=" + System.getProperty("os.version") + "\n", exc);
@@ -702,34 +752,31 @@ class LauncherMigrator {
 	 * @throws UnsupportedOperationException
 	 *   If no executable native launcher is available for this system platform.
 	 */
-	private static String probeJavaVersion(File appDir, String appPrefix)
+	private static String probeJavaVersion(File exeFile)
 		throws IOException
 	{
-		// 1. Find and validate the new launcher and helper files.
-
-		File exeFile = exeFile(appPrefix, appDir);
-
-		// 2. Run it.
+		// 1. Run the indicated launcher
 		List<String> output;
 		int exitCode;
 		try {
 			File propsJar = FileUtils.urlToFile(Types.location(PropsProbe.class));
 			File propsOut = File.createTempFile("props", ".txt");
+			File propsErr = File.createTempFile("props", ".err");
 			propsOut.deleteOnExit();
 			Process p = new ProcessBuilder(exeFile.getPath(),
 					"-Djava.class.path=" + propsJar.getPath(),
 					"--main-class",
 					"net.imagej.ui.swing.updater.PropsProbe",
 					propsOut.getAbsolutePath())
-				.redirectErrorStream(true).start();
-			output = collectProcessOutput(p, propsOut);
+				.redirectError(propsErr).start();
+			output = collectProcessOutput(p, propsOut, propsErr);
 			exitCode = p.exitValue();
 		}
 		catch (InterruptedException exc) {
 			throw new IOException(exc);
 		}
 
-		// 3. Analyze the output.
+		// 2. Analyze the output.
 
 		String noJavas = "No matching Java installations found.";
 		if (!output.isEmpty() && output.get(0).startsWith(noJavas)) return null;
@@ -748,12 +795,38 @@ class LauncherMigrator {
 			.findFirst().orElse(null);
 	}
 
+	/**
+	 * Helper method to determine if we're running on an Arm64 machine even if launched in x64 compatibility mode. Only
+	 * for use on Mac.
+	 */
+	private static boolean isMacArm64() {
+		try {
+			ProcessBuilder pb = new ProcessBuilder("sysctl", "-n", "hw.optional.arm64");
+			Process p = pb.start();
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+				String line = reader.readLine();
+				if (line != null) {
+					return line.trim().equals("1");
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		return false;
+	}
+
 	private static File exeFile(String appPrefix, File appDir) {
+		return exeFile(appPrefix, appDir, null);
+	}
+
+	private static File exeFile(String appPrefix, File appDir, String archOverride) {
 		// Determine the right executable path for the new launcher.
 		String exe;
-		if (OS_WIN) exe = appPrefix + "-windows-" + ARCH + ".exe";
-		else if (OS_MACOS) exe = "Fiji.app/Contents/MacOS/" + appPrefix + "-macos-" + ARCH;
-		else if (OS_LINUX) exe = appPrefix + "-linux-" + ARCH;
+		String effectiveArch = (archOverride == null || archOverride.isEmpty()) ? ARCH : archOverride;
+
+		if (OS_WIN) exe = appPrefix + "-windows-" + effectiveArch + ".exe";
+		else if (OS_MACOS) exe = "Fiji.app/Contents/MacOS/" + appPrefix + "-macos-" + effectiveArch;
+		else if (OS_LINUX) exe = appPrefix + "-linux-" + effectiveArch;
 		else throw new UnsupportedOperationException("Unsupported OS: " + OS);
 
 		// Do some sanity checks to make sure we can actually run it.
@@ -800,9 +873,9 @@ class LauncherMigrator {
 
 	/**
 	 * Annoying code to collect lines from a short-running that writes to the
-	 * specified file.
+	 * specified files.
 	 */
-	private static List<String> collectProcessOutput(Process p, File outFile)
+	private static List<String> collectProcessOutput(Process p, File outFile, File errFile)
 		throws IOException, InterruptedException
 	{
 		boolean completed = p.waitFor(15, TimeUnit.SECONDS);
@@ -810,7 +883,12 @@ class LauncherMigrator {
 			p.destroyForcibly();
 			throw new IOException("Process took too long to complete.");
 		}
-		return Files.readAllLines(outFile.toPath());
+		List<String> lines = Files.readAllLines(outFile.toPath());
+		if (lines.isEmpty()) {
+			// Presumably if no output we should check the error file.
+			lines = Files.readAllLines(errFile.toPath());
+		}
+		return lines;
 	}
 
 	/** Annoying code to discern the AWT/Swing main application frame, if any. */
