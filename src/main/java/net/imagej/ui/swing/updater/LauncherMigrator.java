@@ -764,6 +764,7 @@ class LauncherMigrator {
 			File propsErr = File.createTempFile("props", ".err");
 			propsOut.deleteOnExit();
 			Process p = new ProcessBuilder(exeFile.getPath(),
+					"--headless",
 					"-Djava.class.path=" + propsJar.getPath(),
 					"--main-class",
 					"net.imagej.ui.swing.updater.PropsProbe",
