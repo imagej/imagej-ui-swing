@@ -180,7 +180,7 @@ class LauncherMigrator {
 	 * {@link #queueRestart(Path, String, Path)}
 	 * </p>
 	 */
-	private void warnAboutShortcuts(Path oldExePath, String newExePath) {
+	private void warnAboutShortcuts(String oldExePath, String newExePath) {
 		uiService.showDialog(
 				"As part of this update, the Fiji launcher is being upgraded\n" +
 						"to a completely new version. Therefore any shortcuts referring\n" +
@@ -464,7 +464,7 @@ class LauncherMigrator {
 			// NB - re-find the exeFile to account for overriding the exeFile on arm64 Mac
 			Path checkExe;
 			if (oldLauncherUsed) {
-				warnAboutShortcuts(originalExe, exePath);
+				warnAboutShortcuts(originalExe.toFile().getCanonicalPath(), exePath);
 				checkExe = oldExe;
 			} else {
 				checkExe = exeFile(appSlug, appDir).toPath();
