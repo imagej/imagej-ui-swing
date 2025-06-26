@@ -763,6 +763,7 @@ class LauncherMigrator {
 			File propsOut = File.createTempFile("props", ".txt");
 			File propsErr = File.createTempFile("props", ".err");
 			propsOut.deleteOnExit();
+			propsErr.deleteOnExit();
 			Process p = new ProcessBuilder(exeFile.getPath(),
 					"--headless",
 					"-Djava.class.path=" + propsJar.getPath(),
