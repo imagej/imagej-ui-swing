@@ -752,9 +752,7 @@ class LauncherMigrator {
 	 * @throws UnsupportedOperationException
 	 *   If no executable native launcher is available for this system platform.
 	 */
-	private static String probeJavaVersion(File exeFile)
-		throws IOException
-	{
+	private String probeJavaVersion(File exeFile) throws IOException {
 		// 1. Run the indicated launcher
 		List<String> output;
 		int exitCode;
@@ -764,13 +762,16 @@ class LauncherMigrator {
 			File propsErr = File.createTempFile("props", ".err");
 			propsOut.deleteOnExit();
 			propsErr.deleteOnExit();
-			Process p = new ProcessBuilder(exeFile.getPath(),
-					"--headless",
-					"-Djava.class.path=" + propsJar.getPath(),
-					"--main-class",
-					"net.imagej.ui.swing.updater.PropsProbe",
-					propsOut.getAbsolutePath())
-				.redirectError(propsErr).start();
+			String[] args = {
+				exeFile.getPath(),
+				"--headless",
+				"-Djava.class.path=" + propsJar.getPath(),
+				"--main-class",
+				"net.imagej.ui.swing.updater.PropsProbe",
+				propsOut.getAbsolutePath()
+			};
+			log.debug(Arrays.toString(args));
+			Process p = new ProcessBuilder(args).redirectError(propsErr).start();
 			output = collectProcessOutput(p, propsOut, propsErr);
 			exitCode = p.exitValue();
 		}
