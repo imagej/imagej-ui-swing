@@ -66,11 +66,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Absurdly complex logic for helping users transition
- * safely from the old trio of ImageJ/Fiji/Java-8 update sites to the new
- * Fiji-Latest site.
+ * Absurdly complex logic for helping users transition safely from the old
+ * trio of ImageJ/Fiji/Java-8 update sites to the new Fiji-Latest site.
  *
  * @author Curtis Rueden
+ * @author Mark Hiner
  */
 class LauncherMigrator {
 
