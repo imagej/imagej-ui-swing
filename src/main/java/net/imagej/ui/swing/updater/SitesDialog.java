@@ -130,6 +130,8 @@ public class SitesDialog extends JDialog implements ActionListener {
 
 			@Override
 			public boolean isCellEditable(final int row, final int column) {
+				// Make Description column read-only
+				if ("Description".equals(getColumnName(column))) return false;
 				return column >= 0 && column < getColumnCount() && row >= 0 && row < getRowCount();
 			}
 
