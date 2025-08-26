@@ -97,9 +97,9 @@ public class ImageJUpdater implements UpdaterUI {
 
 		if (new File(appDir, "update").exists()) {
 			if (!UpdaterUserInterface.get().promptYesNo("It is suggested that you restart ImageJ, then continue the update.\n"
-					+ "Alternately, you can attempt to continue the upgrade without\n"
+					+ "Alternatively, you can attempt to continue the upgrade without\n"
 					+ "restarting, but ImageJ might crash.\n\n"
-					+ "Do you want to try it?",
+					+ "Do you want to continue anyway?",
 					"Restart required to finalize update"))
 				return;
 			try {
