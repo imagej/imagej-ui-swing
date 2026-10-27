@@ -31,6 +31,8 @@ package net.imagej.ui.swing.updater;
 
 import net.imagej.updater.*;
 import net.imagej.updater.util.Platforms;
+import net.imagej.updater.util.Progress;
+import net.imagej.updater.util.UpdateCanceledException;
 import org.scijava.Context;
 import org.scijava.app.AppService;
 import org.scijava.launcher.Java;
@@ -47,6 +49,7 @@ import org.scijava.widget.UIComponent;
 import org.xml.sax.SAXException;
 
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerConfigurationException;
@@ -55,9 +58,14 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -101,6 +109,9 @@ class LauncherMigrator {
 	private AppService appService;
 	private UIService uiService;
 	private LogService log;
+
+	/** Where the pre-migration backup was written, or null if none was made. */
+	private Path backupDir;
 
 	LauncherMigrator(Context ctx) {
 		if (ctx == null) return;
@@ -338,6 +349,11 @@ class LauncherMigrator {
 			return;
 		}
 
+		// Note: The backup must happen before anything below touches the
+		// installation: Java.upgrade modifies the java folder, and
+		// migrateUpdateSites rewrites db.xml.gz and stages the update folder.
+		if (!offerBackup(appDir, appTitle, parent)) return;
+
 		// Here, the user has agreed to switch to the new Fiji update site.
 		// We need to be very careful. Users on Apple silicon hardware are likely
 		// to be running with Rosetta (x86 emulation mode) rather than in native
@@ -479,7 +495,8 @@ class LauncherMigrator {
 							"with the appropriate launcher.\n" +
 							"Please allow a few moments for the restart to complete.\n\n" +
 							"If the restart fails, please check the logs directory for details." +
-							(oldLauncherUsed ? "\nYou can also try the backup launcher:" + backupExe.toFile().getName() : ""),
+							(oldLauncherUsed ? "\nYou can also try the backup launcher:" + backupExe.toFile().getName() : "") +
+							(backupDir != null ? "\n\nA backup of your previous installation is at:\n" + backupDir : ""),
 					"Upgrade complete!",
 					DialogPrompt.MessageType.INFORMATION_MESSAGE);
 			queueRestart(appPath, exePath, checkExe);
@@ -488,6 +505,282 @@ class LauncherMigrator {
 		}
 		catch (IOException exc) {
 			askForBugReport(log, appTitle, appSlug, exc);
+		}
+	}
+
+	/**
+	 * Offers to copy the entire application directory to a location of the
+	 * user's choosing, so they can get their old installation back if the
+	 * migration goes badly. On success, {@link #backupDir} is set.
+	 *
+	 * @return true if the migration should proceed (with or without a backup),
+	 *   or false if the user canceled.
+	 */
+	private boolean offerBackup(File appDir, String appTitle, Window parent) {
+		String backUp = "Back up first (recommended)";
+		String skip = "Continue without backup";
+		String cancel = "Cancel upgrade";
+		Object[] options = {backUp, skip, cancel};
+		String message = "<html>Before upgrading, would you like to make a " +
+			"backup copy of your entire " + appTitle + " installation?<br>" +
+			"If anything goes wrong, you can restore the backup to get your " +
+			"current installation back.<br><br>" +
+			"Installation to back up:<br><b>" + appDir + "</b>";
+		while (true) {
+			int rval = JOptionPane.showOptionDialog(parent, message,
+				"Back up " + appTitle + "?", JOptionPane.DEFAULT_OPTION,
+				JOptionPane.QUESTION_MESSAGE, null, options, backUp);
+			if (rval == 1) return true;
+			if (rval != 0) return false;
+
+			File destParent = chooseBackupParent(appDir, parent);
+			if (destParent == null) continue; // Chooser canceled; ask again.
+
+			Path dest = destParent.toPath().resolve(backupName(appDir.getName()));
+			ProgressDialog progress = new ProgressDialog(null, "Backing up " + appTitle + "...");
+			try {
+				copyDirectory(appDir.toPath(), dest, progress);
+				backupDir = dest;
+				if (log != null) log.info("Backed up " + appDir + " to " + dest);
+				return true;
+			}
+			catch (IOException | UpdateCanceledException exc) {
+				if (log != null) log.error("Backup to " + dest + " failed", exc);
+				try {
+					deleteTree(dest);
+				}
+				catch (IOException exc2) {
+					if (log != null) log.warn("Could not remove partial backup " + dest, exc2);
+				}
+				if (!(exc instanceof UpdateCanceledException)) {
+					JOptionPane.showMessageDialog(parent,
+						"The backup failed:\n" + exc.getMessage() + "\n\n" +
+							"You can try again with a different location, " +
+							"continue without a backup, or cancel the upgrade.",
+						"Backup failed", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+			finally {
+				progress.done();
+			}
+		}
+	}
+
+	/**
+	 * Asks the user where to put the backup, defaulting to the parent of the
+	 * application directory if writable, else the user's desktop or home.
+	 *
+	 * @return The chosen directory, or null if the user canceled.
+	 */
+	private File chooseBackupParent(File appDir, Window parent) {
+		File home = new File(System.getProperty("user.home"));
+		File defaultDir = appDir.getParentFile();
+		if (!isWritableDirectory(defaultDir)) defaultDir = new File(home, "Desktop");
+		if (!isWritableDirectory(defaultDir)) defaultDir = home;
+
+		JFileChooser chooser = new JFileChooser();
+		chooser.setDialogTitle("Choose where to save the backup");
+		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		chooser.setAcceptAllFileFilterUsed(false);
+		chooser.setCurrentDirectory(defaultDir.getParentFile());
+		chooser.setSelectedFile(defaultDir);
+		while (true) {
+			if (chooser.showDialog(parent, "Save Backup Here") !=
+				JFileChooser.APPROVE_OPTION) return null;
+			File choice = chooser.getSelectedFile();
+			String problem = null;
+			if (choice == null || !choice.isDirectory()) {
+				problem = "Please choose an existing folder.";
+			}
+			else if (isInside(choice, appDir)) {
+				problem = "The backup cannot be saved inside the installation itself.";
+			}
+			else if (!isWritableDirectory(choice)) {
+				problem = "You do not have permission to write to:\n" + choice;
+			}
+			if (problem == null) return choice;
+			JOptionPane.showMessageDialog(parent, problem,
+				"Invalid backup location", JOptionPane.WARNING_MESSAGE);
+		}
+	}
+
+	/**
+	 * Builds a timestamped backup folder name, keeping any {@code .app} suffix
+	 * so that a macOS backup remains a launchable application bundle.
+	 */
+	private static String backupName(String appDirName) {
+		String timestamp = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
+		String suffix = appDirName.endsWith(".app") ? ".app" : "";
+		String base = appDirName.substring(0, appDirName.length() - suffix.length());
+		return base + "-backup-" + timestamp + suffix;
+	}
+
+	/**
+	 * Copies the {@code src} directory tree to {@code dest}, which must not
+	 * already exist, preserving permissions and symlinks.
+	 */
+	private void copyDirectory(Path src, Path dest, Progress progress)
+		throws IOException
+	{
+		// Count the entries (directories included, since cp -v reports those
+		// too) first so that progress can be reported.
+		final int[] total = {0};
+		Files.walkFileTree(src, new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+				total[0]++;
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+				total[0]++;
+				return FileVisitResult.CONTINUE;
+			}
+		});
+
+		if (OS_MACOS || OS_LINUX) {
+			// Note: On APFS, btrfs and XFS, these produce copy-on-write clones,
+			// which are nearly instant and use no additional disk space.
+			String[] cmd = OS_MACOS ?
+				new String[] {"cp", "-cpRv", src.toString(), dest.toString()} :
+				new String[] {"cp", "-av", "--reflink=auto", src.toString(), dest.toString()};
+			if (log != null) log.debug(Arrays.toString(cmd));
+			Process p = new ProcessBuilder(cmd).redirectErrorStream(true).start();
+			CopyProgress copyProgress = new CopyProgress(progress, src, total[0]);
+			List<String> errors = new ArrayList<>();
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					// Each copied entry is reported as "src -> dest" (macOS) or
+					// "'src' -> 'dest'" (GNU); anything else is an error message.
+					int arrow = line.indexOf(" -> ");
+					if (arrow < 0) {
+						errors.add(line);
+						continue;
+					}
+					String from = line.substring(0, arrow);
+					if (from.length() > 1 && from.startsWith("'") && from.endsWith("'")) {
+						from = from.substring(1, from.length() - 1);
+					}
+					copyProgress.step(Paths.get(from));
+				}
+			}
+			catch (UpdateCanceledException exc) {
+				p.destroyForcibly();
+				try {
+					p.waitFor();
+				}
+				catch (InterruptedException exc2) {
+					Thread.currentThread().interrupt();
+				}
+				throw exc;
+			}
+			try {
+				if (p.waitFor() == 0) return;
+			}
+			catch (InterruptedException exc) {
+				throw new IOException(exc);
+			}
+			if (log != null) log.warn("cp failed; falling back to Java copy:\n" + String.join("\n", errors));
+			deleteTree(dest);
+		}
+
+		CopyProgress copyProgress = new CopyProgress(progress, src, total[0]);
+		Files.walkFileTree(src, new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+				throws IOException
+			{
+				Files.createDirectories(dest.resolve(src.relativize(dir).toString()));
+				copyProgress.step(dir);
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+				throws IOException
+			{
+				Files.copy(file, dest.resolve(src.relativize(file).toString()),
+					StandardCopyOption.COPY_ATTRIBUTES, LinkOption.NOFOLLOW_LINKS);
+				copyProgress.step(file);
+				return FileVisitResult.CONTINUE;
+			}
+		});
+	}
+
+	/**
+	 * Reports each copied entry to a {@link Progress}, throttled so that a
+	 * fast copy does not drown the UI in repaints.
+	 */
+	private static class CopyProgress {
+		private static final long INTERVAL_MS = 50;
+		private final Progress progress;
+		private final Path src;
+		private final int total;
+		private int count;
+		private long lastUpdate;
+
+		CopyProgress(Progress progress, Path src, int total) {
+			this.progress = progress;
+			this.src = src;
+			this.total = total;
+		}
+
+		void step(Path copied) {
+			count++;
+			long now = System.currentTimeMillis();
+			if (now - lastUpdate < INTERVAL_MS && count < total) return;
+			lastUpdate = now;
+			String name = copied.startsWith(src) ? src.relativize(copied).toString() : copied.toString();
+			progress.setTitle("Backing up: " + (name.isEmpty() ? src.getFileName() : name));
+			progress.setCount(Math.min(count, total), total);
+		}
+	}
+
+	/** Deletes a directory tree, without following symlinks out of it. */
+	private static void deleteTree(Path root) throws IOException {
+		if (!Files.exists(root, LinkOption.NOFOLLOW_LINKS)) return;
+		Files.walkFileTree(root, new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+				throws IOException
+			{
+				Files.delete(file);
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult postVisitDirectory(Path dir, IOException exc)
+				throws IOException
+			{
+				if (exc != null) throw exc;
+				Files.delete(dir);
+				return FileVisitResult.CONTINUE;
+			}
+		});
+	}
+
+	private static boolean isWritableDirectory(File dir) {
+		if (dir == null || !dir.isDirectory()) return false;
+		// Note: File#canWrite and Files#isWritable are unreliable on Windows,
+		// so we test for real by creating and deleting a file.
+		try {
+			Files.delete(Files.createTempFile(dir.toPath(), "backup-probe", ".tmp"));
+			return true;
+		}
+		catch (IOException | SecurityException exc) {
+			return false;
+		}
+	}
+
+	/** Whether {@code file} is {@code dir} or somewhere beneath it. */
+	private static boolean isInside(File file, File dir) {
+		try {
+			return file.getCanonicalFile().toPath().startsWith(dir.getCanonicalFile().toPath());
+		}
+		catch (IOException exc) {
+			return false;
 		}
 	}
 
