@@ -906,6 +906,10 @@ class LauncherMigrator {
 			Installer i = new Installer(files, new ProgressDialog(null, "Downloading updates..."));
 			i.start();
 
+			// Persist the newly staged Fiji-Latest file records. Without this, the
+			// local db.xml.gz knows only the records of the now-disabled sites,
+			// which are discarded upon the next read, leaving no records at all.
+			files.write();
 		}
 		catch (IOException | SAXException | TransformerConfigurationException e) {
 			throw new RuntimeException(e);
