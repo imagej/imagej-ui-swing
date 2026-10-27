@@ -888,9 +888,24 @@ class LauncherMigrator {
 				//FIXME abort
 			}
 
+			// Note: FileObject#stageForUpdate also stages dependencies without
+			// checking their platforms, so platform-neutral jars that depend on
+			// e.g. JavaFX would pull in natives for every platform. The resulting
+			// jars/<platform> folders would then make the Updater treat all those
+			// platforms as active from then on. So we unstage such files here.
+			final List<FileObject> wrongPlatform = new ArrayList<>();
+			for (FileObject file : files.toInstallOrUpdate()) {
+				if (!file.isActivePlatform(files)) wrongPlatform.add(file);
+			}
+			for (FileObject file : wrongPlatform) {
+				log.debug("Not installing " + file.filename + " for inactive platform(s) " + file.getPlatforms());
+				file.setNoAction();
+			}
+
 			// Stage the changes in the update folder
 			Installer i = new Installer(files, new ProgressDialog(null, "Downloading updates..."));
 			i.start();
+
 		}
 		catch (IOException | SAXException | TransformerConfigurationException e) {
 			throw new RuntimeException(e);
